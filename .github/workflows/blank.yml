@@ -1,0 +1,53 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js 12.18
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.18
+    - name: Install dependencies
+      run: |
+        cd vuejs_project
+        npm install
+    - name: Lint
+      run: |
+        cd vuejs_project
+        npm run lint
+    - name: Build
+      run: |
+        cd vuejs_project
+        npm run build
+    - name: Test
+      run: |
+        cd vuejs_project
+        npm run test:unit
+    #- name: E2E
+    #  run: |
+    #    cd vuejs_project
+    #    npm run test:e2e
+    #Current error: 
+      #Unable to revert mtime: /usr/share/fonts/cMap
+      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-cns1
+      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-gb1
+      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-japan1
+      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-japan2
+      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-korea1
