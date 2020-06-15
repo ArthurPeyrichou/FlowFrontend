@@ -16,8 +16,8 @@ export class FDComponent {
     private options: {};
 
     /**
-     * @param input Can be boolean or an Integer
-     * @param output Can be boolean or an Integer
+     * @param input Can be boolean or a positive or null integer.
+     * @param output Can be boolean or a positive or null integer.
      * @param click Can be activated by click
      * @param options JSON Object or string parsable into JSON Object.
      */
@@ -27,12 +27,16 @@ export class FDComponent {
         }
         if(output != true && output != false && Number.isNaN(output)){
             throw new Error("Output attribut of FDComponent '" + id + "' should be an integer or boolean value.");
+        } else if(output != true && output != false && output < 0){
+            throw new Error("Output attribut of FDComponent '" + id + "' should be a positive or null integer.");
         }
+    
         try {
             this.options = JSON.parse(options);
         } catch(error) {
             throw new Error("Options attribut of FDComponent '" + id + "' should be a JSON Object value.");
         }
+        
         this.id = id;
         if(group == '' || group == undefined)
             this.group = "Common";

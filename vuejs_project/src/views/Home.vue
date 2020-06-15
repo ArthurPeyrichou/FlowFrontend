@@ -1,6 +1,6 @@
 <template>
   <div class="home" style="display: flex;">
-    <ToolBar/>
+    <ToolBar :compBrutList="compBrutList"/>
     <ConceptionGrid/>
     <ConsoleBar/>
   </div>
@@ -11,6 +11,7 @@
 import ToolBar from '@/components/ToolBar.vue'
 import ConceptionGrid from '@/components/ConceptionGrid.vue'
 import ConsoleBar from '@/components/ConsoleBar.vue'
+import { FDComponent } from '../models/FDComponent';
 
 export default {
   name: 'Home',
@@ -18,6 +19,16 @@ export default {
     ToolBar,
     ConceptionGrid,
     ConsoleBar
+  },
+  data() {
+    return {
+      compBrutList: [new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id1","FakeType2","FakeComp2", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id2","FakeType1","FakeComp3", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id3","FakeType2","FakeComp4", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id4","FakeType1","FakeComp5", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id5","","FakeComp6", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}')]
+    }
   }
 }
 </script>

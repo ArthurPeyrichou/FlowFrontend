@@ -20,37 +20,35 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { FDComponent } from '../models/FDComponent';
 
-@Component
-export default class ToolBar extends Vue {
-  @Prop() private compList!: {};
-  @Prop() private compGroupsList!: string[];
-
-  constructor() {
-    super();
-    const list = [new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id1","FakeType2","FakeComp2", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id2","FakeType1","FakeComp3", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id3","FakeType2","FakeComp4", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id4","FakeType1","FakeComp5", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id5","","FakeComp6", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}')];
-    
-    this.compGroupsList = [];
-    this.compList = {};
-
+export default {
+  name: "ToolBar",
+  props: {
+    compBrutList: {
+      type: Array,
+      required: true
+    }
+  },
+  data() {
+    return {
+      compList: {},
+      compGroupsList: []
+    }
+  },
+  created: function () {
     //We read each FlowData Components, populate the compGroupsList and store them by membership group.
-    list.forEach(FDComp => {
+    this.compBrutList.forEach(FDComp => {
       if(this.compGroupsList.indexOf(FDComp.getGroup()) < 0){
         this.compGroupsList.push(FDComp.getGroup())
         this.compList[FDComp.getGroup()] = new Array<FDComponent>();
       }
       this.compList[FDComp.getGroup()].push(FDComp);
     });
+    //We sort component's group in order to get "Common" group on top and then in alphabetical order.
     this.compGroupsList.sort( (a, b) => {
       if(a == 'Common') return -1;
       else if(b == 'Common') return 1;
       else return a.localeCompare(b);
     });
-    console.log(this.compList)
   }
 }
 </script>
