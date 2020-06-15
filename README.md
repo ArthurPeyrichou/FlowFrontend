@@ -14,3 +14,5 @@ Pour démarrer le serveur vue.JS, aller dans le dossier /vuejs_ptoject et taper 
 `npm run serve`
 
 > Le serveur tourne sur le port 4200 par default (http://localhost:4200)
+
+> Pour en apprendre plus sur Vue.JS (https://vueschool.io/courses)
