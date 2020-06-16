@@ -7,8 +7,8 @@ export class FDComponent {
     private title: string;
     private color: string;
     private author: string;
-    private input: any;
-    private output: any;
+    private input: number;
+    private output: number;
     private icon: string;
     private version: string;
     private readme: string;
@@ -16,37 +16,84 @@ export class FDComponent {
     private options: {};
 
     /**
-     * @param input Can be boolean or a positive or null integer.
-     * @param output Can be boolean or a positive or null integer.
+     * @param input Can be a positive or null integer (True = 1 and False = 0). Negative value = 0.
+     * @param output Can be a positive or null integer (True = 1 and False = 0). Negative value = 0.
      * @param click Can be activated by click
      * @param options JSON Object or string parsable into JSON Object.
      */
-    constructor(id: string, group: string, title: string, color: string, author: string, input: any, output: any, icon: string, version: string, readme: string, click: boolean, options: any) {
-        if(input != true && input != false && Number.isNaN(input)){
-            throw new Error("Input attribut of FDComponent '" + id + "' should be an integer or boolean value.");
+    constructor(id: string, group: string, title: string, color: string, author: string, input: any, output: any, 
+        icon: string, version: string, readme: string, click: boolean, options: any)
+    {    
+        if(input === true) {
+            this.input = 1;
+        } else if(input === false) {
+            this.input = 0;
+        } else if(Number.isInteger(input)) {
+            this.input = input;
+        } else {
+            if(!Number.isNaN(Number.parseInt(input))){
+                this.input = Number.parseInt(input);
+            } else if( input.toString().toLowerCase() == 'true') {
+                this.input = 1;
+            } else if(input.toString().toLowerCase() == 'false') {
+                this.input = 0; 
+            } else {
+                throw new Error("Input attribut of FDComponent '" + id + "' should be an integer or boolean value. Got '" + input + "'.");
+            }
         }
-        if(output != true && output != false && Number.isNaN(output)){
-            throw new Error("Output attribut of FDComponent '" + id + "' should be an integer or boolean value.");
-        } else if(output != true && output != false && output < 0){
-            throw new Error("Output attribut of FDComponent '" + id + "' should be a positive or null integer.");
+
+        if(this.input < 0) {
+            this.input = 0;
+        }
+
+        if(output === true) {
+            this.output = 1;
+        } else if(output === false) {
+            this.output = 0;
+        } else if(Number.isInteger(output)) {
+            this.output = output;
+        } else {
+            if(!Number.isNaN(Number.parseInt(output))){
+                this.output = Number.parseInt(output);
+            } else if(output.toString().toLowerCase() == 'true') {
+                this.output = 1;
+            } else if(output.toString().toLowerCase() == 'false') {
+                this.output = 0; 
+            } else {
+                throw new Error("Output attribut of FDComponent '" + id + "' should be an integer or boolean value. Got '" + output + "'.");
+            }
+        }
+
+        if(this.output < 0) {
+            this.output = 0;
         }
     
         try {
-            this.options = JSON.parse(options);
+            if(typeof options == 'string') {
+                if(options[0] == '{' && options[options.length-1] == '}'){
+                    this.options = JSON.parse(options);
+                } else {
+                    this.options = {};
+                }
+            } else if(typeof options == 'object' && options != null && !(options instanceof Array)) {
+                this.options = options;
+            } else {
+                this.options = {};
+            }
         } catch(error) {
-            throw new Error("Options attribut of FDComponent '" + id + "' should be a JSON Object value.");
+            console.log(error)
+            this.options = {};
         }
-        
-        this.id = id;
+
         if(group == '' || group == undefined)
             this.group = "Common";
         else
             this.group = group;
+        
+        this.id = id;
         this.title = title;
         this.color = color;
         this.author = author;
-        this.input = input;
-        this.output = output;
         this.icon = icon;
         this.version = version;
         this.readme = readme;
@@ -73,11 +120,11 @@ export class FDComponent {
         return this.author;
     }
 
-    getInput(): any {
+    getInput(): number {
         return this.input;
     }
 
-    getOutput(): any {
+    getOutput(): number {
         return this.output;
     }
 
@@ -99,5 +146,14 @@ export class FDComponent {
 
     getOptions(): {} {
         return this.options;
+    }
+
+    toString(): string {
+        return JSON.stringify(this);
+    }
+
+    static fromString(s: string): FDComponent{
+        const j = JSON.parse(s);
+        return new FDComponent(j.id, j.group, j.title, j.color, j.author, j.input, j.output, j.icon, j.version, j.readme, j.click, j.options);
     }
 }

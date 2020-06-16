@@ -4,17 +4,29 @@
     <h3>Conception Grid</h3>
     </div>
     <div class="board">
-      <svg class="grid">
+      <svg class="grid" @dragover.prevent v-on:drop="drop($event)">
       </svg>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
+import { FDComponent } from '../models/FDComponent';
 
 @Component
 export default class ConceptionGrid extends Vue {
+
+  /**
+   * Call when a flowdata component is drop inside the <svg>
+   */
+  public drop(event: DragEvent) {
+      console.log("drop")
+      if(event.dataTransfer != null && event.dataTransfer != undefined){
+        const theFDComp = FDComponent.fromString(event.dataTransfer.getData("text"))
+        console.log(theFDComp)
+      }
+  }
 }
 </script>
 

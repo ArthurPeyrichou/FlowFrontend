@@ -1,92 +1,110 @@
 import { expect } from 'chai'
-import { shallowMount } from '@vue/test-utils'
 import { FDComponent } from '../../src/models/FDComponent'
 
-describe('FDComponent Model', () => {
+describe('FDComponent Model',() => {
 
-  it('should create', () => {
-    let fdComp = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}');
+  it('should create',() => {
+    const fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,'{}');
     expect(fdComp).exist;
   });
 
-  it('Input attribution check', () => {
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',"A STRING",true, 'icon','1.0','readme',false,'{}'))
-      .throw("Input attribut of FDComponent 'id0' should be an integer or boolean value.");
-    
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',"15p",true, 'icon','1.0','readme',false,'{}'))
-    .throw("Input attribut of FDComponent 'id0' should be an integer or boolean value.");
+  it('Input attribution check',() => {
+    expect( () => { new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',"A STRING",true,'icon','1.0','readme',false,'{}');})
+      .throw("Input attribut of FDComponent 'id0' should be an integer or boolean value. Got 'A STRING'.");
 
-    let fdComp1 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',5,true, 'icon','1.0','readme',false,'{}');
-    expect(fdComp1).exist;
+    let fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',2,true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(2);
 
-    let fdComp2 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',0,true, 'icon','1.0','readme',false,'{}');
-    expect(fdComp2).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',0,true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(0);
 
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',-5,true, 'icon','1.0','readme',false,'{}'))
-    .throw("Input attribut of FDComponent 'id0' should be a positive or null integer.");
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',-5,true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(0);
 
-    let fdComp3 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,true, 'icon','1.0','readme',false,'{}');
-    expect(fdComp3).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(1);
 
-    let fdComp4 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',false,true,'icon','1.0','readme',false,'{}');
-    expect(fdComp4).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',false,true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(0);
 
-    let fdComp5 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',"true",true,'icon','1.0','readme',false,'{}');
-    expect(fdComp5).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',"true",true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(1);
 
-    let fdComp6 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',"false",true,'icon','1.0','readme',false,'{}');
-    expect(fdComp6).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',"false",true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getInput()).equal(0);
   });
 
-  it('Output attribution check', () => {
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, "A STRING",'icon','1.0','readme',false,'{}'))
-      .throw("Output attribut of FDComponent 'id0' should be an integer or boolean value.");
-    
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, "15p",'icon','1.0','readme',false,'{}'))
-    .throw("Output attribut of FDComponent 'id0' should be an integer or boolean value.");
+  it('Output attribution check',() => {
+    expect(() => { new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,"A STRING",'icon','1.0','readme',false,'{}');})
+      .throw("Output attribut of FDComponent 'id0' should be an integer or boolean value. Got 'A STRING'.");
 
-    let fdComp1 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,5,'icon','1.0','readme',false,'{}');
-    expect(fdComp1).exist;
+    let fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,2,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(2);
 
-    let fdComp2 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,0,'icon','1.0','readme',false,'{}');
-    expect(fdComp2).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,0,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(0);
 
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, -5,'icon','1.0','readme',false,'{}'))
-    .throw("Output attribut of FDComponent 'id0' should be a positive or null integer.");
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,-5,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(0);
 
-    let fdComp3 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,true,'icon','1.0','readme',false,'{}');
-    expect(fdComp3).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(1);
 
-    let fdComp4 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,false,'icon','1.0','readme',false,'{}');
-    expect(fdComp4).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,false,'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(0);
 
-    let fdComp5 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,"true",'icon','1.0','readme',false,'{}');
-    expect(fdComp5).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,"true",'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(1);
 
-    let fdComp6 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,"false",'icon','1.0','readme',false,'{}');
-    expect(fdComp6).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,"false",'icon','1.0','readme',false,'{}');
+    expect(fdComp).exist;
+    expect(fdComp.getOutput()).equal(0);
   });
 
-  it('Options attribution check', () => {
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, true,'icon','1.0','readme',false,'A STRING'))
-      .throw("Options attribut of FDComponent 'id0' should be a JSON Object value.");
-    
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, "15p",'icon','1.0','readme',false,123456))
-    .throw("Options attribut of FDComponent 'id0' should be a JSON Object value.");
+  it('Options attribution check',() => {
+    let fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,'A STRING');
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
+  
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,123456);
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
 
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, "15p",'icon','1.0','readme',false,true))
-    .throw("Options attribut of FDComponent 'id0' should be a JSON Object value.");
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,true);
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
 
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, "15p",'icon','1.0','readme',false,[]))
-    .throw("Options attribut of FDComponent 'id0' should be a JSON Object value.");
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,false);
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
 
-    expect(new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true, "15p",'icon','1.0','readme',false,null))
-    .throw("Options attribut of FDComponent 'id0' should be a JSON Object value.");
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,[]);
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
 
-    let fdComp1 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,5,'icon','1.0','readme',false,{option1: "op1", option2: "op2"});
-    expect(fdComp1).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,null);
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
 
-    let fdComp2 = new FDComponent("id0","FakeType1","FakeComp1", '#967ADC','autor',true,0,'icon','1.0','readme',false,'{option1: "op1", option2: "op2"}');
-    expect(fdComp2).exist;
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,5,'icon','1.0','readme',false,JSON.parse('{"option1":"op1","option2":"op2"}'));
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{"option1":"op1","option2":"op2"}')
+
+    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,0,'icon','1.0','readme',false,'{"option3": "op3","option4": "op4"}');
+    expect(fdComp).exist;
+    expect(JSON.stringify(fdComp.getOptions())).equal('{"option3":"op3","option4":"op4"}')
   });
 })

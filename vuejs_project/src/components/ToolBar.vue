@@ -7,7 +7,8 @@
       <div v-for="compGroup in compGroupsList" :key="compGroup" class="fdcomp-group-list">
         <p class="fdcomp-group-name">{{ compGroup }}</p>
         <ul class="list-group comp-list">
-          <li v-for="FDComp in compList[compGroup]" :key="FDComp.getId()" class="list-group-item">
+          <li v-for="FDComp in compList[compGroup]" :key="FDComp.getId()" class="list-group-item" draggable="true" v-on:dragstart="dragstart(FDComp, $event)">
+            <i class="fa fa-circle" :style="'color:' + FDComp.getColor()"></i>
             {{ FDComp.getTitle() }}
           </li>
         </ul>
@@ -20,21 +21,15 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { FDComponent } from '../models/FDComponent';
 
-export default {
-  name: "ToolBar",
-  props: {
-    compBrutList: {
-      type: Array,
-      required: true
-    }
-  },
-  data() {
-    return {
-      compList: {},
-      compGroupsList: []
-    }
-  },
-  created: function () {
+@Component
+export default class ToolBar extends Vue {
+  @Prop() private compBrutList!: FDComponent[];
+  compList: any = {};
+  compGroupsList: string[] = [];
+
+  constructor() {
+    super();
+    
     //We read each FlowData Components, populate the compGroupsList and store them by membership group.
     this.compBrutList.forEach(FDComp => {
       if(this.compGroupsList.indexOf(FDComp.getGroup()) < 0){
@@ -49,6 +44,15 @@ export default {
       else if(b == 'Common') return 1;
       else return a.localeCompare(b);
     });
+  }
+
+  /**
+   * Call when a flowdata component is drag from the list
+   */
+  public dragstart(FDComp: FDComponent, event: DragEvent) {
+      console.log("dragstart")
+      if(event.dataTransfer != null && event.dataTransfer != undefined)
+        event.dataTransfer.setData("text", FDComp.toString());
   }
 }
 </script>
