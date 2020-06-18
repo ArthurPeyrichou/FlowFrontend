@@ -50,7 +50,6 @@ export default class ToolBar extends Vue {
    * Call when a flowdata component is drag from the list
    */
   public dragstart(FDComp: FDComponent, event: DragEvent) {
-      console.log("dragstart")
       if(event.dataTransfer != null && event.dataTransfer != undefined)
         event.dataTransfer.setData("text", FDComp.toString());
   }
