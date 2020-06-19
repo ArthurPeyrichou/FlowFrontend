@@ -6,7 +6,9 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
     if(fdCompToDrop !== undefined) {
         const x = d3.mouse(d3.event.currentTarget)[0];
         const y = d3.mouse(d3.event.currentTarget)[1];
-        const compHeight = 40;
+        const inputCount = fdCompToDrop.getInput();
+        const outputCount = fdCompToDrop.getOutput();
+        const compHeight = 25 + Math.max(inputCount, outputCount) * 15;
         const compWidth = 75 + fdCompToDrop.getTitle().length * 9;
         const svgGridBorder = 10;
         const svgMax = 5000;
@@ -74,29 +76,13 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
             }
             return x - (theCompWidth / 2);
         }
-        const inputCirclePlaceY = (y: number, theCompHeight: number) => {
+        const inputCirclePlaceY = (y: number, theCompHeight: number, index: number, count: number) => {
             if(y < (svgGridBorder + (theCompHeight / 2))){
-                return svgGridBorder + (theCompHeight / 2);
+                return svgGridBorder + (theCompHeight / 2) + (index * 20) - (count-1) * 10;
             } else if(y > (svgMax - svgGridBorder - (theCompHeight / 2))){
-                return svgMax - svgGridBorder - (theCompHeight / 2);
+                return svgMax - svgGridBorder - (theCompHeight / 2) + (index * 20) - (count-1) * 10;
             }
-            return y;
-        }
-        const inputTextPlaceX = (x: number, theCompWidth: number) => {
-            if(x < (svgGridBorder + (theCompWidth / 2))){
-                return svgGridBorder - 5;
-            } else if(x > (svgMax - svgGridBorder - (theCompWidth / 2))){
-                return svgMax - 5 - svgGridBorder - theCompWidth;
-            }
-            return x - 5 - (theCompWidth / 2);
-        }
-        const inputTextPlaceY = (y: number, theCompHeight: number) => {
-            if(y < (svgGridBorder + (theCompHeight / 2))){
-                return svgGridBorder + 4 + (theCompHeight / 2);
-            } else if(y > (svgMax - svgGridBorder - (theCompHeight / 2))){
-                return svgMax + 4 - svgGridBorder - (theCompHeight / 2);
-            }
-            return y + 4;
+            return y + (index * 20) - (count-1) * 10;
         }
         const outputCirclePlaceX = (x: number, theCompWidth: number) => {
             if(x < (svgGridBorder + (theCompWidth / 2))){
@@ -106,29 +92,13 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
             }
             return x + (theCompWidth / 2);
         }
-        const outputCirclePlaceY = (y: number, theCompHeight: number) => { 
+        const outputCirclePlaceY = (y: number, theCompHeight: number, index: number, count: number) => { 
             if(y < (svgGridBorder + (theCompHeight / 2))){
-                return svgGridBorder + (theCompHeight / 2);
+                return svgGridBorder + (theCompHeight / 2) + (index * 20) - (count-1) * 10;
             } else if(y > (svgMax - svgGridBorder - (theCompHeight / 2))){
-                return svgMax - svgGridBorder - (theCompHeight / 2);
+                return svgMax - svgGridBorder - (theCompHeight / 2) + (index * 20) - (count-1) * 10;
             }
-            return y;
-        }
-        const outputTextPlaceX = (x: number, theCompWidth: number) => {
-            if(x < (svgGridBorder + (theCompWidth / 2))){
-                return svgGridBorder - 4 + theCompWidth;
-            } else if(x > (svgMax - svgGridBorder - (theCompWidth / 2))){
-                return svgMax - 4 - svgGridBorder;
-            }
-            return x - 4 + (theCompWidth / 2);
-        }
-        const outputTextPlaceY = (y: number, theCompHeight: number) => {
-            if(y < (svgGridBorder + (theCompHeight / 2))){
-                return svgGridBorder + 5 + (theCompHeight / 2);
-            } else if(y > (svgMax - svgGridBorder - (theCompHeight / 2))){
-                return svgMax + 5 - svgGridBorder - (theCompHeight / 2);
-            }
-            return y + 5;
+            return y + (index * 20) - (count-1) * 10;
         }
         
         g.append("rect")
@@ -138,6 +108,8 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
             .attr("fill", fdCompToDrop.getColor())
             .attr("height", compHeight)
             .attr("width", compWidth)
+            .attr("data-input", inputCount)
+            .attr("data-output", outputCount)
             .attr("rx",5)
             .attr("x", rectPlaceX(x, compWidth))
             .attr("y", rectPlaceY(y, compHeight))
@@ -147,7 +119,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
 
         g.append("text")
             .attr("id", "title-text-" + newId)
-            .attr("class", "draggable")
+            .attr("class", "draggable unselectable-text")
             .attr("fill", "black")
             .style("font-size", "14px")
             .html(fdCompToDrop.getTitle())
@@ -159,7 +131,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         
         g.append("text")
             .attr("id", "type-text-" + newId)
-            .attr("class", "draggable")
+            .attr("class", "draggable unselectable-text")
             .attr("fill", "black")
             .style("font-size", "12px")
             .html(fdCompToDrop.getTitle())
@@ -169,64 +141,43 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
                 openModal(newId);
             });
 
-        if(fdCompToDrop.getInput() > 0) {
+        for(let i =0; i < inputCount; ++i) {
             g.append("circle")
-                .attr("id", "input-" + newId)
-                .attr("class", "component-outlet connector")
-                .attr("r", 10)
+                .attr("id", "input-" + i + "-" + newId)
+                .attr("class", "component-outlet connector input-" + newId)
+                .attr("r", 7)
                 .attr("stroke", "black")
                 .attr("fill", "white")
+                .attr("data-index", i)
                 .attr("cx", inputCirclePlaceX(x, compWidth))
-                .attr("cy", inputCirclePlaceY(y, compHeight));
-
-            g.append("text")
-                .attr("id", "input-text-" + newId)
-                .attr("class", "component-outlet")
-                .attr("fill", "black")
-                .style("font-size", "14px")
-                .html(fdCompToDrop.getInput().toString())
-                .attr("x", inputTextPlaceX(x, compWidth))
-                .attr("y", inputTextPlaceY(y, compHeight));
+                .attr("cy", inputCirclePlaceY(y, compHeight, i, inputCount));
         }
-        if(fdCompToDrop.getOutput() > 0) {
+        for(let i =0; i < outputCount; ++i) {
             g.append("circle")
-                .attr("id", "output-" + newId)
-                .attr("class", "component-outlet connector")
-                .attr("r", 10)
+                .attr("id", "output-" + i + "-" + newId)
+                .attr("class", "component-outlet connector output-" + newId)
+                .attr("r", 7)
                 .attr("stroke", "black")
                 .attr("fill", "white")
+                .attr("data-index", i)
                 .attr("cx", outputCirclePlaceX(x, compWidth))
-                .attr("cy", outputCirclePlaceY(y, compHeight));
-
-            g.append("text")
-                .attr("id", "output-text-" + newId)
-                .attr("class", "component-outlet")
-                .attr("fill", "black")
-                .style("font-size", "14px")
-                .html(fdCompToDrop.getOutput().toString())
-                .attr("x", outputTextPlaceX(x, compWidth))
-                .attr("y", outputTextPlaceY(y, compHeight));
+                .attr("cy", outputCirclePlaceY(y, compHeight, i, outputCount));
         }
         
+        
         const dragCompHandler = d3.drag()
-            .on("start",function(){
-                //With this code we re-order components in order to make the draged component above the others.
-                const theCompId = d3.select(this).attr("id").replace('rect-','');
-                const svg: HTMLElement | null  = document.getElementById("conception-grid-svg");
-                if(svg != null) {
-                    if(svg.children != null){
-                        for(let i=0; i < svg.children.length; ++i){
-                            if(!svg.children[i].getAttribute("id")?.includes('link') && svg.children[i].getAttribute("id") != 'comp-' + theCompId){
-                                svg.insertBefore(svg.children[i], document.getElementById('comp-' + theCompId));
-                            }
-                        }
-                    }
-                }
-            })
             .on("drag", function () {
                 const theCompId = d3.select(this).attr("id").replace('rect-','').replace('title-text-','').replace('type-text-','');
                 const theCompWidth = Number.parseInt(d3.select("#rect-" + theCompId).attr("width"));
                 const theCompHeight = Number.parseInt(d3.select("#rect-" + theCompId).attr("height"));
+                const theCompInputCount = Number.parseInt(d3.select("#rect-" + theCompId).attr("data-input"));
+                const theCompOutputCount = Number.parseInt(d3.select("#rect-" + theCompId).attr("data-output"));
+
+                const svg: HTMLElement | null  = document.getElementById("conception-grid-svg");
+                if(svg?.lastElementChild?.getAttribute("id") != "comp-" + theCompId){
+                    d3.select('#comp-' + theCompId).raise(); 
+                }
+
                 d3.select("#rect-" + theCompId)
                     .style("opacity", 0.5)
                     .attr("x", rectPlaceX(d3.event.x, theCompWidth))
@@ -241,23 +192,20 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
                     .attr("x", typePlaceX(d3.event.x, theCompWidth))
                     .attr("y", typePlaceY(d3.event.y, theCompHeight));
 
-                d3.select('#input-'+ theCompId)
-                    .attr("cx", inputCirclePlaceX(d3.event.x, theCompWidth))
-                    .attr("cy", inputCirclePlaceY(d3.event.y, theCompHeight));
+                for(let i =0; i < theCompInputCount; ++i) {
+                    d3.select('#input-'+ i + "-" + theCompId)
+                        .attr("cx", inputCirclePlaceX(d3.event.x, theCompWidth))
+                        .attr("cy", inputCirclePlaceY(d3.event.y, theCompHeight, i, theCompInputCount));
+                }
 
-                d3.select('#output-'+ theCompId)
-                    .attr("cx", outputCirclePlaceX(d3.event.x, theCompWidth))
-                    .attr("cy", outputCirclePlaceY(d3.event.y, theCompHeight));
+                for(let i =0; i < theCompOutputCount; ++i) {
+                    d3.select('#output-'+ i + "-" + theCompId)
+                        .attr("cx", outputCirclePlaceX(d3.event.x, theCompWidth))
+                        .attr("cy", outputCirclePlaceY(d3.event.y, theCompHeight, i, theCompOutputCount));
+                }
 
-                d3.select('#input-text-'+ theCompId)
-                    .attr("x", inputTextPlaceX(d3.event.x, theCompWidth))
-                    .attr("y", inputTextPlaceY(d3.event.y, theCompHeight));
-
-                d3.select('#output-text-'+ theCompId)
-                    .attr("x", outputTextPlaceX(d3.event.x, theCompWidth))
-                    .attr("y", outputTextPlaceY(d3.event.y, theCompHeight));
-
-                d3.selectAll('.link-'+ theCompId).each(function() {
+                
+                d3.selectAll('.link-' + theCompId).each(function() {
                     const input = d3.select(this).attr("data-input");
                     const output = d3.select(this).attr("data-output");
                     const source: [number, number] = 
@@ -271,6 +219,8 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
                         .datum(getLineData(source,target))
                         .attr("d", lineFunction)
                 });
+                
+                
             })
             .on("end",function(){
                 d3.selectAll("rect").style("opacity", 1)

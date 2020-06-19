@@ -22,12 +22,12 @@ export default {
   },
   data() {
     return {
-      compBrutList: [new FDComponent("id0","FakeType1","FakeComp1", '#FFD800','autor',true,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id1","FakeType2","FakeComp2", '#FF0000','autor',true,false,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id2","FakeType1","FakeComp3", '#FFD800','autor',2,2,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id3","FakeType2","FakeComp4", '#FF0000','autor',true,3,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id4","FakeType1","FComp5", '#FFD800','autor',2,true,'icon','1.0','readme',false,'{}'),
-                            new FDComponent("id5","","FakeCompWithLongName", '#0094FF','autor',false,2,'icon','1.0','readme',false,'{}')]
+      compBrutList: [new FDComponent("id0","FakeType1","FakeComp(1-1)", '#FFD800','autor',true,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id1","FakeType2","FakeComp(1-0)", '#FF0000','autor',true,false,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id2","FakeType1","FakeComp(2-2)", '#FFD800','autor',2,2,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id3","FakeType2","FakeComp(1-3)", '#FF0000','autor',true,3,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id4","FakeType1","FComp(2-1)", '#FFD800','autor',2,true,'icon','1.0','readme',false,'{}'),
+                            new FDComponent("id5","","FakeCompLongName(0-2)", '#0094FF','autor',false,2,'icon','1.0','readme',false,'{}')]
     }
   }
 }

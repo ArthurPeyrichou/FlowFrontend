@@ -25,14 +25,13 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
     const dragLinkCompHandler = d3.drag()
         .on("drag", function () {
             //The data for our line
-            const theSourceCompId: string = d3.select(this).attr("id").replace('output-','').replace('input-','').replace('text-','');
+            const theSourceCompId: string = d3.select(this).attr("id").replace('output-','').replace('input-','');
             const isSourceInput: boolean = (d3.select(this).attr("id").indexOf('input') >= 0);
             
-            const source: [number, number] = 
-                [Number.parseInt(d3.select(this).attr("cx") ? d3.select(this).attr("cx") : d3.select(this).attr("x")) + 10, //If <text> we need to readjust the position (+10)
-                Number.parseInt(d3.select(this).attr("cy") ? d3.select(this).attr("cy") : d3.select(this).attr("y")) - 4]; //If <text> we need to readjust the position (-4)
+            const source: [number, number] = [Number.parseInt(d3.select(this).attr("cx")), Number.parseInt(d3.select(this).attr("cy"))];
             const target: [number, number] = [Number.parseInt(d3.event.x), Number.parseInt(d3.event.y)];
 
+            //Look if a temp <g><path/></g> already exist
             if(document.getElementById("link-" + theSourceCompId) == null) {
                 //The line SVG Path we draw
                 const path = d3.select("#conception-grid-svg").append("g").attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId).append("path")
@@ -65,7 +64,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
                         }
                     }
                 }
-            } else {
+            } else { //If a temp <g><path/></g> already exist we just edit the line positions.
                 d3.select("#link-" + theSourceCompId)
                 .datum(getLineData(source,target))
                 .attr("d", lineFunction);
@@ -78,14 +77,13 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
             const theSourceCirle = d3.select('#' + d3.select(this).attr("id").replace('text-',''));
             const source: [number, number] = [Number.parseInt(theSourceCirle.attr("cx")), Number.parseInt(theSourceCirle.attr("cy"))];
 
-            
             let isFounded = false;
             d3.select("#conception-grid-svg").selectAll(".connector")
                 .each(function() {
                     const theTargetCirle = d3.select('#' + d3.select(this).attr("id").replace('text-',''));
                     const target: [number, number] = [Number.parseInt(theTargetCirle.attr("cx")), Number.parseInt(theTargetCirle.attr("cy"))];
 
-                    if( Math.abs(d3.event.x - target[0]) <= 20 &&  Math.abs(d3.event.y - target[1]) <= 20) {
+                    if( Math.abs(d3.event.x - target[0]) <= 10 &&  Math.abs(d3.event.y - target[1]) <= 10) {
                         
                         const theTargetCompId = d3.select(this).attr("id").replace('output-','').replace('input-','').replace('text-','');
                         const isTargetInput: boolean = (d3.select(this).attr("id").indexOf('input') >= 0);
@@ -103,11 +101,13 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
                             document.getElementById("link-" + theSourceCompId)?.parentElement?.setAttribute("id", "link-" + newId)
                             d3.select("#link-" + theSourceCompId)
                                 .attr("id", "link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId))
-                                .attr("class", "link-path link-" + theSourceCompId + ' link-' + theTargetCompId)
+                                .attr("class", "link-path link-" + theSourceCompId.split('-')[1] + ' link-' + theTargetCompId.split('-')[1] )
                                 .datum(getLineData(source,target))
                                 .attr("d", lineFunction)
                                 .attr("data-input", (isSourceInput?theSourceCompId:theTargetCompId))
-                                .attr("data-output", (isSourceInput?theTargetCompId:theSourceCompId));
+                                .attr("data-output", (isSourceInput?theTargetCompId:theSourceCompId))
+                                .attr("data-input-index", (isSourceInput?theSourceCirle.attr("data-index"):theTargetCirle.attr("data-index")))
+                                .attr("data-output-index", (isSourceInput?theTargetCirle.attr("data-index"):theSourceCirle.attr("data-index")));
                         }
                     }
                     
@@ -117,5 +117,5 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
             }
         })
 
-    dragLinkCompHandler(d3.select("#conception-grid-svg").selectAll(".component-outlet"));
+    dragLinkCompHandler(d3.select("#conception-grid-svg").selectAll(".connector"));
 }

@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import CompSettingModal from '@/components/CompSettingModal.vue'
-import { Component, Vue, Emit } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { FDComponent } from '../models/FDComponent';
 import * as d3 from "d3";
 import { addComponentIntoGrid } from "../services/gridServices/addComponent";
@@ -27,7 +27,7 @@ import { addLinkBeetweenTwoComponentsIntoGrid } from "../services/gridServices/a
 export default class ConceptionGrid extends Vue {
   private fdCompToDrop: FDComponent | undefined = undefined;
   private currentFDComp: FDComponent = FDComponent.prototype;
-  private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string}>}> = [];
+  private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
   private idList: Array<string> = [];
 
   //public currentComponent:any = undefined;
@@ -97,12 +97,14 @@ export default class ConceptionGrid extends Vue {
    */
   public registerLink(outputCompId: string, inputCompId: string) {
     let newId = this.makeId(10);
+    const outputComp = outputCompId.split('-');
+    const inputComp = inputCompId.split('-');
     while(this.idList.includes(newId)){
       newId = this.makeId(10);
     }
     this.componentList.forEach( el => {
-      if(el.compId == outputCompId) {
-        el.links.push({linkId: newId, compId: inputCompId});
+      if(el.compId == outputComp[1]) {
+        el.links.push({linkId: newId, compId: inputComp[1], fromOutput: outputComp[0], toInput: inputComp[0]});
       }
     });
     return newId;
