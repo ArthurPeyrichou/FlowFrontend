@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import { lineFunction, getLineData } from "../gridServices/addLink";
 import { FDComponent } from '../../models/FDComponent';
 
-export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newId: string) {
+export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, registerComponent: Function, openModal: Function) {
     if(fdCompToDrop !== undefined) {
         const x = d3.mouse(d3.event.currentTarget)[0];
         const y = d3.mouse(d3.event.currentTarget)[1];
@@ -10,6 +10,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newI
         const compWidth = 75 + fdCompToDrop.getTitle().length * 9;
         const svgGridBorder = 10;
         const svgMax = 5000;
+        const newId = registerComponent(fdCompToDrop);
         
         const g = d3.select("#conception-grid-svg")
             .append("g")
@@ -132,6 +133,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newI
         
         g.append("rect")
             .attr("id", "rect-" + newId)
+            .attr("class", "draggable")
             .attr("stroke", "black")
             .attr("fill", fdCompToDrop.getColor())
             .attr("height", compHeight)
@@ -140,29 +142,31 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newI
             .attr("x", rectPlaceX(x, compWidth))
             .attr("y", rectPlaceY(y, compHeight))
             .on("click", () => {
-                //this.$bvModal.show("modal-edit-component") 
+                openModal(newId);
             });
 
         g.append("text")
             .attr("id", "title-text-" + newId)
+            .attr("class", "draggable")
             .attr("fill", "black")
             .style("font-size", "14px")
             .html(fdCompToDrop.getTitle())
             .attr("x", titlePlaceX(x, compWidth))
             .attr("y", titlePlaceY(y, compHeight))
             .on("click", () => {
-                //this.$bvModal.show("modal-edit-component") 
+                openModal(newId);
             });
         
         g.append("text")
             .attr("id", "type-text-" + newId)
+            .attr("class", "draggable")
             .attr("fill", "black")
             .style("font-size", "12px")
             .html(fdCompToDrop.getTitle())
             .attr("x", typePlaceX(x, compWidth))
             .attr("y", typePlaceY(y, compHeight))
             .on("click", () => {
-                //this.$bvModal.show("modal-edit-component") 
+                openModal(newId);
             });
 
         if(fdCompToDrop.getInput() > 0) {
@@ -212,7 +216,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newI
                 if(svg != null) {
                     if(svg.children != null){
                         for(let i=0; i < svg.children.length; ++i){
-                            if(!svg.children[i].getAttribute("class")?.includes('link') && svg.children[i].getAttribute("id") != 'comp-' + theCompId){
+                            if(!svg.children[i].getAttribute("id")?.includes('link') && svg.children[i].getAttribute("id") != 'comp-' + theCompId){
                                 svg.insertBefore(svg.children[i], document.getElementById('comp-' + theCompId));
                             }
                         }
@@ -220,14 +224,14 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newI
                 }
             })
             .on("drag", function () {
-                const theCompWidth = Number.parseInt(d3.select(this).attr("width"));
-                const theCompHeight = Number.parseInt(d3.select(this).attr("height"));
-                d3.select(this)
+                const theCompId = d3.select(this).attr("id").replace('rect-','').replace('title-text-','').replace('type-text-','');
+                const theCompWidth = Number.parseInt(d3.select("#rect-" + theCompId).attr("width"));
+                const theCompHeight = Number.parseInt(d3.select("#rect-" + theCompId).attr("height"));
+                d3.select("#rect-" + theCompId)
                     .style("opacity", 0.5)
                     .attr("x", rectPlaceX(d3.event.x, theCompWidth))
                     .attr("y", rectPlaceY(d3.event.y, theCompHeight));
 
-                const theCompId = d3.select(this).attr("id").replace('rect-','');
 
                 d3.select('#title-text-'+ theCompId)
                     .attr("x", titlePlaceX(d3.event.x, theCompWidth))
@@ -269,9 +273,9 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, newI
                 });
             })
             .on("end",function(){
-                d3.select(this).style("opacity", 1)
+                d3.selectAll("rect").style("opacity", 1)
             });
 
-        dragCompHandler(d3.select("#conception-grid-svg").selectAll("rect"));
+        dragCompHandler(d3.select("#conception-grid-svg").selectAll(".draggable"));
     }
   }

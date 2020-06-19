@@ -24,6 +24,7 @@ import { FDComponent } from '../models/FDComponent';
 @Component
 export default class ToolBar extends Vue {
   @Prop() private compBrutList!: FDComponent[];
+   // eslint-disable-next-line
   compList: any = {};
   compGroupsList: string[] = [];
 

@@ -7,40 +7,36 @@
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
       </svg>
     </div>
-    <b-button v-b-modal.modal-edit-component>Edit Component</b-button>
-
-    <b-modal id="modal-edit-component">
-      <template v-slot:modal-title>
-        Settings:
-      </template>
-      <p class="my-4">Hello from modal!</p>
-    </b-modal>
+    <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import CompSettingModal from '@/components/CompSettingModal.vue'
+import { Component, Vue, Emit } from 'vue-property-decorator';
 import { FDComponent } from '../models/FDComponent';
 import * as d3 from "d3";
 import { addComponentIntoGrid } from "../services/gridServices/addComponent";
 import { addLinkBeetweenTwoComponentsIntoGrid } from "../services/gridServices/addLink";
 
-// register modal component
-Vue.component("modal", {
-  template: "#modal-template"
-});
-
-@Component
+@Component({
+  components: {
+    CompSettingModal
+  }
+})
 export default class ConceptionGrid extends Vue {
-  // eslint-disable-next-line to ignore the next line.
-  private fdCompToDrop: any = undefined;
-  private componentList: Array<string> = [];
+  private fdCompToDrop: FDComponent | undefined = undefined;
+  private currentFDComp: FDComponent = FDComponent.prototype;
+  private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string}>}> = [];
+  private idList: Array<string> = [];
+
   //public currentComponent:any = undefined;
 
   constructor() {
     super();
     //Tthis way we execute the code after the redering of the template
     this.$nextTick( () => {this.initSvg();});
+    console.log()
   }
 
   /**
@@ -73,12 +69,8 @@ export default class ConceptionGrid extends Vue {
   private initSvg() {
     const actualize = () => {
         if(this.fdCompToDrop != undefined) {
-          let newId = this.makeId(10);
-          while(this.componentList.includes(newId)){
-            newId = this.makeId(10);
-          }
-          addComponentIntoGrid(this.fdCompToDrop, newId);
-          addLinkBeetweenTwoComponentsIntoGrid();
+          addComponentIntoGrid(this.fdCompToDrop, this.registerComponent, this.openSettingModal);
+          addLinkBeetweenTwoComponentsIntoGrid(this.registerLink);
           this.fdCompToDrop = undefined;
         }
     }
@@ -88,6 +80,41 @@ export default class ConceptionGrid extends Vue {
         actualize();
       });
   }
+
+  /**
+   * Call by addComponentIntoGrid() when a comp is drop into grid.
+   */
+  public registerComponent(comp: FDComponent): string {
+    let newId = this.makeId(10);
+    while(this.idList.includes(newId)){
+      newId = this.makeId(10);
+    }
+    this.componentList.push({component: comp, compId: newId, links: []});
+    return newId;
+  }
+  /**
+   * Call by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+   */
+  public registerLink(outputCompId: string, inputCompId: string) {
+    let newId = this.makeId(10);
+    while(this.idList.includes(newId)){
+      newId = this.makeId(10);
+    }
+    this.componentList.forEach( el => {
+      if(el.compId == outputCompId) {
+        el.links.push({linkId: newId, compId: inputCompId});
+      }
+    });
+    return newId;
+  }
+  /**
+   * Call by addComponentIntoGrid() when a comp is clicked.
+   */
+  public openSettingModal(compId: string) {
+    this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0].component;
+    this.$children[0].$bvModal.show("modal-edit-component")
+  }
+
 }
 </script>
 

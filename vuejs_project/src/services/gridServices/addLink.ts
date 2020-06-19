@@ -21,7 +21,7 @@ export function getLineData(source: [number, number], target: [number, number]):
 }
 
 
-export function addLinkBeetweenTwoComponentsIntoGrid() {
+export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
     const dragLinkCompHandler = d3.drag()
         .on("drag", function () {
             //The data for our line
@@ -35,13 +35,24 @@ export function addLinkBeetweenTwoComponentsIntoGrid() {
 
             if(document.getElementById("link-" + theSourceCompId) == null) {
                 //The line SVG Path we draw
-                d3.select("#conception-grid-svg").append("g").attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId).append("path")
+                const path = d3.select("#conception-grid-svg").append("g").attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId).append("path")
                     .attr("id", "link-" + theSourceCompId)
                     .datum(getLineData(source,target))
                     .attr("d", lineFunction)
                     .attr("stroke", "grey")
                     .attr("stroke-width", "3px")
-                    .attr("fill", "none");
+                    .attr("fill", "none")
+                    .style("cursor","pointer");
+                path.on("mouseover", () => {
+                    path.attr("stroke-width", "5px")
+                })
+                path.on("mouseout", () => {
+                    path.attr("stroke-width", "3px")
+                })
+                path.on("click", () => {
+                    d3.selectAll(".link-path").attr("stroke", "grey")
+                    path.attr("stroke", "gold")
+                });
 
                 const svg: HTMLElement | null  = document.getElementById("conception-grid-svg");
                 if(svg != null) {
@@ -64,17 +75,15 @@ export function addLinkBeetweenTwoComponentsIntoGrid() {
             //The data for our line
             const theSourceCompId = d3.select(this).attr("id").replace('output-','').replace('input-','').replace('text-','');
             const isSourceInput: boolean = (d3.select(this).attr("id").indexOf('input') >= 0);
-            const source: [number, number] = 
-                [Number.parseInt(d3.select(this).attr("cx") ? d3.select(this).attr("cx") : d3.select(this).attr("x")) + 10, //If <text> we need to readjust the position (+10)
-                Number.parseInt(d3.select(this).attr("cy") ? d3.select(this).attr("cy") : d3.select(this).attr("y")) - 4]; //If <text> we need to readjust the position (-4)
+            const theSourceCirle = d3.select('#' + d3.select(this).attr("id").replace('text-',''));
+            const source: [number, number] = [Number.parseInt(theSourceCirle.attr("cx")), Number.parseInt(theSourceCirle.attr("cy"))];
 
             
             let isFounded = false;
-            d3.select("#conception-grid-svg").selectAll(".component-outlet")
+            d3.select("#conception-grid-svg").selectAll(".connector")
                 .each(function() {
-                    const target: [number, number] = 
-                    [Number.parseInt(d3.select(this).attr("cx") ? d3.select(this).attr("cx") : d3.select(this).attr("x")) + 10, //If <text> we need to readjust the position (+10)
-                    Number.parseInt(d3.select(this).attr("cy") ? d3.select(this).attr("cy") : d3.select(this).attr("y")) - 4]; //If <text> we need to readjust the position (-4)
+                    const theTargetCirle = d3.select('#' + d3.select(this).attr("id").replace('text-',''));
+                    const target: [number, number] = [Number.parseInt(theTargetCirle.attr("cx")), Number.parseInt(theTargetCirle.attr("cy"))];
 
                     if( Math.abs(d3.event.x - target[0]) <= 20 &&  Math.abs(d3.event.y - target[1]) <= 20) {
                         
@@ -86,23 +95,22 @@ export function addLinkBeetweenTwoComponentsIntoGrid() {
                         // - the connections is beetween an input and an output connector.
                         // - there is no any link who already exist between those two components.
                         if(theTargetCompId != theSourceCompId && isSourceInput != isTargetInput
-                                && document.getElementById("link-" + (isSourceInput? theSourceCompId + '-to-' + theTargetCompId:theTargetCompId + '-to-' + theSourceCompId)) == null){
+                                && document.getElementById("link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId)) == null){
                             
+                            const newId = registerLink((isSourceInput? theTargetCompId:theSourceCompId), (isSourceInput? theSourceCompId:theTargetCompId));
                             isFounded = true;
-                            const target: [number, number] = 
-                            [Number.parseInt(d3.select(this).attr("cx") ? d3.select(this).attr("cx") : d3.select(this).attr("x")) + 10, //If <text> we need to readjust the position (+10)
-                            Number.parseInt(d3.select(this).attr("cy") ? d3.select(this).attr("cy") : d3.select(this).attr("y")) - 4]; //If <text> we need to readjust the position (-4)
-
-                            document.getElementById("link-" + theSourceCompId)?.parentElement?.setAttribute("class", "link " + (isSourceInput?'input-' + theSourceCompId + ' output-' + theTargetCompId:'input-' + theTargetCompId + ' output-' + theSourceCompId))
+                            document.getElementById("link-" + theSourceCompId)?.parentElement?.setAttribute("class", "")
+                            document.getElementById("link-" + theSourceCompId)?.parentElement?.setAttribute("id", "link-" + newId)
                             d3.select("#link-" + theSourceCompId)
-                                .attr("id", "link-" + (isSourceInput? theSourceCompId + '-to-' + theTargetCompId:theTargetCompId + '-to-' + theSourceCompId))
-                                .attr("class", "link-" + theSourceCompId + ' link-' + theTargetCompId)
+                                .attr("id", "link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId))
+                                .attr("class", "link-path link-" + theSourceCompId + ' link-' + theTargetCompId)
                                 .datum(getLineData(source,target))
                                 .attr("d", lineFunction)
                                 .attr("data-input", (isSourceInput?theSourceCompId:theTargetCompId))
                                 .attr("data-output", (isSourceInput?theTargetCompId:theSourceCompId));
                         }
                     }
+                    
                 });  
             if(!isFounded){
                 document.getElementById("link-" + theSourceCompId)?.parentElement?.remove();
