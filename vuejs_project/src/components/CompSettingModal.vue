@@ -5,12 +5,12 @@
       id="modal-edit-component" 
       size="lg"
       ref="modal"
-      :title="'Settings: ' + fdComponent.getTitle()"
+      :title="'Settings: ' + fdComponent.component.getTitle()"
       @show="resetModal"
       @hidden="resetModal"
       @ok="handleOk"
     >
-      <form ref="form" @submit.stop.prevent="handleSubmit">
+      <!--form ref="form" @submit.stop.prevent="handleSubmit">
         <b-form-group
           :state="nameState"
           label="Name"
@@ -24,12 +24,12 @@
             required
           ></b-form-input>
         </b-form-group>
-      </form>
+      </form-->
       <template v-slot:modal-footer>
         <div class="w-100">
           
-          <button type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i> Delete the Component</button>
-          <button type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Apply Settings</button>
+          <button v-on:click="handleDeleteSubmit" type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i> Delete the Component</button>
+          <button v-on:click="handleUpdateSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Apply Settings</button>
           <button v-on:click="hideModal" type="button" class="btn btn-outline-primary float-right">Close</button>
           
         </div>
@@ -39,11 +39,10 @@
 </template>
 
 <script>
-    import { FDComponent } from '../models/FDComponent';
     import Vue from 'vue';
     export default Vue.extend({
         name: 'CompSettingModal',
-        props: ['fdComponent'],
+        props: ['fdComponent', 'deleteTheComp'],
         data() {
             return {
             name: '',
@@ -57,7 +56,6 @@
                 this.$bvModal.show("modal-edit-component")
             },
             hideModal() {
-                this.fdComponent = FDComponent.prototype;
                 this.$bvModal.hide("modal-edit-component")
             },
             checkFormValidity() {
@@ -84,19 +82,14 @@
                 this.submittedNames.push(this.name)
                 // Hide the modal manually
                 this.$nextTick(() => {
-                    this.$bvModal.hide('modal-prevent-closing')
+                    this.$bvModal.hide('modal-edit-component')
                 })
             },
             handleDeleteSubmit() {
-                // Exit when the form isn't valid
-                if (!this.checkFormValidity()) {
-                    return
-                }
-                // Push the name to submitted names
-                this.submittedNames.push(this.name)
+                this.deleteTheComp(this.fdComponent);
                 // Hide the modal manually
                 this.$nextTick(() => {
-                    this.$bvModal.hide('modal-prevent-closing')
+                    this.$bvModal.hide('modal-edit-component')
                 })
             }
         }

@@ -7,7 +7,7 @@
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
       </svg>
     </div>
-    <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" />
+    <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" :deleteTheComp="deleteTheComp" />
   </div>
 </template>
 
@@ -26,7 +26,7 @@ import { addLinkBeetweenTwoComponentsIntoGrid } from "../services/gridServices/a
 })
 export default class ConceptionGrid extends Vue {
   private fdCompToDrop: FDComponent | undefined = undefined;
-  private currentFDComp: FDComponent = FDComponent.prototype;
+  private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
   private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
   private idList: Array<string> = [];
 
@@ -36,7 +36,7 @@ export default class ConceptionGrid extends Vue {
     super();
     //Tthis way we execute the code after the redering of the template
     this.$nextTick( () => {this.initSvg();});
-    console.log()
+    this.currentFDComp = {component: FDComponent.prototype, compId: "", links: []};
   }
 
   /**
@@ -113,8 +113,33 @@ export default class ConceptionGrid extends Vue {
    * Call by addComponentIntoGrid() when a comp is clicked.
    */
   public openSettingModal(compId: string) {
-    this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0].component;
+    this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0];
     this.$children[0].$bvModal.show("modal-edit-component")
+  }
+
+  /**
+   * Call by CompSettingModal, delete the component and all links related from the Array and the screen.
+   */
+  public deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}) {
+    this.componentList.forEach( el => {
+      el.links = el.links.filter(el => {
+        if(el.compId != fdComp.compId) {
+          return true;
+        } else {
+          document.getElementById("link-" + el.linkId)?.remove();
+          return false;
+        }
+      });
+    });
+    this.componentList = this.componentList.filter(el => {
+      if(el.compId != fdComp.compId) {
+          return true;
+        } else {
+          el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
+          document.getElementById("comp-" + fdComp.compId)?.remove();
+          return false;
+        }
+    });
   }
 
 }
