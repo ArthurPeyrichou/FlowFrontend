@@ -43,8 +43,15 @@ export default class ConceptionGrid extends Vue {
    * Call when a flowdata component is drop inside the <svg>
    */
   public drop(event: DragEvent) {
-      if(event.dataTransfer != null && event.dataTransfer != undefined){
-        this.fdCompToDrop = FDComponent.fromString(event.dataTransfer.getData("text"));
+      if(event.dataTransfer != null && event.dataTransfer != undefined) { 
+        try {
+          this.fdCompToDrop = FDComponent.fromString(event.dataTransfer.getData("text"));
+        } catch(error) {
+          //Can be call if a already dropped component is moove in svg. 
+          //Or if we try to link two component and cancel. 
+          //Or drag and drop an element which should not be dropped here
+          //console.log(error)
+        }
       }
   }
 

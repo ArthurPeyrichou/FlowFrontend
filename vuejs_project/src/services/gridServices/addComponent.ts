@@ -8,7 +8,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         const y = d3.mouse(d3.event.currentTarget)[1];
         const inputCount = fdCompToDrop.getInput();
         const outputCount = fdCompToDrop.getOutput();
-        const compHeight = 25 + Math.max(inputCount, outputCount) * 15;
+        const compHeight = 20 + Math.max(inputCount, outputCount) * 20;
         const compWidth = 75 + fdCompToDrop.getTitle().length * 9;
         const svgGridBorder = 10;
         const svgMax = 5000;
@@ -103,7 +103,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         
         g.append("rect")
             .attr("id", "rect-" + newId)
-            .attr("class", "draggable")
+            .attr("class", "fdcomp draggable")
             .attr("stroke", "black")
             .attr("fill", fdCompToDrop.getColor())
             .attr("height", compHeight)
@@ -144,7 +144,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         for(let i =0; i < inputCount; ++i) {
             g.append("circle")
                 .attr("id", "input-" + i + "-" + newId)
-                .attr("class", "component-outlet connector input-" + newId)
+                .attr("class", "input connector input-" + newId)
                 .attr("r", 7)
                 .attr("stroke", "black")
                 .attr("fill", "white")
@@ -155,7 +155,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         for(let i =0; i < outputCount; ++i) {
             g.append("circle")
                 .attr("id", "output-" + i + "-" + newId)
-                .attr("class", "component-outlet connector output-" + newId)
+                .attr("class", "output connector output-" + newId)
                 .attr("r", 7)
                 .attr("stroke", "black")
                 .attr("fill", "white")
@@ -216,7 +216,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
                         Number.parseInt(d3.select('#input-' + input).attr("cy")) ]; 
 
                     d3.select(this)
-                        .datum(getLineData(source,target))
+                        .datum(getLineData(source,target, false))
                         .attr("d", lineFunction)
                 });
                 
