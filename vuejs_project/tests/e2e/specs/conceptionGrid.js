@@ -61,14 +61,14 @@ describe('Grid conception tests', () => {
     cy.visit('/')
     
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 100, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 100, 100)
     cy.get('.fdcomp').should('have.length', 1)
   })
 
   it('Moove a component in the corners of conception grid', function() {
     cy.visit('/')
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.window().then((win) => {
@@ -78,13 +78,13 @@ describe('Grid conception tests', () => {
         .trigger('mousedown', { which: 1, button: 0, view: win })
         .trigger('dragstart', { dataTransfer, view: win })
       
-      cy.get("#conception-grid-svg").trigger('mousemove', {position: "topLeft", force: true, view: win})
-      cy.get("#conception-grid-svg").trigger("dragover", {dataTransfer, view: win, force: true})
+      cy.get("#svg-grid-bg").trigger('mousemove', {position: "topLeft", force: true, view: win})
+      cy.get("#svg-grid-bg").trigger("dragover", {dataTransfer, view: win, force: true})
       cy.wait(10)
   
-      cy.get("#conception-grid-svg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
-        cy.get("#conception-grid-svg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
-          cy.get("#conception-grid-svg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
+      cy.get("#svg-grid-bg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
+        cy.get("#svg-grid-bg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
+          cy.get("#svg-grid-bg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
           }) 
       })
 
@@ -93,13 +93,13 @@ describe('Grid conception tests', () => {
         .trigger('mousedown', { which: 1, button: 0, view: win })
         .trigger('dragstart', { dataTransfer, view: win })
       
-      cy.get("#conception-grid-svg").trigger('mousemove', {position: "topRight", force: true, view: win})
-      cy.get("#conception-grid-svg").trigger("dragover", {dataTransfer, view: win, force: true})
+      cy.get("#svg-grid-bg").trigger('mousemove', {position: "topRight", force: true, view: win})
+      cy.get("#svg-grid-bg").trigger("dragover", {dataTransfer, view: win, force: true})
       cy.wait(10)
   
-      cy.get("#conception-grid-svg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
-        cy.get("#conception-grid-svg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
-          cy.get("#conception-grid-svg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
+      cy.get("#svg-grid-bg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
+        cy.get("#svg-grid-bg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
+          cy.get("#svg-grid-bg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
           }) 
       })
 
@@ -108,28 +108,13 @@ describe('Grid conception tests', () => {
         .trigger('mousedown', { which: 1, button: 0, view: win })
         .trigger('dragstart', { dataTransfer, view: win })
       
-      cy.get("#conception-grid-svg").trigger('mousemove', {position: "bottomLeft", force: true, view: win})
-      cy.get("#conception-grid-svg").trigger("dragover", {dataTransfer, view: win, force: true})
+      cy.get("#svg-grid-bg").trigger('mousemove', {position: "bottomLeft", force: true, view: win})
+      cy.get("#svg-grid-bg").trigger("dragover", {dataTransfer, view: win, force: true})
       cy.wait(10)
   
-      cy.get("#conception-grid-svg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
-        cy.get("#conception-grid-svg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
-          cy.get("#conception-grid-svg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
-          }) 
-      })
-
-      cy.get(".fdcomp").first().trigger('mousemove', {view: win})
-      cy.get(".fdcomp").first().trigger('pointerdown', { which: 1, button: 0, view: win })
-        .trigger('mousedown', { which: 1, button: 0, view: win })
-        .trigger('dragstart', { dataTransfer, view: win })
-      
-      cy.get("#conception-grid-svg").trigger('mousemove', {position: "bottomRight", force: true, view: win})
-      cy.get("#conception-grid-svg").trigger("dragover", {dataTransfer, view: win, force: true})
-      cy.wait(10)
-  
-      cy.get("#conception-grid-svg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
-        cy.get("#conception-grid-svg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
-          cy.get("#conception-grid-svg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
+      cy.get("#svg-grid-bg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
+        cy.get("#svg-grid-bg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
+          cy.get("#svg-grid-bg").trigger('pointerup', { which: 1, button: 0, view: win, force: true})  
           }) 
       })
 
@@ -141,7 +126,7 @@ describe('Grid conception tests', () => {
   it('A component can\'t link his output to his input', function() {
     cy.visit('/')
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('.link-path').should('have.length', 0)
@@ -152,10 +137,10 @@ describe('Grid conception tests', () => {
   it('Link two components in the conception grid and select it', function() {
     cy.visit('/')
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#conception-grid-svg", 150, 250)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#svg-grid-bg", 150, 250)
     cy.get('.fdcomp').should('have.length', 2)
     cy.get('.link-path').should('have.length', 0)
 
@@ -170,10 +155,10 @@ describe('Grid conception tests', () => {
   it('Two components can\'t have the same link twice', function() {
     cy.visit('/')
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#conception-grid-svg", 150, 250)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#svg-grid-bg", 150, 250)
     cy.get('.fdcomp').should('have.length', 2)
     cy.get('.link-path').should('have.length', 0)
 
@@ -188,17 +173,17 @@ describe('Grid conception tests', () => {
     cy.visit('/')
 
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#conception-grid-svg", 150, 200)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#svg-grid-bg", 150, 200)
     cy.get('.fdcomp').should('have.length', 2)
     cy.get('.link-path').should('have.length', 0)
 
     dragDropD3("circle.output", "circle.input")
     cy.get('.link-path').should('have.length', 1)
 
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#conception-grid-svg", 150, 400)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(2)", "#svg-grid-bg", 150, 400)
     cy.get('.fdcomp').should('have.length', 3)
 
     dragDropD3("circle.output", "circle.input")
@@ -220,7 +205,7 @@ describe('Grid conception tests', () => {
     cy.visit('/')
 
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('.fdcomp').click();
@@ -232,7 +217,7 @@ describe('Grid conception tests', () => {
     cy.visit('/')
 
     cy.get('.fdcomp').should('have.length', 0)
-    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#conception-grid-svg", 150, 100)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('.fdcomp').click();

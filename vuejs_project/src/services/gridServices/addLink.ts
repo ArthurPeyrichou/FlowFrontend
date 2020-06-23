@@ -40,7 +40,10 @@ export function getLineData(source: [number, number], target: [number, number], 
     return [ source, q1, q3, target];
 }
 
-
+/**
+ * Select all connectors of "#conception-grid-svg" and sets drag&drop listeners for links creation
+ * @param registerLink function who register the link in component's links of ConceptionGrid's Vue and return his unique id
+ */
 export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
     const dragLinkCompHandler = d3.drag()
         .on("drag", function () {

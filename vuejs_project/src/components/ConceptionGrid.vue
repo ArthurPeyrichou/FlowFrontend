@@ -6,12 +6,12 @@
     <div id="conception-board" class="board">
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
         <defs>
-          <pattern patternUnits="userSpaceOnUse" id="svggrid" x="0" y="0" width="150" height="150">
+          <pattern patternUnits="userSpaceOnUse" id="svg-grid" x="0" y="0" width="150" height="150">
             <image width="150" height="150" xlink:href="../assets/conceptiongrid.png"/>
           </pattern>
         </defs>
-        <g class="svggrid">
-          <rect id="svggridbg" width="5000" height="5000" fill="url(#svggrid)"></rect>
+        <g class="svg-grid">
+          <rect id="svg-grid-bg" x="0" y="0" width="5000" height="5000" fill="url(#svg-grid)"></rect>
         </g>
       </svg>
       <div id="zoom-tools">
@@ -31,201 +31,207 @@
 </template>
 
 <script lang="ts">
-import CompSettingModal from '@/components/CompSettingModal.vue'
-import { Component, Vue } from 'vue-property-decorator';
-import { FDComponent } from '../models/FDComponent';
-import * as d3 from "d3";
-import { addComponentIntoGrid } from "../services/gridServices/addComponent";
-import { addLinkBeetweenTwoComponentsIntoGrid } from "../services/gridServices/addLink";
+  import * as d3 from "d3";
+  import CompSettingModal from '@/components/CompSettingModal.vue'
+  import { Component, Vue } from 'vue-property-decorator';
+  import { FDComponent } from '../models/FDComponent';
+  import { addComponentIntoGrid } from "../services/gridServices/addComponent";
+  import { addLinkBeetweenTwoComponentsIntoGrid } from "../services/gridServices/addLink";
 
-@Component({
-  components: {
-    CompSettingModal
-  }
-})
-export default class ConceptionGrid extends Vue {
-  private fdCompToDrop: FDComponent | undefined = undefined;
-  private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
-  private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
-  private idList: Array<string> = [];
-  private svgScale = 1;
+  @Component({
+    components: {
+      CompSettingModal
+    }
+  })
+  export default class ConceptionGrid extends Vue {
+    private fdCompToDrop: FDComponent | undefined = undefined;
+    private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
+    private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
+    private idList: Array<string> = [];
+    private svgScale = 1;
 
-  //public currentComponent:any = undefined;
+    constructor() {
+      super();
+      //Tthis way we execute the code after the redering of the template
+      this.$nextTick( () => {this.initSvg();});
+      this.currentFDComp = {component: FDComponent.prototype, compId: "", links: []};
+    }
 
-  constructor() {
-    super();
-    //Tthis way we execute the code after the redering of the template
-    this.$nextTick( () => {this.initSvg();});
-    this.currentFDComp = {component: FDComponent.prototype, compId: "", links: []};
-  }
+    /**
+     * Call when a flowdata component is drop inside the <svg>
+     */
+    public drop(event: DragEvent) {
+        if(event.dataTransfer != null && event.dataTransfer != undefined) { 
+          try {
+            this.fdCompToDrop = FDComponent.fromString(event.dataTransfer.getData("text"));
+          } catch(error) {
+            //Can be call if a already dropped component is moove in svg. 
+            //Or if we try to link two component and cancel. 
+            //Or drag and drop an element which should not be dropped here
+            //console.log(error)
+          }
+        }
+    }
 
-  /**
-   * Call when a flowdata component is drop inside the <svg>
-   */
-  public drop(event: DragEvent) {
-      if(event.dataTransfer != null && event.dataTransfer != undefined) { 
-        try {
-          this.fdCompToDrop = FDComponent.fromString(event.dataTransfer.getData("text"));
-        } catch(error) {
-          //Can be call if a already dropped component is moove in svg. 
-          //Or if we try to link two component and cancel. 
-          //Or drag and drop an element which should not be dropped here
-          //console.log(error)
+    /**
+     * Make a random string
+     * @param lenght the lenght wish
+     * @return a random string
+     */
+    private makeId(length: number): string {
+      let result= '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (let i = 0; i < length; ++i) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      return result;
+    }
+
+    /**
+     * Initialize d3 event's Observable
+     * Allow Components and links creation
+     * Drag&Drop of components in order to move them
+     */
+    private initSvg() {
+      const actualize = (mouse: [number, number]) => {
+        if(this.fdCompToDrop != undefined) {
+          addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal);
+          addLinkBeetweenTwoComponentsIntoGrid(this.registerLink);
+          this.fdCompToDrop = undefined;
         }
       }
-  }
 
-  /**
-   * Make a random string
-   * @param lenght the lenght of the returned string
-   */
-  private makeId(length: number): string {
-    let result= '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < length; ++i) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-  }
+      d3.select("#svg-grid-bg").on("mousemove", function () {
+        actualize(d3.mouse(this as any));
+      })
 
-  /**
-   * Initialize d3 event's Observable
-   * Allow Components and links creation
-   * Drag&Drop of components in order to move them
-   */
-  private initSvg() {
-    const actualize = (mouse: [number, number]) => {
-      if(this.fdCompToDrop != undefined) {
-        addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal);
-        addLinkBeetweenTwoComponentsIntoGrid(this.registerLink);
-        this.fdCompToDrop = undefined;
+      //This part allows the conception grid positioning by drag and drop
+      const svgBoard = document.getElementById('conception-board');
+      if(svgBoard != null){
+        let isDown = false;
+        let startX: number;
+        let scrollLeft: number;
+        let startY: number;
+        let scrollTop: number;
+        svgBoard.addEventListener('mousedown', (e) => {
+          isDown = true;
+          svgBoard.classList.add('active');
+          startX = e.pageX - svgBoard.offsetLeft;
+          scrollLeft = svgBoard.scrollLeft;
+          startY = e.pageY - svgBoard.offsetTop;
+          scrollTop = svgBoard.scrollTop;
+        });
+        svgBoard.addEventListener('mouseleave', () => {
+          isDown = false;
+          svgBoard.classList.remove('active');
+        });
+        svgBoard.addEventListener('mouseup', () => {
+          isDown = false;
+          svgBoard.classList.remove('active');
+        });
+        svgBoard.addEventListener('mousemove', (e) => {
+          if(!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - svgBoard.offsetLeft;
+          const walkX = (x - startX) * 2; //scroll faster
+          svgBoard.scrollLeft = scrollLeft - walkX;
+          const y = e.pageY - svgBoard.offsetTop;
+          const walkY = (y - startY) * 2; //scroll faster
+          svgBoard.scrollTop = scrollTop - walkY;
+        });
       }
     }
 
-    d3.select("#svggridbg").on("mousemove", function () {
-      actualize(d3.mouse(this as any));
-    })
-
-    //This part allows the conception grid positioning by drag and drop
-    const svgBoard = document.getElementById('conception-board');
-    if(svgBoard != null){
-      let isDown = false;
-      let startX: number;
-      let scrollLeft: number;
-      let startY: number;
-      let scrollTop: number;
-      svgBoard.addEventListener('mousedown', (e) => {
-        isDown = true;
-        svgBoard.classList.add('active');
-        startX = e.pageX - svgBoard.offsetLeft;
-        scrollLeft = svgBoard.scrollLeft;
-        startY = e.pageY - svgBoard.offsetTop;
-        scrollTop = svgBoard.scrollTop;
-      });
-      svgBoard.addEventListener('mouseleave', () => {
-        isDown = false;
-        svgBoard.classList.remove('active');
-      });
-      svgBoard.addEventListener('mouseup', () => {
-        isDown = false;
-        svgBoard.classList.remove('active');
-      });
-      svgBoard.addEventListener('mousemove', (e) => {
-        if(!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - svgBoard.offsetLeft;
-        const walkX = (x - startX) * 2; //scroll faster
-        svgBoard.scrollLeft = scrollLeft - walkX;
-        const y = e.pageY - svgBoard.offsetTop;
-        const walkY = (y - startY) * 2; //scroll faster
-        svgBoard.scrollTop = scrollTop - walkY;
-      });
-    }
-  }
-
-  public zoomInSvg(){
-    if(this.svgScale < 2) {
-      this.svgScale += 0.1;
-      d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
-    }
-  }
-
-  public zoomResetSvg(){
-    if(this.svgScale != 1) {
-      this.svgScale = 1;
-      d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
-    }
-  }
-
-  public zoomOutSvg(){
-    if(this.svgScale > 0.2) {
-      this.svgScale -= 0.1;
-      d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
-    }
-  }
-
-  /**
-   * Call by addComponentIntoGrid() when a comp is drop into grid.
-   */
-  public registerComponent(comp: FDComponent): string {
-    let newId = this.makeId(10);
-    while(this.idList.includes(newId)){
-      newId = this.makeId(10);
-    }
-    this.componentList.push({component: comp, compId: newId, links: []});
-    return newId;
-  }
-  /**
-   * Call by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
-   */
-  public registerLink(outputCompId: string, inputCompId: string) {
-    let newId = this.makeId(10);
-    const outputComp = outputCompId.split('-');
-    const inputComp = inputCompId.split('-');
-    while(this.idList.includes(newId)){
-      newId = this.makeId(10);
-    }
-    this.componentList.forEach( el => {
-      if(el.compId == outputComp[1]) {
-        el.links.push({linkId: newId, compId: inputComp[1], fromOutput: outputComp[0], toInput: inputComp[0]});
+    public zoomInSvg(){
+      if(this.svgScale < 2) {
+        this.svgScale += 0.1;
+        d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
       }
-    });
-    return newId;
-  }
-  /**
-   * Call by addComponentIntoGrid() when a comp is clicked.
-   */
-  public openSettingModal(compId: string) {
-    this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0];
-    this.$children[0].$bvModal.show("modal-edit-component")
-  }
+    }
 
-  /**
-   * Call by CompSettingModal, delete the component and all links related from the Array and the screen.
-   */
-  public deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}) {
-    this.componentList.forEach( el => {
-      el.links = el.links.filter(el => {
+    public zoomResetSvg(){
+      if(this.svgScale != 1) {
+        this.svgScale = 1;
+        d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+      }
+    }
+
+    public zoomOutSvg(){
+      if(this.svgScale > 0.2) {
+        this.svgScale -= 0.1;
+        d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+      }
+    }
+
+    /**
+     * Call by addComponentIntoGrid() when a comp is drop into grid.
+     * @param comp the flowdata component to add in svg
+     * @return a new string identifiant generate with makeId()
+     */
+    public registerComponent(comp: FDComponent): string {
+      let newId = this.makeId(10);
+      while(this.idList.includes(newId)){
+        newId = this.makeId(10);
+      }
+      this.componentList.push({component: comp, compId: newId, links: []});
+      return newId;
+    }
+    /**
+     * Call by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+     * @param outputCompId the component source
+     * @param inputCompId the component target
+     * @return a new string identifiant generate with makeId()
+     */
+    public registerLink(outputCompId: string, inputCompId: string) {
+      let newId = this.makeId(10);
+      const outputComp = outputCompId.split('-');
+      const inputComp = inputCompId.split('-');
+      while(this.idList.includes(newId)){
+        newId = this.makeId(10);
+      }
+      this.componentList.forEach( el => {
+        if(el.compId == outputComp[1]) {
+          el.links.push({linkId: newId, compId: inputComp[1], fromOutput: outputComp[0], toInput: inputComp[0]});
+        }
+      });
+      return newId;
+    }
+    /**
+     * Call by addComponentIntoGrid() when a comp is clicked.
+     * @param compId the id of the component 
+     */
+    public openSettingModal(compId: string) {
+      this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0];
+      this.$children[0].$bvModal.show("modal-edit-component")
+    }
+
+    /**
+     * Call by CompSettingModal, delete the component and all links related from the Array and the screen.
+     * @param fdComp the component to delete
+     */
+    public deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}) {
+      this.componentList.forEach( el => {
+        el.links = el.links.filter(el => {
+          if(el.compId != fdComp.compId) {
+            return true;
+          } else {
+            document.getElementById("link-" + el.linkId)?.remove();
+            return false;
+          }
+        });
+      });
+      this.componentList = this.componentList.filter(el => {
         if(el.compId != fdComp.compId) {
-          return true;
-        } else {
-          document.getElementById("link-" + el.linkId)?.remove();
-          return false;
-        }
+            return true;
+          } else {
+            el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
+            document.getElementById("comp-" + fdComp.compId)?.remove();
+            return false;
+          }
       });
-    });
-    this.componentList = this.componentList.filter(el => {
-      if(el.compId != fdComp.compId) {
-          return true;
-        } else {
-          el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
-          document.getElementById("comp-" + fdComp.compId)?.remove();
-          return false;
-        }
-    });
-  }
+    }
 
-}
+  }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

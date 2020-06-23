@@ -7,27 +7,27 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+  import { Component, Vue } from 'vue-property-decorator';
 
-@Component
-export default class ConsoleBar extends Vue {
-}
-</script>
+  @Component
+  export default class ConsoleBar extends Vue {
+  }
+  </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .header {
-    background-color: black;
-    height: 50px;
-    width: 100%;
-    color: white;
-    padding-top: 5px;
-  }
-  .console-bar {
-    background-color: grey;
-    float: right;
-    height: 100%;
-    width: 460px;
-    overflow: hidden;
-  }
+  <!-- Add "scoped" attribute to limit CSS to this component only -->
+  <style scoped>
+    .header {
+      background-color: black;
+      height: 50px;
+      width: 100%;
+      color: white;
+      padding-top: 5px;
+    }
+    .console-bar {
+      background-color: grey;
+      float: right;
+      height: 100%;
+      width: 460px;
+      overflow: hidden;
+    }
 </style>

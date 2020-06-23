@@ -2,6 +2,13 @@ import * as d3 from "d3";
 import { lineFunction, getLineData } from "../gridServices/addLink";
 import { FDComponent } from '../../models/FDComponent';
 
+/**
+ * Add a new component into "#conception-grid-svg" and set his listeners
+ * @param mouse position of the cursor in the plan
+ * @param fdCompToDrop the FDComponent to drop
+ * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
+ * @param openModal function call by clicking on the component
+ */
 export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDComponent | undefined, registerComponent: Function, openModal: Function) {
     if(fdCompToDrop !== undefined) {
         const x = mouse[0];

@@ -21,18 +21,18 @@ export class FDComponent {
      * @param click Can be activated by click
      * @param options JSON Object or string parsable into JSON Object.
      */
-    constructor(id: string, group: string, title: string, color: string, author: string, input: any, output: any, 
-        icon: string, version: string, readme: string, click: boolean, options: any)
+    constructor(id: string, group: string, title: string, color: string, author: string, input: boolean | number | string, output: boolean | number | string, 
+        icon: string, version: string, readme: string, click: boolean, options: string | JSON | null)
     {    
         if(input === true) {
             this.input = 1;
         } else if(input === false) {
             this.input = 0;
         } else if(Number.isInteger(input)) {
-            this.input = input;
+            this.input = (typeof input == "string")?Number.parseInt(input):input;
         } else {
-            if(!Number.isNaN(Number.parseInt(input))){
-                this.input = Number.parseInt(input);
+            if(!Number.isNaN((typeof input == "string")?Number.parseInt(input):input)){
+                this.input = (typeof input == "string")?Number.parseInt(input):input;
             } else if( input.toString().toLowerCase() == 'true') {
                 this.input = 1;
             } else if(input.toString().toLowerCase() == 'false') {
@@ -51,10 +51,10 @@ export class FDComponent {
         } else if(output === false) {
             this.output = 0;
         } else if(Number.isInteger(output)) {
-            this.output = output;
+            this.output = (typeof output == "string")?Number.parseInt(output):output;
         } else {
-            if(!Number.isNaN(Number.parseInt(output))){
-                this.output = Number.parseInt(output);
+            if(!Number.isNaN((typeof output == "string")?Number.parseInt(output):output)){
+                this.output = (typeof output == "string")?Number.parseInt(output):output;
             } else if(output.toString().toLowerCase() == 'true') {
                 this.output = 1;
             } else if(output.toString().toLowerCase() == 'false') {
