@@ -5,7 +5,26 @@
     </div>
     <div id="conception-board" class="board">
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
+        <defs>
+          <pattern patternUnits="userSpaceOnUse" id="svggrid" x="0" y="0" width="150" height="150">
+            <image width="150" height="150" xlink:href="../assets/conceptiongrid.png"/>
+          </pattern>
+        </defs>
+        <g class="svggrid">
+          <rect id="svggridbg" width="5000" height="5000" fill="url(#svggrid)"></rect>
+        </g>
       </svg>
+      <div id="zoom-tools">
+        <button title="Zoom in" data-exec="#designer.zoomin" v-on:click="zoomInSvg" class="btn btn-light btn-outline-dark">
+          <i class="fa fa-search-plus"></i>
+        </button>
+        <button title="Reset zoom" data-exec="#designer.zoomreset" v-on:click="zoomResetSvg" class="btn btn-light btn-outline-dark">
+          <i class="fa fa-balance-scale"></i>
+        </button>
+        <button title="Zoom out" data-exec="#designer.zoomout" v-on:click="zoomOutSvg" class="btn btn-light btn-outline-dark">
+          <i class="fa fa-search-minus"></i>
+        </button>
+      </div>
     </div>
     <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" :deleteTheComp="deleteTheComp" />
   </div>
@@ -29,6 +48,7 @@ export default class ConceptionGrid extends Vue {
   private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
   private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
   private idList: Array<string> = [];
+  private svgScale = 1;
 
   //public currentComponent:any = undefined;
 
@@ -82,7 +102,7 @@ export default class ConceptionGrid extends Vue {
       }
     }
 
-    d3.select("#conception-grid-svg").on("mousemove", function () {
+    d3.select("#svggridbg").on("mousemove", function () {
       actualize(d3.mouse(this as any));
     })
 
@@ -120,6 +140,27 @@ export default class ConceptionGrid extends Vue {
         const walkY = (y - startY) * 2; //scroll faster
         svgBoard.scrollTop = scrollTop - walkY;
       });
+    }
+  }
+
+  public zoomInSvg(){
+    if(this.svgScale < 2) {
+      this.svgScale += 0.1;
+      d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+    }
+  }
+
+  public zoomResetSvg(){
+    if(this.svgScale != 1) {
+      this.svgScale = 1;
+      d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+    }
+  }
+
+  public zoomOutSvg(){
+    if(this.svgScale > 0.2) {
+      this.svgScale -= 0.1;
+      d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
     }
   }
 
@@ -218,11 +259,16 @@ export default class ConceptionGrid extends Vue {
     cursor: grabbing;
   }
   .grid {
-    background-image: url("../assets/conceptiongrid.png");
-    background-repeat: repeat;
     min-height: 5000px;
     height: 100%;
     min-width: 5000px;
     width: 100%;
+  }
+  #zoom-tools {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 20px;
+    margin-right: 20px;
   }
 </style>

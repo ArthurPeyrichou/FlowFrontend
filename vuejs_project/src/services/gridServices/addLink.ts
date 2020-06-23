@@ -55,7 +55,8 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
             if(document.getElementById("link-" + theSourceCompId) == null) {
                 //The line SVG Path we draw
                 const path = d3.select("#conception-grid-svg").append("g")
-                    .attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId)
+                    .attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId)       
+                    .attr("transform",d3.select("#conception-grid-svg").select("g").attr("transform"))
                     .append("path")
                     .attr("id", "link-" + theSourceCompId)
                     .datum(getLineData(source,target, isSourceInput))
@@ -81,7 +82,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
                         for(let i=0; i < svg.children.length; ++i){
                             const theClass: string | null = svg.children[i].getAttribute("class") 
                             if(theClass != null && theClass.includes('link')){
-                                svg.insertBefore(svg.children[i], svg.firstChild);
+                                svg.insertBefore(svg.children[i], svg.children[2]); //2 because 0 is defs and 1 is svggridbg
                             }
                         }
                     }

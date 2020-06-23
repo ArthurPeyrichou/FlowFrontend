@@ -17,7 +17,8 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             .append("g")
             .attr("id", "comp-" + newId)
             .attr("stroke-width", 1.5)
-            .attr("style", "cursor:pointer;");
+            .attr("style", "cursor:pointer;")
+            .attr("transform",d3.select("#conception-grid-svg").select("g").attr("transform"));
 
         const rectPlaceX = (x: number, theCompWidth: number) => {
             if(x < (svgGridBorder + (theCompWidth / 2))){
