@@ -3,7 +3,7 @@
     <div class="header container">
     <h3>Conception Grid</h3>
     </div>
-    <div class="board">
+    <div id="conception-board" class="board">
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
       </svg>
     </div>
@@ -74,18 +74,53 @@ export default class ConceptionGrid extends Vue {
    * Drag&Drop of components in order to move them
    */
   private initSvg() {
-    const actualize = () => {
-        if(this.fdCompToDrop != undefined) {
-          addComponentIntoGrid(this.fdCompToDrop, this.registerComponent, this.openSettingModal);
-          addLinkBeetweenTwoComponentsIntoGrid(this.registerLink);
-          this.fdCompToDrop = undefined;
-        }
+    const actualize = (mouse: [number, number]) => {
+      if(this.fdCompToDrop != undefined) {
+        addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal);
+        addLinkBeetweenTwoComponentsIntoGrid(this.registerLink);
+        this.fdCompToDrop = undefined;
+      }
     }
 
-    d3.select("#conception-grid-svg")
-      .on("mousemove", function () {
-        actualize();
+    d3.select("#conception-grid-svg").on("mousemove", function () {
+      actualize(d3.mouse(this as any));
+    })
+
+    //This part allows the conception grid positioning by drag and drop
+    const svgBoard = document.getElementById('conception-board');
+    if(svgBoard != null){
+      let isDown = false;
+      let startX: number;
+      let scrollLeft: number;
+      let startY: number;
+      let scrollTop: number;
+      svgBoard.addEventListener('mousedown', (e) => {
+        isDown = true;
+        svgBoard.classList.add('active');
+        startX = e.pageX - svgBoard.offsetLeft;
+        scrollLeft = svgBoard.scrollLeft;
+        startY = e.pageY - svgBoard.offsetTop;
+        scrollTop = svgBoard.scrollTop;
       });
+      svgBoard.addEventListener('mouseleave', () => {
+        isDown = false;
+        svgBoard.classList.remove('active');
+      });
+      svgBoard.addEventListener('mouseup', () => {
+        isDown = false;
+        svgBoard.classList.remove('active');
+      });
+      svgBoard.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - svgBoard.offsetLeft;
+        const walkX = (x - startX) * 2; //scroll faster
+        svgBoard.scrollLeft = scrollLeft - walkX;
+        const y = e.pageY - svgBoard.offsetTop;
+        const walkY = (y - startY) * 2; //scroll faster
+        svgBoard.scrollTop = scrollTop - walkY;
+      });
+    }
   }
 
   /**
@@ -177,6 +212,10 @@ export default class ConceptionGrid extends Vue {
   .board {
     overflow: scroll;
     height: 100%;
+    cursor: move;
+  }
+  .board.active {
+    cursor: grabbing;
   }
   .grid {
     background-image: url("../assets/conceptiongrid.png");

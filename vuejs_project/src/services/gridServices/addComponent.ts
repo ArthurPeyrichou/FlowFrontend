@@ -2,10 +2,10 @@ import * as d3 from "d3";
 import { lineFunction, getLineData } from "../gridServices/addLink";
 import { FDComponent } from '../../models/FDComponent';
 
-export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, registerComponent: Function, openModal: Function) {
+export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDComponent | undefined, registerComponent: Function, openModal: Function) {
     if(fdCompToDrop !== undefined) {
-        const x = d3.mouse(d3.event.currentTarget)[0];
-        const y = d3.mouse(d3.event.currentTarget)[1];
+        const x = mouse[0];
+        const y = mouse[1];
         const inputCount = fdCompToDrop.getInput();
         const outputCount = fdCompToDrop.getOutput();
         const compHeight = 20 + Math.max(inputCount, outputCount) * 20;
@@ -13,7 +13,6 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         const svgGridBorder = 10;
         const svgMax = 5000;
         const newId = registerComponent(fdCompToDrop);
-        
         const g = d3.select("#conception-grid-svg")
             .append("g")
             .attr("id", "comp-" + newId)

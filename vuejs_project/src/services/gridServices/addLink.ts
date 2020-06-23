@@ -54,7 +54,9 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
             //Look if a temp <g><path/></g> already exist
             if(document.getElementById("link-" + theSourceCompId) == null) {
                 //The line SVG Path we draw
-                const path = d3.select("#conception-grid-svg").append("g").attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId).append("path")
+                const path = d3.select("#conception-grid-svg").append("g")
+                    .attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId)
+                    .append("path")
                     .attr("id", "link-" + theSourceCompId)
                     .datum(getLineData(source,target, isSourceInput))
                     .attr("d", lineFunction)
