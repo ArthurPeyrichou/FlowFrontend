@@ -49,14 +49,6 @@ function dragDropD3(source, target) {
 
 describe('Grid conception tests', () => {
 
-  it('Verify the 3 main components presence', () => {
-    cy.visit('/')
-
-    cy.get('.tool-bar').get('.header').contains("Tool bar")
-    cy.get('.conception-grid').get('.header').contains("Console")
-    cy.get('.console-bar').get('.header').contains("Conception Grid")
-  })
- 
   it('Drag and drop a component into conception grid', function() {
     cy.visit('/')
     

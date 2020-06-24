@@ -1,7 +1,27 @@
 <template>
-  <div class="tool-bar">
-    <div class="header container">
-      <h3>Tool bar</h3>
+  <div v-bind:class="'tool-bar ' + theme">
+    <div class="header">
+      <b-navbar toggleable v-bind:type="theme" class="setting-tool-navbar">
+        
+        <b-navbar-toggle target="navbar-toggle-collapse">
+          <template v-slot:default="{ expanded }">
+            <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
+            <b-icon v-else icon="chevron-bar-down"></b-icon>
+          </template>
+        </b-navbar-toggle>
+
+        
+        <div id="tool-options">
+        </div>
+
+        <b-collapse id="navbar-toggle-collapse" is-nav>
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item href="#"><i class="fa fa-plus"></i> Component</b-nav-item>
+            <b-nav-item href="#" disabled>Settings</b-nav-item>
+          </b-navbar-nav>
+        </b-collapse>
+      </b-navbar>
+
     </div>
     <div class="board">
       <div v-for="compGroup in compGroupsList" :key="compGroup" class="fdcomp-group-list">
@@ -24,6 +44,7 @@
   @Component
   export default class ToolBar extends Vue {
     @Prop({default: []}) private compBrutList!: FDComponent[];
+    @Prop({default: "dark"}) public theme!: string;
     // eslint-disable-next-line
     compList: Record<string, any> = {};
     compGroupsList: string[] = [];
@@ -59,40 +80,88 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .header {
-    background-color: black;
-    height: 50px;
-    width: 100%;
-    color: white;
-    padding-top: 5px;
-  }
   .tool-bar {
-    background-color: #404040;
     float: left;
     height: 100%;
     width: 215px;
     overflow: hidden;
+    background-color: #c8c8c8;
+  }
+  .header {
+    min-height: 50px;
+    width: 100%;
+    background-color: #b8b8b8;
+  }
+  .setting-tool-navbar {
+    padding: inherit;
+    font-size: 14px;
+  }
+  .navbar-toggler {
+    border: 0;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);;
+    outline: 0;
+    background-color: transparent;
+    height: 50px;
+    width: 45px;
+    border-radius: 0px;
+  }
+  #tool-options {
+    height: 50px;
+    width: 170px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);;
   }
   .board {
     width: 100%;
     text-align: left;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
   }
   .fdcomp-group-list {
-    border-bottom: 1px solid darkgrey;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding-top: 15px;
     padding-bottom: 15px;
     padding-left: 15px;
     padding-right: 15px;
+    cursor: grab;
   }
   .fdcomp-group-name {
     font-weight: bold;
-    color: white;
-  }
-  .comp-list {
-    font-size: small;
+    font-size: 14px;
   }
   .comp-list li{
     padding-top: 5px;
     padding-bottom: 5px;
+    font-size: 12px;
+    background-color: #e8e8e8;
+  }
+
+  /* Dark side */
+  .dark.tool-bar {
+    background-color: #202020;
+  }
+  .dark .header {
+    background-color: #101010;
+    color: white;
+  }
+  .dark .navbar-toggler {
+    color: gray;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark #tool-options {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .board {
+    width: 100%;
+    text-align: left;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .fdcomp-group-list {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .fdcomp-group-name {
+    color: #e8e8e8;
+  }
+  .dark .comp-list li{
+    background-color: #404040;
+    color: #c8c8c8;
   }
 </style>
