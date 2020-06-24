@@ -16,7 +16,7 @@
 
         <b-collapse id="navbar-toggle-collapse" is-nav>
           <b-navbar-nav class="ml-auto">
-            <b-nav-item href="#"><i class="fa fa-plus"></i> Component</b-nav-item>
+            <b-nav-item v-on:click="openAddCompModal()"><i class="fa fa-plus"></i> Component</b-nav-item>
             <b-nav-item href="#" disabled>Settings</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
@@ -34,14 +34,21 @@
         </ul>
       </div>
     </div>
+    
+    <AddCompModal ref="myAddCompModal" />
   </div>
 </template>
 
 <script lang="ts">
   import { Component, Prop, Vue } from 'vue-property-decorator';
-  import { FDComponent } from '../models/FDComponent';
+  import AddCompModal from '@/components/tool/AddCompModal.vue'
+  import { FDComponent } from '../../models/FDComponent';
 
-  @Component
+ @Component({
+    components: {
+      AddCompModal
+    }
+  })
   export default class ToolBar extends Vue {
     @Prop({default: []}) private compBrutList!: FDComponent[];
     @Prop({default: "dark"}) public theme!: string;
@@ -75,6 +82,11 @@
         if(event.dataTransfer != null && event.dataTransfer != undefined)
           event.dataTransfer.setData("text", FDComp.toString());
     }
+    
+    public openAddCompModal() {
+      this.$children[0].$bvModal.show("modal-add-component")
+    }
+
   }
 </script>
 
@@ -98,7 +110,7 @@
   }
   .navbar-toggler {
     border: 0;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
     outline: 0;
     background-color: transparent;
     height: 50px;
@@ -108,7 +120,7 @@
   #tool-options {
     height: 50px;
     width: 170px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
   .board {
     width: 100%;

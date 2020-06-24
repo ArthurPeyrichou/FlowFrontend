@@ -1,5 +1,5 @@
 <template>
-  <div class="conception-grid">
+  <div v-bind:class="'conception-grid ' + theme">
     <div class="header container">
     <h3>Conception Grid</h3>
     </div>
@@ -7,7 +7,7 @@
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
         <defs>
           <pattern patternUnits="userSpaceOnUse" id="svg-grid" x="0" y="0" width="150" height="150">
-            <image width="150" height="150" xlink:href="../assets/conceptiongrid.png"/>
+            <image width="150" height="150" v-bind="{'xlink:href' : require('@/assets/conception-grid-' + theme + '.png')}"/>
           </pattern>
         </defs>
         <g class="svg-grid">
@@ -32,11 +32,11 @@
 
 <script lang="ts">
   import * as d3 from "d3";
-  import CompSettingModal from '@/components/CompSettingModal.vue'
-  import { Component, Vue } from 'vue-property-decorator';
-  import { FDComponent } from '../models/FDComponent';
-  import { addComponentIntoGrid } from "../services/gridServices/addComponent";
-  import { addLinkBeetweenTwoComponentsIntoGrid } from "../services/gridServices/addLink";
+  import CompSettingModal from '@/components/conception/CompSettingModal.vue'
+  import { Component, Prop, Vue } from 'vue-property-decorator';
+  import { FDComponent } from '../../models/FDComponent';
+  import { addComponentIntoGrid } from "../../services/gridServices/addComponent";
+  import { addLinkBeetweenTwoComponentsIntoGrid } from "../../services/gridServices/addLink";
 
   @Component({
     components: {
@@ -44,6 +44,7 @@
     }
   })
   export default class ConceptionGrid extends Vue {
+    @Prop({default: "dark"}) public theme!: string;
     private fdCompToDrop: FDComponent | undefined = undefined;
     private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
     private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
@@ -237,18 +238,11 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .header {
-    background-color: black;
-    height: 50px;
-    width: 100%;
-    color: white;
-    padding-top: 5px;
-  }
   .conception-grid {
-    background-color: black;
+    background-color: #c8c8c8;
     height: 100%;
-    border-left: 1px solid darkgrey;
-    border-right: 1px solid darkgrey;
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
     overflow: hidden;
     position: relative;
     flex-basis: 0;
@@ -257,10 +251,18 @@
     max-width: 100%;
     padding-bottom: 50px;
   }
+  .header {
+    background-color: #b8b8b8;
+    height: 50px;
+    width: 100%;
+    padding-top: 5px;
+    max-width: 100%;
+  }
   .board {
     overflow: scroll;
     height: 100%;
     cursor: move;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
   }
   .board.active {
     cursor: grabbing;
@@ -284,5 +286,19 @@
     padding: initial;
     margin-left: 1px;
     margin-right: 1px;
+  }
+
+  /* Dark side */
+  .dark.conception-grid {
+    background-color: #202020;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .header {
+    background-color: #101010;
+    color: white;
+  }
+  .dark .board {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>

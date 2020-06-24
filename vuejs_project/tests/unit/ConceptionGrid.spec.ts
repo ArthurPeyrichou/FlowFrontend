@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
-import ConceptionGrid from '@/components/ConceptionGrid.vue'
+import ConceptionGrid from '@/components/conception/ConceptionGrid.vue'
 
 const wrapper = shallowMount(ConceptionGrid)
 
