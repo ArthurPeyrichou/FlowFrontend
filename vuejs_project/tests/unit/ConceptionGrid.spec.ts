@@ -2,9 +2,15 @@ import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
 import ConceptionGrid from '@/components/ConceptionGrid.vue'
 
+const wrapper = shallowMount(ConceptionGrid)
+
 describe('ConceptionGrid.vue', () => {
-   it('should create', () => {
-     // restitue le composant
-    const wrapper = shallowMount(ConceptionGrid)
-  });
+
+  it('Datas check', () => {
+    expect(wrapper.vm.$data.fdCompToDrop).equal(undefined);
+    expect(wrapper.vm.$data.currentFDComp.compId).equal("");
+    expect(wrapper.vm.$data.componentList.toString()).equal("");
+    expect(wrapper.vm.$data.idList.toString()).equal("");
+    expect(wrapper.vm.$data.svgScale).equal(1);
+  })
 })

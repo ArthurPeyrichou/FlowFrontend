@@ -15,13 +15,13 @@
         </g>
       </svg>
       <div id="zoom-tools">
-        <button title="Zoom in" data-exec="#designer.zoomin" v-on:click="zoomInSvg" class="btn btn-light btn-outline-dark">
+        <button id="zoom-in-btn" title="Zoom in" data-exec="#designer.zoomin" v-on:click="zoomInSvg" class="btn btn-light btn-outline-dark">
           <i class="fa fa-search-plus"></i>
         </button>
-        <button title="Reset zoom" data-exec="#designer.zoomreset" v-on:click="zoomResetSvg" class="btn btn-light btn-outline-dark">
+        <button id="reset-zoom-btn" title="Reset zoom" data-exec="#designer.zoomreset" v-on:click="zoomResetSvg" class="btn btn-light btn-outline-dark">
           <i class="fa fa-balance-scale"></i>
         </button>
-        <button title="Zoom out" data-exec="#designer.zoomout" v-on:click="zoomOutSvg" class="btn btn-light btn-outline-dark">
+        <button id="zoom-out-btn" title="Zoom out" data-exec="#designer.zoomout" v-on:click="zoomOutSvg" class="btn btn-light btn-outline-dark">
           <i class="fa fa-search-minus"></i>
         </button>
       </div>
@@ -102,6 +102,7 @@
       }
 
       d3.select("#svg-grid-bg").on("mousemove", function () {
+         // eslint-disable-next-line
         actualize(d3.mouse(this as any));
       })
 
@@ -145,21 +146,21 @@
     public zoomInSvg(){
       if(this.svgScale < 2) {
         this.svgScale += 0.1;
-        d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+        d3.selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
     public zoomResetSvg(){
       if(this.svgScale != 1) {
         this.svgScale = 1;
-        d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+        d3.selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
     public zoomOutSvg(){
       if(this.svgScale > 0.2) {
         this.svgScale -= 0.1;
-        d3.selectAll("g").attr("transform", "scale(" + this.svgScale + ")")
+        d3.selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
@@ -276,5 +277,12 @@
     right: 0;
     margin-bottom: 20px;
     margin-right: 20px;
+  }
+  #zoom-tools button {
+    width: 30px;
+    height: 30px;
+    padding: initial;
+    margin-left: 1px;
+    margin-right: 1px;
   }
 </style>

@@ -23,7 +23,8 @@
 
   @Component
   export default class ToolBar extends Vue {
-    @Prop() private compBrutList!: FDComponent[];
+    @Prop({default: []}) private compBrutList!: FDComponent[];
+    // eslint-disable-next-line
     compList: Record<string, any> = {};
     compGroupsList: string[] = [];
 

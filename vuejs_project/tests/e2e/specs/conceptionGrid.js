@@ -229,4 +229,137 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 0)
   })
 
+  it('Zoom in test', function() {
+    cy.visit('/')
+
+    cy.get('.fdcomp').should('have.length', 0)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
+    cy.get('.fdcomp').should('have.length', 1)
+
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.1)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.2)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.3)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.4)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.5)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.6)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.7)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.8)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.9)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(2.0)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(2.0)')
+  })
+
+  it('Zoom out test', function() {
+    cy.visit('/')
+
+    cy.get('.fdcomp').should('have.length', 0)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
+    cy.get('.fdcomp').should('have.length', 1)
+
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.9)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.8)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.7)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.6)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.5)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.4)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.3)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.2)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.1)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.1)')
+  })
+
+  it('Zoom reset test', function() {
+    cy.visit('/')
+
+    cy.get('.fdcomp').should('have.length', 0)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(2) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 100)
+    cy.get('.fdcomp').should('have.length', 1)
+
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.9)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.8)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.7)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.6)')
+    cy.get('#zoom-out-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(0.5)')
+
+    cy.get('#reset-zoom-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
+
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.1)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.2)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.3)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.4)')
+    cy.get('#zoom-in-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.5)')
+
+    cy.get('#reset-zoom-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
+
+    cy.get('#reset-zoom-btn').click();
+    cy.wait(10)
+    cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
+  })
+
 })
