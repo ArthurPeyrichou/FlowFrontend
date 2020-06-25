@@ -60,6 +60,7 @@
       },
       checkFormValidity() {
         this.fileState = Boolean(this.file);
+        document.getElementsByClassName('invalid-feedback')[0].setAttribute("style","outline-color: transparent !important");
         //Extension -> this.file.name.split('.').pop()
         return this.fileState
       },

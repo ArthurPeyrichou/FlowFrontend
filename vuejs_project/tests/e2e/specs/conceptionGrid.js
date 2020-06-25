@@ -1,5 +1,7 @@
 // https://docs.cypress.io/api/introduction/api.html
 
+const TIMELAPS = 10;
+
 function dragDropIntoSvg(source, target, xDestInsvg, yDestInsvg) {
   cy.get(source)
   cy.get(target)
@@ -10,7 +12,7 @@ function dragDropIntoSvg(source, target, xDestInsvg, yDestInsvg) {
     .trigger('dragstart', { dataTransfer, force: true})
 
   cy.get(target).trigger("dragover", {dataTransfer, force: true})
-  cy.wait(10)
+  cy.wait(TIMELAPS)
 
   cy.get(target).trigger('drop', { dataTransfer, force: true}).then(() => {
     cy.get(target).trigger('mouseup', { which: 1, button: 0, force: true}).then(() => {  
@@ -19,7 +21,7 @@ function dragDropIntoSvg(source, target, xDestInsvg, yDestInsvg) {
       }) 
     }) 
   })
-  cy.wait(10)
+  cy.wait(TIMELAPS)
 }
 
 function dragDropD3(source, target) {
@@ -36,7 +38,7 @@ function dragDropD3(source, target) {
     cy.get(target).last().trigger('mousemove', {view: win})
 
     cy.get(target).last().trigger("dragover", {dataTransfer, view: win})
-    cy.wait(10)
+    cy.wait(TIMELAPS)
 
     cy.get(target).last().trigger('drop', { dataTransfer, view: win}).then(() => { 
       cy.get(target).last().trigger('mouseup', { which: 1, button: 0, view: win}).then(() => {     
@@ -44,7 +46,7 @@ function dragDropD3(source, target) {
         }) 
     })
   })
-  cy.wait(10)
+  cy.wait(TIMELAPS)
 }
 
 describe('Grid conception tests', () => {
@@ -72,7 +74,7 @@ describe('Grid conception tests', () => {
       
       cy.get("#svg-grid-bg").trigger('mousemove', {position: "topLeft", force: true, view: win})
       cy.get("#svg-grid-bg").trigger("dragover", {dataTransfer, view: win, force: true})
-      cy.wait(10)
+      cy.wait(TIMELAPS)
   
       cy.get("#svg-grid-bg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
         cy.get("#svg-grid-bg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
@@ -87,7 +89,7 @@ describe('Grid conception tests', () => {
       
       cy.get("#svg-grid-bg").trigger('mousemove', {position: "topRight", force: true, view: win})
       cy.get("#svg-grid-bg").trigger("dragover", {dataTransfer, view: win, force: true})
-      cy.wait(10)
+      cy.wait(TIMELAPS)
   
       cy.get("#svg-grid-bg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
         cy.get("#svg-grid-bg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
@@ -102,7 +104,7 @@ describe('Grid conception tests', () => {
       
       cy.get("#svg-grid-bg").trigger('mousemove', {position: "bottomLeft", force: true, view: win})
       cy.get("#svg-grid-bg").trigger("dragover", {dataTransfer, view: win, force: true})
-      cy.wait(10)
+      cy.wait(TIMELAPS)
   
       cy.get("#svg-grid-bg").trigger('drop', { dataTransfer, view: win, force: true}).then(() => { 
         cy.get("#svg-grid-bg").trigger('mouseup', { which: 1, button: 0, view: win, force: true}).then(() => {     
@@ -201,7 +203,7 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('.fdcomp').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get(".modal-title").contains("Settings: ")
   })
 
@@ -213,11 +215,11 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('.fdcomp').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get(".modal-title").contains("Settings: ")
     
     cy.get('#setting-modal-delete').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('.fdcomp').should('have.length', 0)
   })
 
@@ -229,37 +231,37 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.1)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.2)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.3)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.4)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.5)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.6)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.7)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.8)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.9)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(2.0)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(2.0)')
   })
 
@@ -271,34 +273,34 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.9)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.8)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.7)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.6)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.5)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.4)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.3)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.2)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.1)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.1)')
   })
 
@@ -310,47 +312,47 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 1)
 
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.9)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.8)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.7)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.6)')
     cy.get('#zoom-out-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(0.5)')
 
     cy.get('#reset-zoom-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
 
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.1)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.2)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.3)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.4)')
     cy.get('#zoom-in-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.5)')
 
     cy.get('#reset-zoom-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
 
     cy.get('#reset-zoom-btn').click();
-    cy.wait(10)
+    cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
   })
 

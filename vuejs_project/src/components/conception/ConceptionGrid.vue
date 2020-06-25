@@ -2,14 +2,14 @@
   <div v-bind:class="'conception-grid ' + theme">
     <div class="header">
       <div class="reduce-button" v-on:click="toggleBar('tool')">
-        <b-icon v-if="true" icon="chevron-bar-left"></b-icon>
+        <b-icon v-if="isToolBarHide" icon="chevron-bar-left"></b-icon>
         <b-icon v-else icon="chevron-bar-right"></b-icon>
       </div>
       <div class="header-content">
         <h3>Conception Grid</h3>
       </div>
       <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
-        <b-icon v-if="true" icon="chevron-bar-right"></b-icon>
+        <b-icon v-if="isConsoleBarHide" icon="chevron-bar-right"></b-icon>
         <b-icon v-else icon="chevron-bar-left"></b-icon>
       </div>
     </div>
@@ -60,6 +60,9 @@
     private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
     private idList: Array<string> = [];
     private svgScale = 1;
+
+    private hideToolBar = false;
+    private hideConsoleBar = false;
 
     constructor() {
       super();
@@ -243,15 +246,35 @@
       });
     }
 
-    public toggleBar(barName: string){
+    /**
+     * Toggle bar visibility, use for console-bar and tool-bar
+     * @param barName the id's prefix of the bar's div
+     */
+    public toggleBar(barName: string) {
       const element: HTMLElement | null = document.getElementById(barName + "-bar");
-      if(element != null){
-        if(element.className.includes(' hide')){
+      if(element != null) {
+        const isHide = element.className.includes(' hide');
+        if(isHide){
           element.className = element.className.replace(" hide", '');
         } else {
           element.className += " hide";
         }
+        switch(barName){
+          case "tool":
+            this.hideToolBar = isHide;
+            break;
+          case "console":
+            this.hideConsoleBar = isHide;
+        }
       }
+    }
+
+    get isToolBarHide(){
+      return this.hideToolBar;
+    }
+
+    get isConsoleBarHide() {
+      return this.hideConsoleBar;
     }
 
   }
