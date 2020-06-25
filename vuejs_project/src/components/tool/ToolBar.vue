@@ -24,6 +24,17 @@
 
     </div>
     <div class="board">
+      <div class="search-component-box">
+        <div class="search-component-box-text">
+          <input type="text" placeholder="Search components ..." v-model="compSearchPattern">
+        </div>
+        <div class="search-component-box-control" v-bind:hidden="!isThereResearch">
+          <span class="fa fa-search"></span>
+        </div>
+        <div class="search-component-box-control" v-bind:hidden="isThereResearch" v-on:click="resetSearch">
+          <span class="fa fa-times"></span>
+        </div>
+      </div>
       <div v-for="compGroup in compGroupsList" :key="compGroup" class="fdcomp-group-list">
         <p class="fdcomp-group-name">{{ compGroup }}</p>
         <ul class="list-group comp-list">
@@ -53,26 +64,42 @@
     @Prop({default: []}) private compBrutList!: FDComponent[];
     @Prop({default: "dark"}) public theme!: string;
     // eslint-disable-next-line
-    compList: Record<string, any> = {};
-    compGroupsList: string[] = [];
+    public compList: Record<string, any> = {};
+    public compGroupsList: string[] = [];
+    public compSearchPattern = "";
 
     constructor() {
       super();
-      
-      //We read each FlowData Components, populate the compGroupsList and store them by membership group.
-      this.compBrutList.forEach(FDComp => {
-        if(this.compGroupsList.indexOf(FDComp.getGroup()) < 0){
-          this.compGroupsList.push(FDComp.getGroup())
-          this.compList[FDComp.getGroup()] = new Array<FDComponent>();
-        }
-        this.compList[FDComp.getGroup()].push(FDComp);
-      });
-      //We sort component's group in order to get "Common" group on top and then in alphabetical order.
-      this.compGroupsList.sort( (a, b) => {
-        if(a == 'Common') return -1;
-        else if(b == 'Common') return 1;
-        else return a.localeCompare(b);
-      });
+      this.filterList()
+    }
+
+    get isThereResearch() {
+      this.filterList();
+      return this.compSearchPattern == '';
+    }
+
+    public filterList() {
+      if(this.compSearchPattern != undefined) {
+        this.compGroupsList = [];
+        this.compList = {};
+
+        this.compBrutList.forEach(anFDComp => {
+          if(anFDComp.getTitle().toLowerCase().includes(this.compSearchPattern.toLowerCase())){
+            if(!this.compGroupsList.includes(anFDComp.getGroup())){
+              this.compGroupsList.push(anFDComp.getGroup())
+              this.compList[anFDComp.getGroup()] = new Array<FDComponent>();
+            }
+            this.compList[anFDComp.getGroup()].push(anFDComp);
+          }
+        });
+
+        //We sort component's group in order to get "Common" group on top and then in alphabetical order.
+        this.compGroupsList.sort( (a, b) => {
+          if(a == 'Common') return -1;
+          else if(b == 'Common') return 1;
+          else return a.localeCompare(b);
+        });
+      }
     }
 
     /**
@@ -85,6 +112,10 @@
     
     public openAddCompModal() {
       this.$children[0].$bvModal.show("modal-add-component")
+    }
+
+    public resetSearch() {
+      this.compSearchPattern = "";
     }
 
   }
@@ -145,6 +176,43 @@
     font-size: 12px;
     background-color: #e8e8e8;
   }
+  .search-component-box {
+    background-color: #e8e8e8;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
+    border-radius: 2px;
+    position: relative;
+    display: table;
+  }
+  .search-component-box-text {
+    padding: 5px 2px 0 5px;
+  }
+  .search-component-box-text input {
+    color: gray;
+    background-color: #e8e8e8;
+    border: 0;
+    outline: 0;
+    width: 100%;
+    vertical-align: top;
+    line-height: 14px;
+    font-size: 14px;
+  }
+  .search-component-box-control {
+    vertical-align: middle;
+    display: table-cell;
+    text-align: center;
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    color: gray;
+    width: 26px;
+    font-size: 12px;
+  }
+  .search-component-box-control .fa-times {
+    color: red;
+    cursor: pointer;
+  }
 
   /* Dark side */
   .dark.tool-bar {
@@ -175,5 +243,17 @@
   .dark .comp-list li{
     background-color: #404040;
     color: #c8c8c8;
+  }
+  .dark .search-component-box {
+    background-color: #303030;
+    border: 1px solid #404040;
+  }
+  .dark .search-component-box-text input {
+    color: gray;
+    background-color: #303030;
+  }
+  .dark .search-component-box-control {
+    border-left: 1px solid #404040;
+    color: gray;
   }
 </style>
