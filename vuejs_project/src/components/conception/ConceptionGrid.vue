@@ -147,21 +147,21 @@
     public zoomInSvg(){
       if(this.svgScale < 2) {
         this.svgScale += 0.1;
-        d3.selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
     public zoomResetSvg(){
       if(this.svgScale != 1) {
         this.svgScale = 1;
-        d3.selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
     public zoomOutSvg(){
       if(this.svgScale > 0.2) {
         this.svgScale -= 0.1;
-        d3.selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 

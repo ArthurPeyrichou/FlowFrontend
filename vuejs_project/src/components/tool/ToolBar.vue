@@ -128,12 +128,16 @@
     height: 100%;
     width: 215px;
     overflow: hidden;
+    display: flex;
+    flex-flow: column;
+    height: 100%;
     background-color: #c8c8c8;
   }
   .header {
     min-height: 50px;
     width: 100%;
     background-color: #b8b8b8;
+    display: contents;
   }
   .setting-tool-navbar {
     padding: inherit;
@@ -157,14 +161,19 @@
     width: 100%;
     text-align: left;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
+    overflow: auto;
+    padding-bottom: 50px;
+    direction: rtl;
   }
   .fdcomp-group-list {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     padding-top: 15px;
     padding-bottom: 15px;
     padding-left: 15px;
     padding-right: 15px;
     cursor: grab;
+    word-wrap:break-word;
+    direction:ltr;
   }
   .fdcomp-group-name {
     font-weight: bold;
@@ -186,6 +195,7 @@
     border-radius: 2px;
     position: relative;
     display: table;
+    direction:ltr;
   }
   .search-component-box-text {
     padding: 5px 2px 0 5px;
@@ -230,12 +240,10 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
   .dark .board {
-    width: 100%;
-    text-align: left;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
   .dark .fdcomp-group-list {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
   .dark .fdcomp-group-name {
     color: #e8e8e8;
