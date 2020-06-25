@@ -41,5 +41,6 @@
       width: 100%;
       position: absolute;
       margin: auto;
+      overflow: hidden;
     }
 </style>

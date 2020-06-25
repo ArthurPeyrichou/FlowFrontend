@@ -1,7 +1,17 @@
 <template>
   <div v-bind:class="'conception-grid ' + theme">
-    <div class="header container">
-    <h3>Conception Grid</h3>
+    <div class="header">
+      <div class="reduce-button" v-on:click="toggleBar('tool')">
+        <b-icon v-if="true" icon="chevron-bar-left"></b-icon>
+        <b-icon v-else icon="chevron-bar-right"></b-icon>
+      </div>
+      <div class="header-content">
+        <h3>Conception Grid</h3>
+      </div>
+      <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
+        <b-icon v-if="true" icon="chevron-bar-right"></b-icon>
+        <b-icon v-else icon="chevron-bar-left"></b-icon>
+      </div>
     </div>
     <div id="conception-board" class="board">
       <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
@@ -233,6 +243,17 @@
       });
     }
 
+    public toggleBar(barName: string){
+      const element: HTMLElement | null = document.getElementById(barName + "-bar");
+      if(element != null){
+        if(element.className.includes(' hide')){
+          element.className = element.className.replace(" hide", '');
+        } else {
+          element.className += " hide";
+        }
+      }
+    }
+
   }
 </script>
 
@@ -255,8 +276,26 @@
     background-color: #b8b8b8;
     height: 50px;
     width: 100%;
-    padding-top: 5px;
     max-width: 100%;
+    display: flex;
+  }
+  .header-content {
+    width: inherit;
+  }
+  .reduce-button {
+    height: 50px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: gray;
+    width: 25px;
+    padding-top: 10px;
+    background-color: #c8c8c8;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  .reduce-button-right {
+    float: right;
+    margin-right: 0px;
+    margin-left: 10px;
   }
   .board {
     overflow: scroll;
@@ -300,5 +339,9 @@
   }
   .dark .board {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .reduce-button {
+    background-color: #303030;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 </style>

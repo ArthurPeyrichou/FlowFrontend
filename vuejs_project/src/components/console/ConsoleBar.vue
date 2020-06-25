@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="'console-bar ' + theme">
+  <div id="console-bar" v-bind:class="theme">
     <div class="header container">
       <h3>Console</h3>
     </div>
@@ -17,12 +17,22 @@
 
   <!-- Add "scoped" attribute to limit CSS to this component only -->
   <style scoped>
-    .console-bar {
+    #console-bar {
       background-color: #c8c8c8;
       float: right;
       height: 100%;
-      width: 460px;
       overflow: hidden;
+      width: 460px;
+    }
+    #console-bar {
+      margin-right: 0px;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    #console-bar.hide{
+      margin-right: -460px;
+      -webkit-transition: .4s;
+      transition: .4s;
     }
     .header {
       background-color: #b8b8b8;
@@ -33,7 +43,7 @@
     }
 
     /* Dark side */
-    .dark.console-bar {
+    .dark#console-bar {
       background-color: #202020;
     }
     .dark .header {

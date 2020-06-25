@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="'tool-bar ' + theme">
+  <div id="tool-bar" v-bind:class="theme">
     <div class="header">
       <b-navbar toggleable v-bind:type="theme" class="setting-tool-navbar">
         
@@ -123,15 +123,25 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .tool-bar {
+  #tool-bar {
     float: left;
     height: 100%;
-    width: 215px;
     overflow: hidden;
     display: flex;
     flex-flow: column;
     height: 100%;
+    width: 215px;
     background-color: #c8c8c8;
+  }
+  #tool-bar {
+    margin-left: 0px;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  #tool-bar.hide{
+    margin-left: -215px;
+    -webkit-transition: .4s;
+    transition: .4s;
   }
   .header {
     min-height: 50px;
@@ -142,6 +152,7 @@
   .setting-tool-navbar {
     padding: inherit;
     font-size: 14px;
+    background-color: #b8b8b8;
   }
   .navbar-toggler {
     border: 0;
@@ -225,12 +236,15 @@
   }
 
   /* Dark side */
-  .dark.tool-bar {
+  .dark#tool-bar {
     background-color: #202020;
   }
   .dark .header {
     background-color: #101010;
     color: white;
+  }
+  .dark .setting-tool-navbar {
+    background-color: #101010;
   }
   .dark .navbar-toggler {
     color: gray;
