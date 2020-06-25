@@ -75,16 +75,18 @@
      * Call when a flowdata component is drop inside the <svg>
      */
     public drop(event: DragEvent) {
-        if(event.dataTransfer != null && event.dataTransfer != undefined) { 
-          try {
-            this.fdCompToDrop = FDComponent.fromString(event.dataTransfer.getData("text"));
-          } catch(error) {
-            //Can be call if a already dropped component is moove in svg. 
-            //Or if we try to link two component and cancel. 
-            //Or drag and drop an element which should not be dropped here
-            //console.log(error)
-          }
+      event.preventDefault();
+      event.stopPropagation();
+      if(event.dataTransfer != null && event.dataTransfer != undefined) { 
+        try {
+          this.fdCompToDrop = FDComponent.fromString(event.dataTransfer.getData("text"));
+        } catch(error) {
+          //Can be call if a already dropped component is moove in svg. 
+          //Or if we try to link two component and cancel. 
+          //Or drag and drop an element which should not be dropped here
+          //console.log(error)
         }
+      }
     }
 
     /**
@@ -303,22 +305,24 @@
     display: flex;
   }
   .header-content {
-    width: inherit;
+    width: 100%;
+    padding-left: 35px;
+    padding-right: 35px;
+    min-height: 50px;
   }
-  .reduce-button {
+  .reduce-button {    
+    position: absolute;
+    top: 0;
     height: 50px;
     border: 1px solid rgba(0, 0, 0, 0.2);
     color: gray;
     width: 25px;
     padding-top: 10px;
     background-color: #c8c8c8;
-    margin-right: 10px;
     cursor: pointer;
   }
   .reduce-button-right {
-    float: right;
-    margin-right: 0px;
-    margin-left: 10px;
+    right: 0;
   }
   .board {
     overflow: scroll;

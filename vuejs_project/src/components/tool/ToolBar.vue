@@ -162,10 +162,12 @@
     height: 50px;
     width: 45px;
     border-radius: 0px;
+    float: left;
   }
   #tool-options {
     height: 50px;
     width: 170px;
+    float: right;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   }
   .board {
@@ -195,6 +197,7 @@
     padding-bottom: 5px;
     font-size: 12px;
     background-color: #e8e8e8;
+    border-radius: 5px;
   }
   .search-component-box {
     background-color: #e8e8e8;
