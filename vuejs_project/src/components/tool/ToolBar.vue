@@ -129,7 +129,6 @@
     overflow: hidden;
     display: flex;
     flex-flow: column;
-    height: 100%;
     width: 215px;
     background-color: #c8c8c8;
   }

@@ -352,7 +352,12 @@
     padding: initial;
     margin-left: 1px;
     margin-right: 1px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
   }
+
 
   /* Dark side */
   .dark.conception-grid {
