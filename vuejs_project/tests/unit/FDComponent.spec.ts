@@ -78,22 +78,6 @@ describe('FDComponent Model',() => {
     let fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,'A STRING');
     expect(fdComp).exist;
     expect(JSON.stringify(fdComp.getOptions())).equal('{}')
-  
-    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,123456);
-    expect(fdComp).exist;
-    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
-
-    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,true);
-    expect(fdComp).exist;
-    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
-
-    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,false);
-    expect(fdComp).exist;
-    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
-
-    fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,[]);
-    expect(fdComp).exist;
-    expect(JSON.stringify(fdComp.getOptions())).equal('{}')
 
     fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,true,'icon','1.0','readme',false,null);
     expect(fdComp).exist;

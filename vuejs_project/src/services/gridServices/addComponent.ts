@@ -2,23 +2,30 @@ import * as d3 from "d3";
 import { lineFunction, getLineData } from "../gridServices/addLink";
 import { FDComponent } from '../../models/FDComponent';
 
-export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, registerComponent: Function, openModal: Function) {
+/**
+ * Add a new component into "#conception-grid-svg" and set his listeners
+ * @param mouse position of the cursor in the plan
+ * @param fdCompToDrop the FDComponent to drop
+ * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
+ * @param openModal function call by clicking on the component
+ */
+export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDComponent | undefined, registerComponent: Function, openModal: Function) {
     if(fdCompToDrop !== undefined) {
-        const x = d3.mouse(d3.event.currentTarget)[0];
-        const y = d3.mouse(d3.event.currentTarget)[1];
+        const x = mouse[0];
+        const y = mouse[1];
         const inputCount = fdCompToDrop.getInput();
         const outputCount = fdCompToDrop.getOutput();
-        const compHeight = 25 + Math.max(inputCount, outputCount) * 15;
+        const compHeight = 20 + Math.max(inputCount, outputCount) * 20;
         const compWidth = 75 + fdCompToDrop.getTitle().length * 9;
         const svgGridBorder = 10;
         const svgMax = 5000;
         const newId = registerComponent(fdCompToDrop);
-        
         const g = d3.select("#conception-grid-svg")
             .append("g")
             .attr("id", "comp-" + newId)
             .attr("stroke-width", 1.5)
-            .attr("style", "cursor:pointer;");
+            .attr("style", "cursor:pointer;")
+            .attr("transform",d3.select("#conception-grid-svg").select("g").attr("transform"));
 
         const rectPlaceX = (x: number, theCompWidth: number) => {
             if(x < (svgGridBorder + (theCompWidth / 2))){
@@ -103,7 +110,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         
         g.append("rect")
             .attr("id", "rect-" + newId)
-            .attr("class", "draggable")
+            .attr("class", "fdcomp draggable")
             .attr("stroke", "black")
             .attr("fill", fdCompToDrop.getColor())
             .attr("height", compHeight)
@@ -144,7 +151,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         for(let i =0; i < inputCount; ++i) {
             g.append("circle")
                 .attr("id", "input-" + i + "-" + newId)
-                .attr("class", "component-outlet connector input-" + newId)
+                .attr("class", "input connector input-" + newId)
                 .attr("r", 7)
                 .attr("stroke", "black")
                 .attr("fill", "white")
@@ -155,7 +162,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
         for(let i =0; i < outputCount; ++i) {
             g.append("circle")
                 .attr("id", "output-" + i + "-" + newId)
-                .attr("class", "component-outlet connector output-" + newId)
+                .attr("class", "output connector output-" + newId)
                 .attr("r", 7)
                 .attr("stroke", "black")
                 .attr("fill", "white")
@@ -216,7 +223,7 @@ export function addComponentIntoGrid(fdCompToDrop: FDComponent | undefined, regi
                         Number.parseInt(d3.select('#input-' + input).attr("cy")) ]; 
 
                     d3.select(this)
-                        .datum(getLineData(source,target))
+                        .datum(getLineData(source,target, false))
                         .attr("d", lineFunction)
                 });
                 

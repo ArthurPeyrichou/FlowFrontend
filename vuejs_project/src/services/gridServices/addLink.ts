@@ -8,19 +8,42 @@ export const lineFunction = d3.line()
     .y(function(d) { return d[1]; })
     .curve(d3.curveBasis);
 
+
+/**
+ * When two component are aligned in y plan and there are linked 
+ * We wannt to avoid a cross line (if the ouput component is more on the right and the input component more on the left)
+ * @param source 
+ * @param sourceRect 
+ * @param targetRect 
+ * @param target 
+ */
+function isCrossLine(source: [number, number], target: [number, number], isSourceInput: boolean): boolean {
+    return (isSourceInput && (source[0] < target[0])) || (!isSourceInput && (source[0] > target[0]));
+}
+
 /**
  * Return data for a curve line from to points in the svg (source and target)
  * @param source the start of the line
  * @param target the end of the line
  */
-export function getLineData(source: [number, number], target: [number, number]): Array<[number, number]>  {
-    const q1: [number, number]  = [source[0] + ((target[0] - source[0]) / 4), source[1]];
-    const q3: [number, number]  = [source[0] + (((target[0] - source[0]) * 3) / 4), target[1]];
-
+export function getLineData(source: [number, number], target: [number, number], isSourceInput: boolean): Array<[number, number]>  {
+    const isACrossLine = isCrossLine(source, target, isSourceInput);
+    let q1: [number, number];
+    let q3: [number, number];
+    if(isACrossLine){
+        q1 = [source[0] + ((source[0] - target[0]) / 4 * 1.5), source[1] - ((source[1] - target[1]) / 4 * 1.5 )];
+        q3 = [target[0] - ((source[0] - target[0]) / 4 * 1.5), target[1] + ((source[1] - target[1]) / 4 * 1.5 )];    
+    } else {
+        q1 = [source[0] + ((target[0] - source[0]) / 4), source[1]];
+        q3 = [source[0] + (((target[0] - source[0]) * 3) / 4), target[1]];
+    }
     return [ source, q1, q3, target];
 }
 
-
+/**
+ * Select all connectors of "#conception-grid-svg" and sets drag&drop listeners for links creation
+ * @param registerLink function who register the link in component's links of ConceptionGrid's Vue and return his unique id
+ */
 export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
     const dragLinkCompHandler = d3.drag()
         .on("drag", function () {
@@ -34,9 +57,12 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
             //Look if a temp <g><path/></g> already exist
             if(document.getElementById("link-" + theSourceCompId) == null) {
                 //The line SVG Path we draw
-                const path = d3.select("#conception-grid-svg").append("g").attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId).append("path")
+                const path = d3.select("#conception-grid-svg").append("g")
+                    .attr("class", "link " + (isSourceInput?'input-':'output-') + theSourceCompId)       
+                    .attr("transform",d3.select("#conception-grid-svg").select("g").attr("transform"))
+                    .append("path")
                     .attr("id", "link-" + theSourceCompId)
-                    .datum(getLineData(source,target))
+                    .datum(getLineData(source,target, isSourceInput))
                     .attr("d", lineFunction)
                     .attr("stroke", "grey")
                     .attr("stroke-width", "3px")
@@ -59,14 +85,14 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
                         for(let i=0; i < svg.children.length; ++i){
                             const theClass: string | null = svg.children[i].getAttribute("class") 
                             if(theClass != null && theClass.includes('link')){
-                                svg.insertBefore(svg.children[i], svg.firstChild);
+                                svg.insertBefore(svg.children[i], svg.children[2]); //2 because 0 is defs and 1 is svggridbg
                             }
                         }
                     }
                 }
             } else { //If a temp <g><path/></g> already exist we just edit the line positions.
                 d3.select("#link-" + theSourceCompId)
-                .datum(getLineData(source,target))
+                .datum(getLineData(source,target, isSourceInput))
                 .attr("d", lineFunction);
             }
         })
@@ -102,7 +128,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
                             d3.select("#link-" + theSourceCompId)
                                 .attr("id", "link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId))
                                 .attr("class", "link-path link-" + theSourceCompId.split('-')[1] + ' link-' + theTargetCompId.split('-')[1] )
-                                .datum(getLineData(source,target))
+                                .datum(getLineData(source,target, isSourceInput))
                                 .attr("d", lineFunction)
                                 .attr("data-input", (isSourceInput?theSourceCompId:theTargetCompId))
                                 .attr("data-output", (isSourceInput?theTargetCompId:theSourceCompId))
