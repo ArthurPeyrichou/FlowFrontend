@@ -8,7 +8,6 @@
       :title="'Upload new component'"
       @show="resetModal"
       @hidden="resetModal"
-      @ok="handleOk"
     >
       <form ref="form" @submit.stop.prevent="handleSubmit">
         <b-form-group
@@ -40,55 +39,73 @@
   </div>
 </template>
 
-<script>
-  import Vue from 'vue';
-  export default Vue.extend({
-    name: 'AddCompModal',
-    props: [],
-    data() {
-      return {
-        file: null,
-        fileState: null
-      }
-    },
-    methods: {
-      openModal() {
-        this.$bvModal.show("modal-add-component")
-      },
-      hideModal() {
-        this.$bvModal.hide("modal-add-component")
-      },
-      checkFormValidity() {
-        this.fileState = Boolean(this.file);
-        document.getElementsByClassName('invalid-feedback')[0].setAttribute("style","outline-color: transparent !important");
-        //Extension -> this.file.name.split('.').pop()
-        return this.fileState
-      },
-      resetModal() {
-        this.file = null
-        this.fileState = null
-      },
-      handleOk(bvModalEvt) {
-        // Prevent modal from closing
-        bvModalEvt.preventDefault()
-        // Trigger submit handler
-        this.handleSubmit()
-      },
-      handleAddSubmit() {
-        console.log(this.checkFormValidity())
-        // Exit when the form isn't valid
-        if (!this.checkFormValidity()) {
-            return
-        }
+<script lang="ts">
+  import { Component, Vue } from 'vue-property-decorator';
 
-        //DO SOMETHING HERE
-        console.log("upload validated.")
+  /** Modal that allow users to upload Flowdata components files into the toolbar. */
+  @Component
+  export default class AddCompModal extends Vue {
+    
+    file: null | File = null;
+    fileState: null | boolean = null;
 
-        // Hide the modal manually
-        this.$nextTick(() => {
-            this.$bvModal.hide('modal-add-component')
-        })
-      }
+    /**
+     * Check if the file is valide.
+     * @public
+     * @returns true if the file is valid, false otherwise
+     */
+    checkFormValidity(): boolean {
+      this.fileState = Boolean(this.file);
+      document.getElementsByClassName('invalid-feedback')[0].setAttribute("style","outline-color: transparent !important");
+      //Extension -> this.file.name.split('.').pop()
+      return this.fileState
     }
-  });
+
+    /**
+     * Called when user click "Validate" button.
+     * WARNING: empty function
+     * @public
+     */
+    handleAddSubmit(): void {
+      console.log(this.checkFormValidity())
+      // Exit when the form isn't valid
+      if (!this.checkFormValidity()) {
+          return
+      }
+
+      //DO SOMETHING HERE
+      console.log("upload validated.")
+
+      // Hide the modal manually
+      this.$nextTick(() => {
+          this.$bvModal.hide('modal-add-component')
+      })
+    }
+
+    /**
+     * Hides the modal from the user interface.
+     * @public
+     */
+    hideModal(): void {
+      this.$bvModal.hide("modal-add-component")
+    }
+
+    /**
+     * Shows the modal from the user interface.
+     * @public
+     */
+    openModal(): void {
+        this.$bvModal.show("modal-add-component")
+    }
+
+    /**
+     * Resets the file's input of the modal form.
+     * @public
+     */
+    resetModal(): void {
+      this.file = null
+      this.fileState = null
+    }
+
+}
 </script>

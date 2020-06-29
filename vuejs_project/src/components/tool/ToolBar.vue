@@ -55,7 +55,8 @@
   import AddCompModal from '@/components/tool/AddCompModal.vue'
   import { FDComponent } from '../../models/FDComponent';
 
- @Component({
+  /** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
+  @Component({
     components: {
       AddCompModal
     }
@@ -76,13 +77,13 @@
     }
 
     /**
-     * Used for search-bar's right icon.
+     * Called when a flowdata component is drag from the list.
+     * Sets the selected component in event's dataTransfer in order to get it in the ConceptionFrid Vue.
      * @public
-     * @returns true if no string is typed in the search-bar, false otherwise.
      */
-    get isThereResearch(): boolean {
-      this.filterList();
-      return this.compSearchPattern == '';
+    dragstart(FDComp: FDComponent, event: DragEvent): void {
+        if(event.dataTransfer != null && event.dataTransfer != undefined)
+          event.dataTransfer.setData("text", FDComp.toString());
     }
 
     /**
@@ -116,13 +117,13 @@
     }
 
     /**
-     * Called when a flowdata component is drag from the list.
-     * Sets the selected component in event's dataTransfer in order to get it in the ConceptionFrid Vue.
+     * Used for search-bar's right icon.
      * @public
+     * @returns true if no string is typed in the search-bar, false otherwise.
      */
-    dragstart(FDComp: FDComponent, event: DragEvent): void {
-        if(event.dataTransfer != null && event.dataTransfer != undefined)
-          event.dataTransfer.setData("text", FDComp.toString());
+    get isThereResearch(): boolean {
+      this.filterList();
+      return this.compSearchPattern == '';
     }
     
     /**

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 
 /**
- * Construct a line with the 4 points : [ from, q1, q3, to]
+ * Constructs a line with the 4 points : [ from, q1, q3, to]
  */
 export const lineFunction = d3.line()
     .x(function(d) { return d[0]; })
@@ -10,8 +10,8 @@ export const lineFunction = d3.line()
 
 
 /**
- * When two component are aligned in y plan and there are linked 
- * We wannt to avoid a cross line (if the ouput component is more on the right and the input component more on the left)
+ * Used when two component are aligned in y plan and there are linked.
+ * We want to avoid a cross line (if the output component is more on the right and the input component more on the left).
  * @param source 
  * @param sourceRect 
  * @param targetRect 
@@ -25,6 +25,7 @@ function isCrossLine(source: [number, number], target: [number, number], isSourc
  * Return data for a curve line from to points in the svg (source and target)
  * @param source the start of the line
  * @param target the end of the line
+ * @returns an array of 2DPoints for line draw
  */
 export function getLineData(source: [number, number], target: [number, number], isSourceInput: boolean): Array<[number, number]>  {
     const isACrossLine = isCrossLine(source, target, isSourceInput);
@@ -41,10 +42,10 @@ export function getLineData(source: [number, number], target: [number, number], 
 }
 
 /**
- * Select all connectors of "#conception-grid-svg" and sets drag&drop listeners for links creation
+ * Selects all connectors of "#conception-grid-svg" and sets drag&drop listeners for links creation.
  * @param registerLink function who register the link in component's links of ConceptionGrid's Vue and return his unique id
  */
-export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function) {
+export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): void{
     const dragLinkCompHandler = d3.drag()
         .on("drag", function () {
             //The data for our line

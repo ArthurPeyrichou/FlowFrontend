@@ -48,19 +48,21 @@
   import { addComponentIntoGrid } from "../../services/gridServices/addComponent";
   import { addLinkBeetweenTwoComponentsIntoGrid } from "../../services/gridServices/addLink";
 
+  /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
   @Component({
     components: {
       CompSettingModal
     }
   })
   export default class ConceptionGrid extends Vue {
+
     @Prop({default: "dark"}) theme!: string;
+
     fdCompToDrop: FDComponent | undefined = undefined;
     currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
     componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
     idList: Array<string> = [];
     svgScale = 1;
-
     hideToolBar = false;
     hideConsoleBar = false;
 
@@ -69,6 +71,33 @@
       //This way we execute the code after the redering of the template
       this.$nextTick( () => {this.initSvg();});
       this.currentFDComp = {component: FDComponent.prototype, compId: "", links: []};
+    }
+
+    /**
+     * Called by CompSettingModal, delete the component and all links related from the Array and the screen.
+     * @public
+     * @param fdComp the component to delete
+     */
+    deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
+      this.componentList.forEach( el => {
+        el.links = el.links.filter(el => {
+          if(el.compId != fdComp.compId) {
+            return true;
+          } else {
+            document.getElementById("link-" + el.linkId)?.remove();
+            return false;
+          }
+        });
+      });
+      this.componentList = this.componentList.filter(el => {
+        if(el.compId != fdComp.compId) {
+            return true;
+          } else {
+            el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
+            document.getElementById("comp-" + fdComp.compId)?.remove();
+            return false;
+          }
+      });
     }
 
     /**
@@ -88,21 +117,6 @@
           //console.log(error)
         }
       }
-    }
-
-    /**
-     * Make a random string.
-     * @public
-     * @param length the length wish
-     * @returns a random string
-     */
-    makeId(length: number): string {
-      let result= '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      for (let i = 0; i < length; ++i) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      return result;
     }
 
     /**
@@ -163,36 +177,46 @@
     }
 
     /**
-     * Increases the zoom of the conception grid.
+     * Used for show/hide the console-bar.
      * @public
+     * @returns true if the console-bar should by hide, false otherwise.
      */
-    zoomInSvg(): void {
-      if(this.svgScale < 2) {
-        this.svgScale += 0.1;
-        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
-      }
+    get isConsoleBarHide(): boolean {
+      return this.hideConsoleBar;
     }
 
     /**
-     * Resets the zoom of the conception grid.
+     * Used for show/hide the tool-bar.
      * @public
+     * @returns true if the tool-bar should by hide, false otherwise.
      */
-    zoomResetSvg(): void {
-      if(this.svgScale != 1) {
-        this.svgScale = 1;
-        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
-      }
+    get isToolBarHide(): boolean {
+      return this.hideToolBar;
     }
 
     /**
-     * Reduces the zoom of the conception grid.
+     * Make a random string.
      * @public
+     * @param length the length wish
+     * @returns a random string
      */
-    zoomOutSvg(): void {
-      if(this.svgScale > 0.2) {
-        this.svgScale -= 0.1;
-        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+    makeId(length: number): string {
+      let result= '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (let i = 0; i < length; ++i) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
       }
+      return result;
+    }
+
+    /**
+     * Called by addComponentIntoGrid() when a comp is clicked.
+     * @public
+     * @param compId the id of the component 
+     */
+    openSettingModal(compId: string): void {
+      this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0];
+      this.$children[0].$bvModal.show("modal-edit-component")
     }
 
     /**
@@ -230,42 +254,6 @@
       });
       return newId;
     }
-    /**
-     * Called by addComponentIntoGrid() when a comp is clicked.
-     * @public
-     * @param compId the id of the component 
-     */
-    openSettingModal(compId: string): void {
-      this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0];
-      this.$children[0].$bvModal.show("modal-edit-component")
-    }
-
-    /**
-     * Called by CompSettingModal, delete the component and all links related from the Array and the screen.
-     * @public
-     * @param fdComp the component to delete
-     */
-    deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
-      this.componentList.forEach( el => {
-        el.links = el.links.filter(el => {
-          if(el.compId != fdComp.compId) {
-            return true;
-          } else {
-            document.getElementById("link-" + el.linkId)?.remove();
-            return false;
-          }
-        });
-      });
-      this.componentList = this.componentList.filter(el => {
-        if(el.compId != fdComp.compId) {
-            return true;
-          } else {
-            el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
-            document.getElementById("comp-" + fdComp.compId)?.remove();
-            return false;
-          }
-      });
-    }
 
     /**
      * Toggles bar visibility, use for console-bar and tool-bar.
@@ -292,21 +280,36 @@
     }
 
     /**
-     * Used for show/hide the tool-bar.
+     * Increases the zoom of the conception grid.
      * @public
-     * @returns true if the tool-bar should by hide, false otherwise.
      */
-    get isToolBarHide(): boolean {
-      return this.hideToolBar;
+    zoomInSvg(): void {
+      if(this.svgScale < 2) {
+        this.svgScale += 0.1;
+        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+      }
     }
 
     /**
-     * Used for show/hide the console-bar.
+     * Reduces the zoom of the conception grid.
      * @public
-     * @returns true if the console-bar should by hide, false otherwise.
      */
-    get isConsoleBarHide(): boolean {
-      return this.hideConsoleBar;
+    zoomOutSvg(): void {
+      if(this.svgScale > 0.2) {
+        this.svgScale -= 0.1;
+        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+      }
+    }
+
+    /**
+     * Resets the zoom of the conception grid.
+     * @public
+     */
+    zoomResetSvg(): void {
+      if(this.svgScale != 1) {
+        this.svgScale = 1;
+        d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
+      }
     }
 
   }

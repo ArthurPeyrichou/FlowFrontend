@@ -9,6 +9,7 @@
     "test:e2e": "vue-cli-service test:e2e",
     "lint": "vue-cli-service lint",
     "styleguide": "vue-cli-service styleguidist",
+    "vue-docgen": "vue-docgen src/components/**/*.vue docs/components",
     "styleguide:build": "vue-cli-service styleguidist:build"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "d3": "^5.16.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
+    "vue-docgen-cli": "^4.25.0",
     "vue-mc": "^0.6.0",
     "vue-property-decorator": "^8.4.2",
     "vue-router": "^3.2.0"

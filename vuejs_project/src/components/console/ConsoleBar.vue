@@ -9,6 +9,7 @@
 <script lang="ts">
   import { Component, Prop, Vue } from 'vue-property-decorator';
 
+  /** Gives an user interface that will allow texts output and flowdata monitoring. (NOT IMPLEMENTED YET) */
   @Component
   export default class ConsoleBar extends Vue {
     @Prop({default: "dark"}) public theme!: string;
