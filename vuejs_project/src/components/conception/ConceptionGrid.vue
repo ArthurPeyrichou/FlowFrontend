@@ -54,7 +54,7 @@
     }
   })
   export default class ConceptionGrid extends Vue {
-    @Prop({default: "dark"}) public theme!: string;
+    @Prop({default: "dark"}) theme!: string;
     private fdCompToDrop: FDComponent | undefined = undefined;
     private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
     private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
@@ -72,9 +72,10 @@
     }
 
     /**
-     * Call when a flowdata component is drop inside the <svg>
+     * Call when a flowdata component is drop inside the #conception-grid-svg
+     * @public
      */
-    public drop(event: DragEvent) {
+    drop(event: DragEvent): void {
       event.preventDefault();
       event.stopPropagation();
       if(event.dataTransfer != null && event.dataTransfer != undefined) { 
@@ -91,8 +92,9 @@
 
     /**
      * Make a random string
-     * @param lenght the lenght wish
-     * @return a random string
+     * @public
+     * @param length the length wish
+     * @returns a random string
      */
     private makeId(length: number): string {
       let result= '';
@@ -107,8 +109,9 @@
      * Initialize d3 event's Observable
      * Allow Components and links creation
      * Drag&Drop of components in order to move them
+     * @public
      */
-    private initSvg() {
+    private initSvg(): void {
       const actualize = (mouse: [number, number]) => {
         if(this.fdCompToDrop != undefined) {
           addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal);
@@ -159,21 +162,33 @@
       }
     }
 
-    public zoomInSvg(){
+    /**
+     * Increase the zoom of the conception grid 
+     * @public
+     */
+    zoomInSvg(): void {
       if(this.svgScale < 2) {
         this.svgScale += 0.1;
         d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
-    public zoomResetSvg(){
+    /**
+     * Reset the zoom of the conception grid 
+     * @public
+     */
+    zoomResetSvg(): void {
       if(this.svgScale != 1) {
         this.svgScale = 1;
         d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
       }
     }
 
-    public zoomOutSvg(){
+    /**
+     * Reduce the zoom of the conception grid 
+     * @public
+     */
+    zoomOutSvg(): void {
       if(this.svgScale > 0.2) {
         this.svgScale -= 0.1;
         d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")
@@ -182,10 +197,11 @@
 
     /**
      * Call by addComponentIntoGrid() when a comp is drop into grid.
+     * @public
      * @param comp the flowdata component to add in svg
-     * @return a new string identifiant generate with makeId()
+     * @returns a new string identifiant generate with makeId()
      */
-    public registerComponent(comp: FDComponent): string {
+    registerComponent(comp: FDComponent): string {
       let newId = this.makeId(10);
       while(this.idList.includes(newId)){
         newId = this.makeId(10);
@@ -195,11 +211,12 @@
     }
     /**
      * Call by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+     * @public
      * @param outputCompId the component source
      * @param inputCompId the component target
-     * @return a new string identifiant generate with makeId()
+     * @returns a new string identifiant generate with makeId()
      */
-    public registerLink(outputCompId: string, inputCompId: string) {
+    registerLink(outputCompId: string, inputCompId: string): string{
       let newId = this.makeId(10);
       const outputComp = outputCompId.split('-');
       const inputComp = inputCompId.split('-');
@@ -215,18 +232,20 @@
     }
     /**
      * Call by addComponentIntoGrid() when a comp is clicked.
+     * @public
      * @param compId the id of the component 
      */
-    public openSettingModal(compId: string) {
+    openSettingModal(compId: string): void {
       this.currentFDComp = this.componentList.filter(el => el.compId == compId)[0];
       this.$children[0].$bvModal.show("modal-edit-component")
     }
 
     /**
      * Call by CompSettingModal, delete the component and all links related from the Array and the screen.
+     * @public
      * @param fdComp the component to delete
      */
-    public deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}) {
+    deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
       this.componentList.forEach( el => {
         el.links = el.links.filter(el => {
           if(el.compId != fdComp.compId) {
@@ -250,9 +269,10 @@
 
     /**
      * Toggle bar visibility, use for console-bar and tool-bar
+     * @public
      * @param barName the id's prefix of the bar's div
      */
-    public toggleBar(barName: string) {
+    toggleBar(barName: string): void {
       const element: HTMLElement | null = document.getElementById(barName + "-bar");
       if(element != null) {
         const isHide = element.className.includes(' hide');
