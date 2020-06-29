@@ -55,24 +55,24 @@
   })
   export default class ConceptionGrid extends Vue {
     @Prop({default: "dark"}) theme!: string;
-    private fdCompToDrop: FDComponent | undefined = undefined;
-    private currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
-    private componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
-    private idList: Array<string> = [];
-    private svgScale = 1;
+    fdCompToDrop: FDComponent | undefined = undefined;
+    currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
+    componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
+    idList: Array<string> = [];
+    svgScale = 1;
 
-    private hideToolBar = false;
-    private hideConsoleBar = false;
+    hideToolBar = false;
+    hideConsoleBar = false;
 
     constructor() {
       super();
-      //Tthis way we execute the code after the redering of the template
+      //This way we execute the code after the redering of the template
       this.$nextTick( () => {this.initSvg();});
       this.currentFDComp = {component: FDComponent.prototype, compId: "", links: []};
     }
 
     /**
-     * Call when a flowdata component is drop inside the #conception-grid-svg
+     * Called when a flowdata component is drop inside the #conception-grid-svg.
      * @public
      */
     drop(event: DragEvent): void {
@@ -91,12 +91,12 @@
     }
 
     /**
-     * Make a random string
+     * Make a random string.
      * @public
      * @param length the length wish
      * @returns a random string
      */
-    private makeId(length: number): string {
+    makeId(length: number): string {
       let result= '';
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       for (let i = 0; i < length; ++i) {
@@ -106,12 +106,12 @@
     }
 
     /**
-     * Initialize d3 event's Observable
-     * Allow Components and links creation
-     * Drag&Drop of components in order to move them
+     * Initializes d3 event's Observable.
+     * Allows Components and links creation.
+     * Drag&Drop of components in order to move them.
      * @public
      */
-    private initSvg(): void {
+    initSvg(): void {
       const actualize = (mouse: [number, number]) => {
         if(this.fdCompToDrop != undefined) {
           addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal);
@@ -163,7 +163,7 @@
     }
 
     /**
-     * Increase the zoom of the conception grid 
+     * Increases the zoom of the conception grid.
      * @public
      */
     zoomInSvg(): void {
@@ -174,7 +174,7 @@
     }
 
     /**
-     * Reset the zoom of the conception grid 
+     * Resets the zoom of the conception grid.
      * @public
      */
     zoomResetSvg(): void {
@@ -185,7 +185,7 @@
     }
 
     /**
-     * Reduce the zoom of the conception grid 
+     * Reduces the zoom of the conception grid.
      * @public
      */
     zoomOutSvg(): void {
@@ -196,7 +196,7 @@
     }
 
     /**
-     * Call by addComponentIntoGrid() when a comp is drop into grid.
+     * Called by addComponentIntoGrid() when a comp is drop into grid.
      * @public
      * @param comp the flowdata component to add in svg
      * @returns a new string identifiant generate with makeId()
@@ -210,7 +210,7 @@
       return newId;
     }
     /**
-     * Call by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+     * Called by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
      * @public
      * @param outputCompId the component source
      * @param inputCompId the component target
@@ -231,7 +231,7 @@
       return newId;
     }
     /**
-     * Call by addComponentIntoGrid() when a comp is clicked.
+     * Called by addComponentIntoGrid() when a comp is clicked.
      * @public
      * @param compId the id of the component 
      */
@@ -241,7 +241,7 @@
     }
 
     /**
-     * Call by CompSettingModal, delete the component and all links related from the Array and the screen.
+     * Called by CompSettingModal, delete the component and all links related from the Array and the screen.
      * @public
      * @param fdComp the component to delete
      */
@@ -268,7 +268,7 @@
     }
 
     /**
-     * Toggle bar visibility, use for console-bar and tool-bar
+     * Toggles bar visibility, use for console-bar and tool-bar.
      * @public
      * @param barName the id's prefix of the bar's div
      */
@@ -291,11 +291,21 @@
       }
     }
 
-    get isToolBarHide(){
+    /**
+     * Used for show/hide the tool-bar.
+     * @public
+     * @returns true if the tool-bar should by hide, false otherwise.
+     */
+    get isToolBarHide(): boolean {
       return this.hideToolBar;
     }
 
-    get isConsoleBarHide() {
+    /**
+     * Used for show/hide the console-bar.
+     * @public
+     * @returns true if the console-bar should by hide, false otherwise.
+     */
+    get isConsoleBarHide(): boolean {
       return this.hideConsoleBar;
     }
 
