@@ -283,7 +283,7 @@
      * Increases the zoom of the conception grid.
      * @public
      */
-    zoomInSvg(): void {
+    public zoomInSvg(): void {
       if(this.svgScale < 2) {
         this.svgScale += 0.1;
         d3.select("#conception-grid-svg").selectAll("g").attr("transform", "scale(" + this.svgScale.toFixed(1) + ")")

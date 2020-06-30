@@ -80,17 +80,14 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): vo
                     path.attr("stroke", "gold")
                 });
 
-                const svg: HTMLElement | null  = document.getElementById("conception-grid-svg");
-                if(svg != null) {
-                    if(svg.children != null){
-                        for(let i=0; i < svg.children.length; ++i){
-                            const theClass: string | null = svg.children[i].getAttribute("class") 
-                            if(theClass != null && theClass.includes('link')){
-                                svg.insertBefore(svg.children[i], svg.children[2]); //2 because 0 is defs and 1 is svggridbg
-                            }
-                        }
+                const svg: HTMLElement | null  = document.getElementById("conception-grid-svg")!;
+                for(let i=0; i < svg.children.length; ++i){
+                    const theClass: string | null = svg.children[i].getAttribute("class") 
+                    if(theClass != null && theClass.includes('link')){
+                        svg.insertBefore(svg.children[i], svg.children[2]); //2 because 0 is defs and 1 is svggridbg
                     }
                 }
+                
             } else { //If a temp <g><path/></g> already exist we just edit the line positions.
                 d3.select("#link-" + theSourceCompId)
                 .datum(getLineData(source,target, isSourceInput))

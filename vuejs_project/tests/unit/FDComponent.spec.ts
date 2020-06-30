@@ -91,4 +91,20 @@ describe('FDComponent Model',() => {
     expect(fdComp).exist;
     expect(JSON.stringify(fdComp.getOptions())).equal('{"option3":"op3","option4":"op4"}')
   });
+
+  it('Getters check',() => {
+    const fdComp = new FDComponent("id0","FakeType1","FakeComp1",'#967ADC','autor',true,5,'icon','1.0','readme',false,JSON.parse('{"option1":"op1","option2":"op2"}'));
+    expect(fdComp).exist;
+    expect(fdComp.getId()).equal("id0")
+    expect(fdComp.getGroup()).equal("FakeType1")
+    expect(fdComp.getTitle()).equal("FakeComp1")
+    expect(fdComp.getColor()).equal("#967ADC")
+    expect(fdComp.getAuthor()).equal("autor")
+    expect(fdComp.getInput()).equal(1)
+    expect(fdComp.getOutput()).equal(5)
+    expect(fdComp.getIcon()).equal("icon")
+    expect(fdComp.getReadme()).equal("readme")
+    expect(JSON.stringify(fdComp.getOptions())).equal('{"option1":"op1","option2":"op2"}')
+  });
+
 })

@@ -12,5 +12,8 @@ describe('ConceptionGrid.vue', () => {
     expect(wrapper.vm.$data.componentList.toString()).equal("");
     expect(wrapper.vm.$data.idList.toString()).equal("");
     expect(wrapper.vm.$data.svgScale).equal(1);
+    expect(wrapper.vm.$data.hideToolBar).equal(false);
+    expect(wrapper.vm.$data.hideConsoleBar).equal(false);
   })
+
 })

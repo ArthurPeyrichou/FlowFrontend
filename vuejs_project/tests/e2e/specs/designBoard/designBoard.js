@@ -2,9 +2,9 @@
 
 const TIMELAPS = 10;
 
-describe('Bar hide/show tests', () => {
+describe('Bar hide and show tests', () => {
 
-  it('Hide/show tool bar', function() {
+  it('Hide andshow tool bar', function() {
     cy.visit('/')
     
     expect(cy.get('#tool-bar').should('have.css', 'margin-left', '0px'))
@@ -16,7 +16,7 @@ describe('Bar hide/show tests', () => {
     expect(cy.get('#tool-bar').should('have.css', 'margin-left', '0px'))
   })
 
-  it('Hide/show console bar', function() {
+  it('Hide and show console bar', function() {
     cy.visit('/')
     
     expect(cy.get('#console-bar').should('have.css', 'margin-right', '0px'))

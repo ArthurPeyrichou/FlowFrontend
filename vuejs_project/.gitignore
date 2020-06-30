@@ -1,6 +1,13 @@
 .DS_Store
 node_modules
+
 /dist
+
+/styleguide
+/docs
+
+/coverage
+/.nyc_output
 
 /tests/e2e/videos/
 /tests/e2e/screenshots/

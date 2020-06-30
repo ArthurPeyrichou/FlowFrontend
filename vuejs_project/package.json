@@ -7,12 +7,16 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
+    "test:unit-coverage": "nyc vue-cli-service test:unit",
+    "test:e2e-coverage": "vue-cli-service test:e2e --headless && npx nyc report --reporter=text-summary",
     "lint": "vue-cli-service lint",
     "styleguide": "vue-cli-service styleguidist",
     "vue-docgen": "vue-docgen src/components/**/*.vue docs/components",
     "styleguide:build": "vue-cli-service styleguidist:build"
   },
   "dependencies": {
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/polyfill": "^7.10.1",
     "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^4.5.0",
     "bootstrap-vue": "^2.15.0",
@@ -23,9 +27,12 @@
     "vue-docgen-cli": "^4.25.0",
     "vue-mc": "^0.6.0",
     "vue-property-decorator": "^8.4.2",
-    "vue-router": "^3.2.0"
+    "vue-router": "^3.2.0",
+    "webpack-cli": "^3.3.12"
   },
   "devDependencies": {
+    "@cypress/browserify-preprocessor": "^3.0.0",
+    "@cypress/code-coverage": "^3.8.1",
     "@types/chai": "^4.2.11",
     "@types/d3": "5.7.2",
     "@types/mocha": "^5.2.4",
@@ -40,9 +47,12 @@
     "@vue/cli-service": "~4.4.0",
     "@vue/eslint-config-typescript": "^5.0.2",
     "@vue/test-utils": "^1.0.3",
+    "babel-plugin-istanbul": "^6.0.0",
+    "babel-preset-vue": "^2.0.2",
     "chai": "^4.1.2",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "istanbul": "^0.4.5",
     "typescript": "~3.9.3",
     "vue-cli-plugin-styleguidist": "~4.25.0",
     "vue-styleguidist": "^4.25.0",
