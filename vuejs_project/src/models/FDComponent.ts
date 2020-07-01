@@ -30,18 +30,16 @@ export class FDComponent {
             this.input = 0;
         } else if(Number.isInteger(input)) {
             this.input = (typeof input == "string")?Number.parseInt(input):input;
+        } else if(!Number.isNaN((typeof input == "string")?Number.parseInt(input):input)){
+            this.input = (typeof input == "string")?Number.parseInt(input):input;
+        } else if( input.toString().toLowerCase() == 'true') {
+            this.input = 1;
+        } else if(input.toString().toLowerCase() == 'false') {
+            this.input = 0; 
         } else {
-            if(!Number.isNaN((typeof input == "string")?Number.parseInt(input):input)){
-                this.input = (typeof input == "string")?Number.parseInt(input):input;
-            } else if( input.toString().toLowerCase() == 'true') {
-                this.input = 1;
-            } else if(input.toString().toLowerCase() == 'false') {
-                this.input = 0; 
-            } else {
-                throw new Error("Input attribut of FDComponent '" + id + "' should be an integer or boolean value. Got '" + input + "'.");
-            }
+            throw new Error("Input attribut of FDComponent '" + id + "' should be an integer or boolean value. Got '" + input + "'.");
         }
-
+        
         if(this.input < 0) {
             this.input = 0;
         }
@@ -52,16 +50,14 @@ export class FDComponent {
             this.output = 0;
         } else if(Number.isInteger(output)) {
             this.output = (typeof output == "string")?Number.parseInt(output):output;
-        } else {
-            if(!Number.isNaN((typeof output == "string")?Number.parseInt(output):output)){
+        } else if(!Number.isNaN((typeof output == "string")?Number.parseInt(output):output)){
                 this.output = (typeof output == "string")?Number.parseInt(output):output;
-            } else if(output.toString().toLowerCase() == 'true') {
-                this.output = 1;
-            } else if(output.toString().toLowerCase() == 'false') {
-                this.output = 0; 
-            } else {
-                throw new Error("Output attribut of FDComponent '" + id + "' should be an integer or boolean value. Got '" + output + "'.");
-            }
+        } else if(output.toString().toLowerCase() == 'true') {
+            this.output = 1;
+        } else if(output.toString().toLowerCase() == 'false') {
+            this.output = 0; 
+        } else {
+            throw new Error("Output attribut of FDComponent '" + id + "' should be an integer or boolean value. Got '" + output + "'.");
         }
 
         if(this.output < 0) {
@@ -81,7 +77,7 @@ export class FDComponent {
                 this.options = {};
             }
         } catch(error) {
-            console.log(error)
+            //console.log(error)
             this.options = {};
         }
 

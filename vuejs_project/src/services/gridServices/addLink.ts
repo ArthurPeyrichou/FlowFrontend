@@ -80,7 +80,8 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): vo
                     path.attr("stroke", "gold")
                 });
 
-                const svg: HTMLElement | null  = document.getElementById("conception-grid-svg")!;
+                // eslint-disable-next-line
+                const svg: HTMLElement  = document.getElementById("conception-grid-svg")!;
                 for(let i=0; i < svg.children.length; ++i){
                     const theClass: string | null = svg.children[i].getAttribute("class") 
                     if(theClass != null && theClass.includes('link')){

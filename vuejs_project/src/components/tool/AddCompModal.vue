@@ -67,7 +67,6 @@
      * @public
      */
     handleAddSubmit(): void {
-      console.log(this.checkFormValidity())
       // Exit when the form isn't valid
       if (!this.checkFormValidity()) {
           return
