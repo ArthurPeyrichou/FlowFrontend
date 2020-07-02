@@ -1,4 +1,8 @@
 import * as d3 from "d3";
+import { transfertDataWithPath } from "../gridServices/transfertData";
+
+const LINK_FILL_COLOR = "grey";
+const ACTIVE_LINK_FILL_COLOR = "gold";
 
 /**
  * Constructs a line with the 4 points : [ from, q1, q3, to]
@@ -65,7 +69,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): vo
                     .attr("id", "link-" + theSourceCompId)
                     .datum(getLineData(source,target, isSourceInput))
                     .attr("d", lineFunction)
-                    .attr("stroke", "grey")
+                    .attr("stroke", LINK_FILL_COLOR)
                     .attr("stroke-width", "3px")
                     .attr("fill", "none")
                     .style("cursor","pointer");
@@ -76,8 +80,14 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): vo
                     path.attr("stroke-width", "3px")
                 })
                 path.on("click", () => {
-                    d3.selectAll(".link-path").attr("stroke", "grey")
-                    path.attr("stroke", "gold")
+                    if(path.attr("stroke") == LINK_FILL_COLOR) {
+                        d3.selectAll(".link-path").attr("stroke", LINK_FILL_COLOR)
+                        path.attr("stroke", ACTIVE_LINK_FILL_COLOR);
+                    } else {
+                        d3.selectAll(".link-path").attr("stroke", LINK_FILL_COLOR)
+                        path.attr("stroke", LINK_FILL_COLOR);
+                    }
+                    
                 });
 
                 // eslint-disable-next-line
@@ -127,12 +137,14 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): vo
                             d3.select("#link-" + theSourceCompId)
                                 .attr("id", "link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId))
                                 .attr("class", "link-path link-" + theSourceCompId.split('-')[1] + ' link-' + theTargetCompId.split('-')[1] )
-                                .datum(getLineData(source,target, isSourceInput))
+                                .datum(getLineData(isSourceInput?target:source,isSourceInput?source:target, false))
                                 .attr("d", lineFunction)
                                 .attr("data-input", (isSourceInput?theSourceCompId:theTargetCompId))
                                 .attr("data-output", (isSourceInput?theTargetCompId:theSourceCompId))
                                 .attr("data-input-index", (isSourceInput?theSourceCirle.attr("data-index"):theTargetCirle.attr("data-index")))
                                 .attr("data-output-index", (isSourceInput?theTargetCirle.attr("data-index"):theSourceCirle.attr("data-index")));
+
+                                transfertDataWithPath( "#output-" + (isSourceInput?theTargetCompId:theSourceCompId), "#input-" + (isSourceInput?theSourceCompId:theTargetCompId))
                         }
                     }
                     

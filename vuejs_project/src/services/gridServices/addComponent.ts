@@ -223,6 +223,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             .attr("stroke", "black")
             .attr("fill", "white")
             .attr("data-index", i)
+            .attr("data-id", newId)
             .attr("cx", inputCirclePlaceX(x, compWidth))
             .attr("cy", inputCirclePlaceY(y, compHeight, i, inputCount));
     }
@@ -234,6 +235,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             .attr("stroke", "black")
             .attr("fill", "white")
             .attr("data-index", i)
+            .attr("data-id", newId)
             .attr("cx", outputCirclePlaceX(x, compWidth))
             .attr("cy", outputCirclePlaceY(y, compHeight, i, outputCount));
     }
