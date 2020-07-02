@@ -74,6 +74,22 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
         }
         return y + 13;
     }
+    const iconPlaceX = (x: number, theCompWidth: number) => {
+        if(x < (svgGridBorder + (theCompWidth / 2))){
+            return svgGridBorder + 20;
+        } else if(x > (svgMax - svgGridBorder - (theCompWidth / 2))){
+            return svgMax + 20 - svgGridBorder - theCompWidth;
+        }
+        return x - (theCompWidth / 2) + 20;
+    }
+    const iconPlaceY = (y: number, theCompHeight: number) => {
+        if(y < (svgGridBorder + (theCompHeight / 2))){
+            return svgGridBorder + 8 + (theCompHeight / 2);
+        } else if(y > (svgMax - svgGridBorder - (theCompHeight / 2))){
+            return svgMax + 8 - svgGridBorder - (theCompHeight / 2);
+        }
+        return y + 8;
+    }
     const inputCirclePlaceX = (x: number, theCompWidth: number) => {
         if(x < (svgGridBorder + (theCompWidth / 2))){
             return svgGridBorder;
@@ -110,6 +126,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
     g.append("rect")
         .attr("id", "rect-" + newId)
         .attr("class", "fdcomp draggable")
+        .attr("data-id", newId)
         .attr("stroke", "black")
         .attr("fill", fdCompToDrop.getColor())
         .attr("height", compHeight)
@@ -126,6 +143,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
     g.append("text")
         .attr("id", "title-text-" + newId)
         .attr("class", "draggable unselectable-text")
+        .attr("data-id", newId)
         .attr("fill", "black")
         .style("font-size", "14px")
         .html(fdCompToDrop.getTitle())
@@ -138,11 +156,25 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
     g.append("text")
         .attr("id", "type-text-" + newId)
         .attr("class", "draggable unselectable-text")
+        .attr("data-id", newId)
         .attr("fill", "black")
         .style("font-size", "12px")
         .html(fdCompToDrop.getTitle())
         .attr("x", typePlaceX(x, compWidth))
         .attr("y", typePlaceY(y, compHeight))
+        .on("click", () => {
+            openModal(newId);
+        });
+    
+    g.append("text")
+        .attr("id", "icon-" + newId)
+        .attr("class", "draggable unselectable-text icon")
+        .attr("data-id", newId)
+        .attr("fill", "black")
+        .style("font", "900 normal normal 24px 'Font Awesome 5 Free'")
+        .text(fdCompToDrop.getIcon())
+        .attr("x", iconPlaceX(x, compWidth))
+        .attr("y", iconPlaceY(y, compHeight))
         .on("click", () => {
             openModal(newId);
         });
@@ -173,7 +205,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
     
     const dragCompHandler = d3.drag()
         .on("drag", function () {
-            const theCompId = d3.select(this).attr("id").replace('rect-','').replace('title-text-','').replace('type-text-','');
+            const theCompId = d3.select(this).attr("data-id");
             const theCompWidth = Number.parseInt(d3.select("#rect-" + theCompId).attr("width"));
             const theCompHeight = Number.parseInt(d3.select("#rect-" + theCompId).attr("height"));
             const theCompInputCount = Number.parseInt(d3.select("#rect-" + theCompId).attr("data-input"));
@@ -197,6 +229,10 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             d3.select('#type-text-'+ theCompId)
                 .attr("x", typePlaceX(d3.event.x, theCompWidth))
                 .attr("y", typePlaceY(d3.event.y, theCompHeight));
+
+            d3.select('#icon-'+ theCompId)
+                .attr("x", iconPlaceX(d3.event.x, theCompWidth))
+                .attr("y", iconPlaceY(d3.event.y, theCompHeight));
 
             for(let i =0; i < theCompInputCount; ++i) {
                 d3.select('#input-'+ i + "-" + theCompId)
