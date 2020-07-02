@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
-import ToolBar from '@/components/tool/ToolBar.vue'
+import ToolBar from '../../src/components/tool/ToolBar.vue'
 import { FDComponent } from '../../src/models/FDComponent';
 
 const fakeBrutList: Array<FDComponent> = [new FDComponent("id0","FakeType1","FakeComp1", '#FFD800','autor',true,true,'icon','1.0','readme',false,'{}'),

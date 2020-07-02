@@ -79,7 +79,7 @@
      * @param fdComp the component to delete
      */
     deleteTheComp(fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
-      this.componentList.forEach( el => {
+      this.componentList = this.componentList.filter(el => {
         el.links = el.links.filter(el => {
           if(el.compId != fdComp.compId) {
             return true;
@@ -88,15 +88,13 @@
             return false;
           }
         });
-      });
-      this.componentList = this.componentList.filter(el => {
         if(el.compId != fdComp.compId) {
             return true;
-          } else {
-            el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
-            document.getElementById("comp-" + fdComp.compId)?.remove();
-            return false;
-          }
+        } else {
+          el.links.forEach( el => document.getElementById("link-" + el.linkId)?.remove());
+          document.getElementById("comp-" + fdComp.compId)?.remove();
+          return false;
+        }
       });
     }
 
@@ -140,40 +138,39 @@
       })
 
       //This part allows the conception grid positioning by drag and drop
-      const svgBoard = document.getElementById('conception-board');
-      if(svgBoard != null){
-        let isDown = false;
-        let startX: number;
-        let scrollLeft: number;
-        let startY: number;
-        let scrollTop: number;
-        svgBoard.addEventListener('mousedown', (e) => {
-          isDown = true;
-          svgBoard.classList.add('active');
-          startX = e.pageX - svgBoard.offsetLeft;
-          scrollLeft = svgBoard.scrollLeft;
-          startY = e.pageY - svgBoard.offsetTop;
-          scrollTop = svgBoard.scrollTop;
-        });
-        svgBoard.addEventListener('mouseleave', () => {
-          isDown = false;
-          svgBoard.classList.remove('active');
-        });
-        svgBoard.addEventListener('mouseup', () => {
-          isDown = false;
-          svgBoard.classList.remove('active');
-        });
-        svgBoard.addEventListener('mousemove', (e) => {
-          if(!isDown) return;
-          e.preventDefault();
-          const x = e.pageX - svgBoard.offsetLeft;
-          const walkX = (x - startX) * 2; //scroll faster
-          svgBoard.scrollLeft = scrollLeft - walkX;
-          const y = e.pageY - svgBoard.offsetTop;
-          const walkY = (y - startY) * 2; //scroll faster
-          svgBoard.scrollTop = scrollTop - walkY;
-        });
-      }
+      const svgBoard = document.getElementById('conception-board')!;
+      let isDown = false;
+      let startX: number;
+      let scrollLeft: number;
+      let startY: number;
+      let scrollTop: number;
+      svgBoard.addEventListener('mousedown', (e) => {
+        isDown = true;
+        svgBoard.classList.add('active');
+        startX = e.pageX - svgBoard.offsetLeft;
+        scrollLeft = svgBoard.scrollLeft;
+        startY = e.pageY - svgBoard.offsetTop;
+        scrollTop = svgBoard.scrollTop;
+      });
+      svgBoard.addEventListener('mouseleave', () => {
+        isDown = false;
+        svgBoard.classList.remove('active');
+      });
+      svgBoard.addEventListener('mouseup', () => {
+        isDown = false;
+        svgBoard.classList.remove('active');
+      });
+      svgBoard.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - svgBoard.offsetLeft;
+        const walkX = (x - startX) * 2; //scroll faster
+        svgBoard.scrollLeft = scrollLeft - walkX;
+        const y = e.pageY - svgBoard.offsetTop;
+        const walkY = (y - startY) * 2; //scroll faster
+        svgBoard.scrollTop = scrollTop - walkY;
+      });
+      
     }
 
     /**
@@ -261,22 +258,21 @@
      * @param barName the id's prefix of the bar's div
      */
     toggleBar(barName: string): void {
-      const element: HTMLElement | null = document.getElementById(barName + "-bar");
-      if(element != null) {
-        const isHide = element.className.includes(' hide');
-        if(isHide){
-          element.className = element.className.replace(" hide", '');
-        } else {
-          element.className += " hide";
-        }
-        switch(barName){
-          case "tool":
-            this.hideToolBar = isHide;
-            break;
-          case "console":
-            this.hideConsoleBar = isHide;
-        }
+      const element: HTMLElement = document.getElementById(barName + "-bar")!;
+      const isHide = element.className.includes(' hide');
+      if(isHide){
+        element.className = element.className.replace(" hide", '');
+      } else {
+        element.className += " hide";
       }
+      switch(barName){
+        case "tool":
+          this.hideToolBar = isHide;
+          break;
+        case "console":
+          this.hideConsoleBar = isHide;
+      }
+      
     }
 
     /**

@@ -82,8 +82,8 @@
      * @public
      */
     dragstart(FDComp: FDComponent, event: DragEvent): void {
-        if(event.dataTransfer != null && event.dataTransfer != undefined)
-          event.dataTransfer.setData("text", FDComp.toString());
+      if(event.dataTransfer != null && event.dataTransfer != undefined)
+        event.dataTransfer.setData("text", FDComp.toString());
     }
 
     /**

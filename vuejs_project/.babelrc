@@ -1,18 +1,4 @@
 {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "modules": false,
-          "targets": {
-            "browsers": ["> 1%", "last 2 versions", "not ie <= 8", "ie >= 11"]
-          }
-        }
-      ]
-    ],
-    "plugins": [
-      "transform-class-properties", 
-      "istanbul",
-      "@babel/plugin-syntax-dynamic-import"
-    ]
+  "presets": ["@vue/cli-plugin-babel/preset"],
+  "plugins": ["istanbul", "transform-class-properties"]
 }

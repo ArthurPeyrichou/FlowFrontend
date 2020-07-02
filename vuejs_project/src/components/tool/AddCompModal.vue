@@ -90,14 +90,6 @@
     }
 
     /**
-     * Shows the modal from the user interface.
-     * @public
-     */
-    openModal(): void {
-        this.$bvModal.show("modal-add-component")
-    }
-
-    /**
      * Resets the file's input of the modal form.
      * @public
      */

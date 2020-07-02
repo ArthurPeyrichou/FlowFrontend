@@ -463,6 +463,55 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 0)
   })
 
+  it('Link three components in the conception grid, then delete a component with link in output and input', function() {
+    cy.visit('/')
+    giveSpace()
+
+    cy.get('.fdcomp').should('have.length', 0)
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(3) .list-group-item:nth-child(1)", "#svg-grid-bg", 150, 150)
+    cy.get('.fdcomp').should('have.length', 1)
+
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(3) .list-group-item:nth-child(1)", "#svg-grid-bg", 250, 300)
+    cy.get('.fdcomp').should('have.length', 2)
+    cy.get('.link-path').should('have.length', 0)
+
+    dragDropD3("circle.output", "circle.input")
+    cy.get('.link-path').should('have.length', 1)
+
+    dragDropIntoSvg(".fdcomp-group-list:nth-child(3) .list-group-item:nth-child(1)", "#svg-grid-bg", 350, 450)
+    cy.get('.fdcomp').should('have.length', 3)
+
+    cy.window().then((win) => {
+      const dataTransfer = new DataTransfer()
+      cy.get("circle.output").last().trigger('mousemove', {view: win})
+      cy.get("circle.output").last().trigger('pointerdown', { which: 1, button: 0, view: win })
+        .trigger('mousedown', { which: 1, button: 0, view: win })
+        .trigger('dragstart', { dataTransfer, view: win })
+      
+      cy.get("circle.input").first().trigger('mousemove', {view: win})
+  
+      cy.get("circle.input").first().trigger("dragover", {dataTransfer, view: win})
+      cy.wait(TIMELAPS)
+  
+      cy.get("circle.input").first().trigger('drop', { dataTransfer, view: win}).then(() => { 
+        cy.get("circle.input").first().trigger('mouseup', { which: 1, button: 0, view: win}).then(() => {     
+          cy.get("circle.input").first().trigger('pointerup', { which: 1, button: 0, view: win})  
+          }) 
+      })
+    })
+    cy.wait(TIMELAPS)
+    cy.get('.link-path').should('have.length', 2)
+
+    cy.get('.fdcomp').first().click();
+    cy.wait(TIMELAPS)
+    cy.get(".modal-title").contains("Settings: ")
+    
+    cy.get('#setting-modal-delete').click();
+    cy.wait(TIMELAPS)
+    cy.get('.fdcomp').should('have.length', 2)
+    cy.get('.link-path').should('have.length', 0)
+  })
+
   it('Zoom in test', function() {
     cy.visit('/')
     giveSpace()
@@ -598,5 +647,39 @@ describe('Grid conception tests', () => {
     cy.wait(TIMELAPS)
     cy.get('g').last().should('have.attr', 'transform', 'scale(1.0)')
   })
+
+  it('Can moove in conception grid by grabbing it', function() {
+    cy.visit('/')
+    giveSpace()
+
+    cy.get("#conception-board")
+    const dataTransfer = new DataTransfer()
+
+    cy.get("#conception-board").trigger('pointerdown', { x:400, y:400, which: 1, button: 0, force: true})
+      .trigger('mousedown', { x:400, y:400, which: 1, button: 0, force: true})
+      .trigger('dragstart', { x:400, y:400, dataTransfer, force: true})
+
+    cy.get("#conception-board").trigger('mousemove', {x:150, y:150, force: true, view: window})
+    cy.get("#conception-board").trigger("dragover", {x:150, y:150, dataTransfer, force: true})
+    cy.wait(TIMELAPS)
+
+    cy.get("#conception-board").trigger('drop', { x:150, y:150, dataTransfer, force: true}).then(() => {
+      cy.get("#conception-board").trigger('mouseup', { x:150, y:150, which: 1, button: 0, force: true}).then(() => {  
+        cy.get("#conception-board").trigger('pointerup', { x:150, y:150, which: 1, button: 0, force: true}).then(() => { 
+          cy.get("#conception-board").trigger('mousemove', { x:150, y:150, force: true, view:window})
+        }) 
+      }) 
+    })
+    cy.wait(TIMELAPS)
+    })
+
+    it('Handle drop in conception of items that should not be drop', function() {
+      cy.visit('/')
+      giveSpace()
+  
+      cy.get('.fdcomp').should('have.length', 0)
+      dragDropIntoSvg(".header-content > h3", "#svg-grid-bg", 150, 100)
+      cy.get('.fdcomp').should('have.length', 0)
+    })
 
 })

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
-import ConsoleBar from '@/components/console/ConsoleBar.vue'
+import ConsoleBar from '../../src/components/console/ConsoleBar.vue'
 
 describe('ConsoleBar.vue', () => {
   it('should create', () => {

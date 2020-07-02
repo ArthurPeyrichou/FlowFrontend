@@ -1,0 +1,16 @@
+{
+    "include": [
+        "src/**/*.{ts,vue}"
+    ],
+    "extension": [
+        ".ts",
+        ".vue"
+    ],
+    "exclude": [
+        "**/*.spec.js",
+        "**/*.spec.ts"
+    ],
+    "reporter": [
+        "text-summary"
+    ]
+}
