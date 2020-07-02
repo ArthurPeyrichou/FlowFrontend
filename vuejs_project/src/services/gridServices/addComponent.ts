@@ -14,7 +14,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
     const y = mouse[1];
     const inputCount = fdCompToDrop.getInput();
     const outputCount = fdCompToDrop.getOutput();
-    const compHeight = 20 + Math.max(inputCount, outputCount) * 20;
+    const compHeight = 30 + Math.max(inputCount, outputCount) * 20;
     const compWidth = 75 + fdCompToDrop.getTitle().length * 9;
     const svgGridBorder = 10;
     const svgMax = 5000;
@@ -89,6 +89,29 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             return svgMax + 8 - svgGridBorder - (theCompHeight / 2);
         }
         return y + 8;
+    }
+    const triggerPlaceX = (x: number, theCompWidth: number) => {
+        if(x < (svgGridBorder + (theCompWidth / 2))){
+            return 10 + (theCompWidth / 2);
+        } else if(x > (svgMax - svgGridBorder - (theCompWidth / 2))){
+            return svgMax - svgGridBorder - (theCompWidth / 2);
+        }
+        return x;
+    }
+    const triggerPlaceY = (y: number, theCompHeight: number) => {
+        if(y < (svgGridBorder + (theCompHeight / 2))){
+            return svgGridBorder - 10;
+        } else if(y > (svgMax - svgGridBorder - (theCompHeight / 2))){
+            return svgMax - 10 - svgGridBorder - theCompHeight;
+        }
+        return y - 10 - (theCompHeight / 2);
+    }
+
+    const getTriggerTrianglePoints = (x: number, theCompWidth: number, y: number, theCompHeight: number) => {
+        const xPos = triggerPlaceX(x, theCompWidth);
+        const yPos = triggerPlaceY(y, theCompHeight);
+        return (xPos - 10) + ',' + yPos + ' ' + (xPos + 10) + ',' + yPos + ' ' + xPos + ',' + (yPos + 20);
+
     }
     const inputCirclePlaceX = (x: number, theCompWidth: number) => {
         if(x < (svgGridBorder + (theCompWidth / 2))){
@@ -178,6 +201,19 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
         .on("click", () => {
             openModal(newId);
         });
+    
+    if(fdCompToDrop.isClickable()){
+        g.append("polygon")
+            .attr("id", "trigger-" + newId)
+            .attr("class", "draggable")
+            .attr("points", getTriggerTrianglePoints(x, compWidth, y, compHeight))
+            .attr("data-id", newId)
+            .attr("stroke", "black")
+            .attr("fill", "white")
+            .on("click", () => {
+                console.log("Component activated!")
+            });
+    }
 
     for(let i =0; i < inputCount; ++i) {
         g.append("circle")
@@ -233,6 +269,9 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             d3.select('#icon-'+ theCompId)
                 .attr("x", iconPlaceX(d3.event.x, theCompWidth))
                 .attr("y", iconPlaceY(d3.event.y, theCompHeight));
+            
+            d3.select('#trigger-'+ theCompId)
+                .attr("points", getTriggerTrianglePoints(d3.event.x, theCompWidth, d3.event.y, theCompHeight));
 
             for(let i =0; i < theCompInputCount; ++i) {
                 d3.select('#input-'+ i + "-" + theCompId)

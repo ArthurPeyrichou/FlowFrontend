@@ -27,7 +27,7 @@
                                                 new FDComponent("id2","FakeType1","FakeComp(2-2)", '#FFD800','autor',2,2,'\uf188','1.0','readme',false,'{}'),
                                                 new FDComponent("id3","FakeType2","FakeComp(1-3)", '#FF0000','autor',true,3,'\uf188','1.0','readme',false,'{}'),
                                                 new FDComponent("id4","FakeType1","FComp(2-1)", '#FFD800','autor',2,true,'\uf188','1.0','readme',false,'{}'),
-                                                new FDComponent("id5","","FakeCompLongName(0-2)", '#0094FF','autor',false,2,'\uf188','1.0','readme',false,'{}')];
+                                                new FDComponent("id5","","FakeCompLongName(0-2)", '#0094FF','autor',false,2,'\uf188','1.0','readme',true,'{}')];
     //dark or light
     @Prop({default: "dark"}) public theme!: string;
   }
