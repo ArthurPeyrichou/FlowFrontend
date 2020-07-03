@@ -1,6 +1,22 @@
 import * as d3 from "d3";
 import { lineFunction, getLineData } from "../gridServices/addLink";
 import { FDComponent } from '../../models/FDComponent';
+import { transfertData, TRANSFER_TYPE } from './transfertData';
+
+/**
+ * Create an animation for data transfer for each outputs of a component to his childrens.
+ * @param id the component's id
+ */
+export function makeComponentTransferData(id: string): void {
+    const links = document.getElementsByClassName("link-" + id);
+    for(let i=0; i < links.length; ++i) {
+        const output = "#output-" + links[i].getAttribute("data-output");
+        const intput = "#input-" + links[i].getAttribute("data-input");
+        if(output.includes(id)) {
+            transfertData(output, intput, TRANSFER_TYPE);
+        }
+    }
+}
 
 /**
  * Adds a new component into "#conception-grid-svg" and set his listeners.
@@ -18,7 +34,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
     const compWidth = 75 + fdCompToDrop.getTitle().length * 9;
     const svgGridBorder = 10;
     const svgMax = 5000;
-    const newId = registerComponent(fdCompToDrop);
+    const newId: string = registerComponent(fdCompToDrop);
     const g = d3.select("#conception-grid-svg")
         .append("g")
         .attr("id", "comp-" + newId)
@@ -201,7 +217,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
         .on("click", () => {
             openModal(newId);
         });
-    
+
     if(fdCompToDrop.isClickable()){
         g.append("polygon")
             .attr("id", "trigger-" + newId)
@@ -212,6 +228,7 @@ export function addComponentIntoGrid(mouse: [number, number], fdCompToDrop: FDCo
             .attr("fill", "white")
             .on("click", () => {
                 console.log("Component activated!")
+                makeComponentTransferData(newId);
             });
     }
 

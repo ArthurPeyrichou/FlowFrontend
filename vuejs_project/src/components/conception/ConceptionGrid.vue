@@ -230,6 +230,7 @@
       this.componentList.push({component: comp, compId: newId, links: []});
       return newId;
     }
+
     /**
      * Called by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
      * @public

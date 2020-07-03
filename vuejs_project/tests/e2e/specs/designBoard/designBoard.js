@@ -1,10 +1,10 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-const TIMELAPS = 10;
+const TIMELAPS = 100;
 
 describe('Bar hide and show tests', () => {
 
-  it('Hide andshow tool bar', function() {
+  it('Hide and show tool bar', function() {
     cy.visit('/')
     
     expect(cy.get('#tool-bar').should('have.css', 'margin-left', '0px'))

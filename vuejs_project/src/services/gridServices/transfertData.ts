@@ -5,9 +5,11 @@ const TRANSFER_DURATION = 1000;
 const TRANSFER_RADIUS = 4;
 const TRANSFER_FILL_COLOR = "gold";
 const TRANSFER_STROKE_COLOR = "black";
+export const TRANSFER_TYPE = "PATH";
 
 /**
  * Generates an animation for data transfer between two components.
+ * The animation make a circle on the existing link's path which start from the start (output) to the end (input) like a pearl on a string.
  * @param theOuputId 
  * @param theInputId 
  */
@@ -21,10 +23,11 @@ export function transfertDataWithCircle(theOuputId: string, theInputId: string):
     const dataTransfertId = "data-trans-" + theOuputCircle.attr("data-index") + "-" + theOuputCircle.attr("data-id") + "-to-" + theInputCircle.attr("data-index") + "-" + theInputCircle.attr("data-id");
 
     //Make the circle follow the path line from the output to the input
+    // eslint-disable-next-line
     function pathTween(path: any) {
         const length = path.node().getTotalLength();
         const r = d3.interpolate(0, length);
-        return function(t: any){
+        return function(t: number){
             const position = r(t)
             const point = path.node().getPointAtLength(position);
             if(position < length -1) {
@@ -51,6 +54,7 @@ export function transfertDataWithCircle(theOuputId: string, theInputId: string):
 
 /**
  * Generates an animation for data transfer between two components.
+ * The animation make a path on the existing link's path which start from the start (output) to the end (input) like a loading bar.
  * @param theOuputId 
  * @param theInputId 
  */
@@ -67,11 +71,12 @@ export function transfertDataWithPath(theOuputId: string, theInputId: string): v
 
 
     //Make the circle follow the path line from the output to the input
+    // eslint-disable-next-line
     function pathTween(path: any) {
         const length = path.node().getTotalLength();
         const r = d3.interpolate(0, length);
         const xy: Array<[number, number]> = [];
-        return function(t: any){
+        return function(t: number){
             const position = r(t)
             const point = path.node().getPointAtLength(position);
             xy.push([point.x, point.y]);
@@ -96,4 +101,24 @@ export function transfertDataWithPath(theOuputId: string, theInputId: string): v
         .duration(TRANSFER_DURATION)
         .tween("pathTween", function(){return pathTween(path);})
    
+}
+
+/**
+ * Generates an animation for data transfer between two components.
+ * @param theOuputId 
+ * @param theInputId 
+ * @param typeOfTransfer 
+ */
+export function transfertData(theOuputId: string, theInputId: string, typeOfTransfer: string): void  {
+    switch(typeOfTransfer.toUpperCase()) {
+        case "CIRCLE":
+            transfertDataWithCircle(theOuputId, theInputId);
+            break;
+        case "PATH":
+            transfertDataWithPath(theOuputId, theInputId);
+            break;
+        default:
+            transfertDataWithPath(theOuputId, theInputId);
+            break;
+    }
 }

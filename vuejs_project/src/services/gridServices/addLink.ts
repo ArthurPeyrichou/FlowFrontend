@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { transfertDataWithPath } from "../gridServices/transfertData";
+import { transfertData, TRANSFER_TYPE } from "../gridServices/transfertData";
 
 const LINK_FILL_COLOR = "grey";
 const ACTIVE_LINK_FILL_COLOR = "gold";
@@ -106,51 +106,63 @@ export function addLinkBeetweenTwoComponentsIntoGrid(registerLink: Function): vo
             }
         })
         .on("end",function(){
-            //The data for our line
-            const theSourceCompId = d3.select(this).attr("id").replace('output-','').replace('input-','').replace('text-','');
-            const isSourceInput: boolean = (d3.select(this).attr("id").indexOf('input') >= 0);
-            const theSourceCirle = d3.select('#' + d3.select(this).attr("id").replace('text-',''));
-            const source: [number, number] = [Number.parseInt(theSourceCirle.attr("cx")), Number.parseInt(theSourceCirle.attr("cy"))];
+            const theSourceCirle = d3.select(this);
+            const theSourceCirleCode = theSourceCirle.attr("data-index") + '-' + theSourceCirle.attr("data-id");
+            const isSourceInput: boolean = (theSourceCirle.attr("id").indexOf('input') >= 0);
+            //This object will contains all data necessary to concrete link creation.
+            const outputInput: {output: {id: string; compId: string; circle: unknown; xy: [number, number]}; input: {id: string; compId: string; circle: unknown; xy: [number, number]}} = {output: {id: "", compId: "", circle: "", xy: [0, 0]}, input: {id: "", compId: "", circle: "", xy: [0, 0]}};
+
+            outputInput[isSourceInput?'input':'output'] = { 
+                id: theSourceCirle.attr("data-index") + '-' + theSourceCirle.attr("data-id"), 
+                compId: theSourceCirle.attr("data-id"),
+                circle: theSourceCirle,
+                xy: [Number.parseInt(theSourceCirle.attr("cx")), Number.parseInt(theSourceCirle.attr("cy"))]
+            };
 
             let isFounded = false;
             d3.select("#conception-grid-svg").selectAll(".connector")
                 .each(function() {
-                    const theTargetCirle = d3.select('#' + d3.select(this).attr("id").replace('text-',''));
-                    const target: [number, number] = [Number.parseInt(theTargetCirle.attr("cx")), Number.parseInt(theTargetCirle.attr("cy"))];
+                    const theTargetCirle = d3.select(this);
+                    const targetXY: [number, number] = [Number.parseInt(theTargetCirle.attr("cx")), Number.parseInt(theTargetCirle.attr("cy"))];
 
-                    if( Math.abs(d3.event.x - target[0]) <= 10 &&  Math.abs(d3.event.y - target[1]) <= 10) {
-                        
-                        const theTargetCompId = d3.select(this).attr("id").replace('output-','').replace('input-','').replace('text-','');
-                        const isTargetInput: boolean = (d3.select(this).attr("id").indexOf('input') >= 0);
+                    if( Math.abs(d3.event.x - targetXY[0]) <= 10 &&  Math.abs(d3.event.y - targetXY[1]) <= 10) {
+                        const isTargetInput: boolean = (theTargetCirle.attr("id").indexOf('input') >= 0);
+                        outputInput[isSourceInput?'output':'input'] = { 
+                            id: theTargetCirle.attr("data-index") + '-' + theTargetCirle.attr("data-id"), 
+                            compId: theTargetCirle.attr("data-id"),
+                            circle: theTargetCirle,
+                            xy: targetXY
+                        };
 
                         //To be able to add a new link we need to be sure that :
                         // - the target and the source is not the same component.
                         // - the connections is beetween an input and an output connector.
                         // - there is no any link who already exist between those two components.
-                        if(theTargetCompId != theSourceCompId && isSourceInput != isTargetInput
-                                && document.getElementById("link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId)) == null){
+                        if(outputInput.output.compId != outputInput.input.compId && isSourceInput != isTargetInput
+                                && document.getElementById("link-" + outputInput.output.id + '-to-' + outputInput.input.id) == null){
                             
-                            const newId = registerLink((isSourceInput? theTargetCompId:theSourceCompId), (isSourceInput? theSourceCompId:theTargetCompId));
+                            const newId = registerLink(outputInput.output.id, outputInput.input.id);
                             isFounded = true;
-                            document.getElementById("link-" + theSourceCompId)?.parentElement?.setAttribute("class", "")
-                            document.getElementById("link-" + theSourceCompId)?.parentElement?.setAttribute("id", "link-" + newId)
-                            d3.select("#link-" + theSourceCompId)
-                                .attr("id", "link-" + (isSourceInput? theTargetCompId + '-to-' + theSourceCompId:theSourceCompId + '-to-' + theTargetCompId))
-                                .attr("class", "link-path link-" + theSourceCompId.split('-')[1] + ' link-' + theTargetCompId.split('-')[1] )
-                                .datum(getLineData(isSourceInput?target:source,isSourceInput?source:target, false))
+
+                            document.getElementById("link-" + theSourceCirleCode)?.parentElement?.setAttribute("class", "")
+                            document.getElementById("link-" + theSourceCirleCode)?.parentElement?.setAttribute("id", "link-" + newId)
+                            d3.select("#link-" + theSourceCirleCode)
+                                .attr("id", "link-" + outputInput.output.id + '-to-' + outputInput.input.id)
+                                .attr("class", "link-path link-" + outputInput.output.compId + ' link-' + outputInput.input.compId )
+                                .datum(getLineData(outputInput.output.xy,outputInput.input.xy, false))
                                 .attr("d", lineFunction)
-                                .attr("data-input", (isSourceInput?theSourceCompId:theTargetCompId))
-                                .attr("data-output", (isSourceInput?theTargetCompId:theSourceCompId))
+                                .attr("data-input", outputInput.input.id)
+                                .attr("data-output", outputInput.output.id)
                                 .attr("data-input-index", (isSourceInput?theSourceCirle.attr("data-index"):theTargetCirle.attr("data-index")))
                                 .attr("data-output-index", (isSourceInput?theTargetCirle.attr("data-index"):theSourceCirle.attr("data-index")));
 
-                                transfertDataWithPath( "#output-" + (isSourceInput?theTargetCompId:theSourceCompId), "#input-" + (isSourceInput?theSourceCompId:theTargetCompId))
+                                transfertData( "#output-" + outputInput.output.id, "#input-" + outputInput.input.id, TRANSFER_TYPE);
                         }
                     }
                     
                 });  
             if(!isFounded){
-                document.getElementById("link-" + theSourceCompId)?.parentElement?.remove();
+                document.getElementById("link-" + theSourceCirleCode)?.parentElement?.remove();
             }
         })
 
