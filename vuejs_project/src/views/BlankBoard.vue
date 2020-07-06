@@ -5,15 +5,15 @@
 </template>
 
 <script lang="ts">
-  // @ is an alias to /src
-  import { Component, Vue, Prop } from 'vue-property-decorator';
+// @ is an alias to /src
+import { Component, Vue, Prop } from 'vue-property-decorator'
 
-  @Component
-  export default class BlankBoard extends Vue {
-    //dark or light
-    @Prop({default: "dark"}) public theme!: string;
-  }
-  </script>
+@Component
+export default class BlankBoard extends Vue {
+  // dark or light
+  @Prop({ default: 'dark' }) public theme!: string;
+}
+</script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>

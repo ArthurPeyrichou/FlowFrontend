@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-modal
-      centered 
-      id="modal-add-component" 
+      centered
+      id="modal-add-component"
       size="lg"
       ref="modal"
       :title="'Upload new component'"
@@ -29,10 +29,8 @@
 
       <template v-slot:modal-footer>
         <div class="w-100">
-          
           <button id="setting-modal-update" v-on:click="handleAddSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Validate</button>
           <button id="setting-modal-close" v-on:click="hideModal" type="button" class="btn btn-outline-primary float-right">Close</button>
-          
         </div>
       </template>
     </b-modal>
@@ -40,63 +38,61 @@
 </template>
 
 <script lang="ts">
-  import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator'
 
-  /** Modal that allow users to upload Flowdata components files into the toolbar. */
-  @Component
-  export default class AddCompModal extends Vue {
-    
-    file: null | File = null;
-    fileState: null | boolean = null;
+/** Modal that allow users to upload Flowdata components files into the toolbar. */
+@Component
+export default class AddCompModal extends Vue {
+  file: null | File = null;
+  fileState: null | boolean = null;
 
-    /**
-     * Check if the file is valide.
-     * @public
-     * @returns true if the file is valid, false otherwise
-     */
-    checkFormValidity(): boolean {
-      this.fileState = Boolean(this.file);
-      document.getElementsByClassName('invalid-feedback')[0].setAttribute("style","outline-color: transparent !important");
-      //Extension -> this.file.name.split('.').pop()
-      return this.fileState
+  /**
+   * Check if the file is valide.
+   * @public
+   * @returns true if the file is valid, false otherwise
+   */
+  checkFormValidity (): boolean {
+    this.fileState = Boolean(this.file)
+    document.getElementsByClassName('invalid-feedback')[0].setAttribute('style', 'outline-color: transparent !important')
+    // Extension -> this.file.name.split('.').pop()
+    return this.fileState
+  }
+
+  /**
+   * Called when user click 'Validate' button.
+   * WARNING: empty function
+   * @public
+   */
+  handleAddSubmit (): void {
+    // Exit when the form isn't valid
+    if (!this.checkFormValidity()) {
+      return
     }
 
-    /**
-     * Called when user click "Validate" button.
-     * WARNING: empty function
-     * @public
-     */
-    handleAddSubmit(): void {
-      // Exit when the form isn't valid
-      if (!this.checkFormValidity()) {
-          return
-      }
+    // DO SOMETHING HERE
+    console.log('upload validated.')
 
-      //DO SOMETHING HERE
-      console.log("upload validated.")
+    // Hide the modal manually
+    this.$nextTick(() => {
+      this.$bvModal.hide('modal-add-component')
+    })
+  }
 
-      // Hide the modal manually
-      this.$nextTick(() => {
-          this.$bvModal.hide('modal-add-component')
-      })
-    }
+  /**
+   * Hides the modal from the user interface.
+   * @public
+   */
+  hideModal (): void {
+    this.$bvModal.hide('modal-add-component')
+  }
 
-    /**
-     * Hides the modal from the user interface.
-     * @public
-     */
-    hideModal(): void {
-      this.$bvModal.hide("modal-add-component")
-    }
-
-    /**
-     * Resets the file's input of the modal form.
-     * @public
-     */
-    resetModal(): void {
-      this.file = null
-      this.fileState = null
-    }
-
+  /**
+   * Resets the file's input of the modal form.
+   * @public
+   */
+  resetModal (): void {
+    this.file = null
+    this.fileState = null
+  }
 }
 </script>

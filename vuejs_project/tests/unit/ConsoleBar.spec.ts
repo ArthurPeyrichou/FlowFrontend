@@ -1,13 +1,17 @@
-import { expect } from 'chai'
-import { shallowMount } from '@vue/test-utils'
+import { shallowMount, createLocalVue } from '@vue/test-utils'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import ConsoleBar from '../../src/components/console/ConsoleBar.vue'
 
-describe('ConsoleBar.vue', () => {
-  it('should create', () => {
-   const wrapper = shallowMount(ConsoleBar)
+const localVue = createLocalVue()
+localVue.use(BootstrapVue)
+localVue.use(IconsPlugin)
 
-   it('Props check', () => {
-    expect(wrapper.vm.$props.theme).equal("dark");
+describe('ConsoleBar.vue', () => {
+  const wrapper = shallowMount(ConsoleBar, {
+    localVue
   })
- });
+
+  it('Props check', () => {
+    expect(wrapper.vm.$props.theme).toEqual('dark')
+  })
 })

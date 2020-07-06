@@ -10,16 +10,16 @@
 </template>
 
 <script lang="ts">
-  // @ is an alias to /src
-  import { Component, Vue } from 'vue-property-decorator';
+// @ is an alias to /src
+import { Component, Vue } from 'vue-property-decorator'
 
-  @Component
-  export default class App extends Vue {
-    //dark or light
-    private theme = "dark";
+@Component
+export default class App extends Vue {
+  // Dark or light
+  private theme = 'dark';
 
-    get currentRoute(){ return this.$route.path;}
-  }
+  get currentRoute () { return this.$route.path }
+}
 </script>
 
 <style>
@@ -32,7 +32,7 @@
   }
 
   .unselectable-text {
-    -webkit-user-select: none; /* Safari */        
+    -webkit-user-select: none; /* Safari */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* IE10+/Edge */
     user-select: none; /* Standard */
@@ -73,7 +73,6 @@
     color: white !important;
   }
 
-  
   /* CSS mobile tablette ici */
   @media (max-width: 450px) {
     .navbar-menu {

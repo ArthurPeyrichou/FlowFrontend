@@ -5,7 +5,7 @@ import BlankBoard from '../views/BlankBoard.vue'
 
 Vue.use(VueRouter)
 
-  const routes: Array<RouteConfig> = [
+const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'DesignBoard',

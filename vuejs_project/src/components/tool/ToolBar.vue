@@ -2,7 +2,6 @@
   <div id="tool-bar" v-bind:class="theme">
     <div class="header">
       <b-navbar toggleable v-bind:type="theme" class="setting-tool-navbar">
-        
         <b-navbar-toggle target="navbar-toggle-collapse">
           <template v-slot:default="{ expanded }">
             <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
@@ -10,7 +9,6 @@
           </template>
         </b-navbar-toggle>
 
-        
         <div id="tool-options">
         </div>
 
@@ -45,106 +43,106 @@
         </ul>
       </div>
     </div>
-    
+
     <AddCompModal ref="myAddCompModal" />
   </div>
 </template>
 
 <script lang="ts">
-  import { Component, Prop, Vue } from 'vue-property-decorator';
-  import AddCompModal from '@/components/tool/AddCompModal.vue'
-  import { FDComponent } from '../../models/FDComponent';
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import AddCompModal from '@/components/tool/AddCompModal.vue'
+import { FDComponent } from '../../models/FDComponent'
 
-  /** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
-  @Component({
-    components: {
-      AddCompModal
-    }
-  })
-  export default class ToolBar extends Vue {
-    /** FlowData components list got from DesignBoard vue, got itself by the api.  */
-    @Prop({default: []}) compBrutList!: FDComponent[];
-    @Prop({default: "dark"}) theme!: string;
-
-    // eslint-disable-next-line
-    compList: Record<string, any> = {};
-    compGroupsList: string[] = [];
-    compSearchPattern = "";
-
-    constructor() {
-      super();
-      this.filterList()
-    }
-
-    /**
-     * Called when a flowdata component is drag from the list.
-     * Sets the selected component in event's dataTransfer in order to get it in the ConceptionFrid Vue.
-     * @public
-     */
-    dragstart(FDComp: FDComponent, event: DragEvent): void {
-      if(event.dataTransfer != null && event.dataTransfer != undefined)
-        event.dataTransfer.setData("text", FDComp.toString());
-    }
-
-    /**
-     * Called each time a key is typed in the search bar to filter the list of components.
-     * Takes FlowData components list, filters if there is a search pattern, groups them by type and finnaly sorts them 
-     * to have Common components on top and then by Sring.localeCompare().
-     * @public
-     */
-    filterList(): void {
-      if(this.compSearchPattern != undefined) {
-        this.compGroupsList = [];
-        this.compList = {};
-
-        this.compBrutList.forEach(anFDComp => {
-          if(anFDComp.getTitle().toLowerCase().includes(this.compSearchPattern.toLowerCase())){
-            if(!this.compGroupsList.includes(anFDComp.getGroup())){
-              this.compGroupsList.push(anFDComp.getGroup())
-              this.compList[anFDComp.getGroup()] = new Array<FDComponent>();
-            }
-            this.compList[anFDComp.getGroup()].push(anFDComp);
-          }
-        });
-
-        //We sort component's group in order to get "Common" group on top and then in alphabetical order.
-        this.compGroupsList.sort( (a, b) => {
-          if(a == 'Common') return -1;
-          else if(b == 'Common') return 1;
-          else return a.localeCompare(b);
-        });
-      }
-    }
-
-    /**
-     * Used for search-bar's right icon.
-     * @public
-     * @returns true if no string is typed in the search-bar, false otherwise.
-     */
-    get isThereResearch(): boolean {
-      this.filterList();
-      return this.compSearchPattern == '';
-    }
-    
-    /**
-     * Called when the user select "Add Component" in the setting-tool-navbar.
-     * Opens modal from AddCompModal Vue.
-     * @public
-     */
-    openAddCompModal(): void {
-      this.$children[0].$bvModal.show("modal-add-component")
-    }
-
-    /**
-     * Called when the user click on times-icons (cross symbol).
-     * Clears the search-bar.
-     * @public
-     */
-    resetSearch(): void {
-      this.compSearchPattern = "";
-    }
-
+/** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
+@Component({
+  components: {
+    AddCompModal
   }
+})
+export default class ToolBar extends Vue {
+  /** FlowData components list got from DesignBoard vue, got itself by the api.  */
+  @Prop({ default: [] }) compBrutList!: FDComponent[];
+  @Prop({ default: 'dark' }) theme!: string;
+
+  // eslint-disable-next-line
+  compList: Record<string, any> = {};
+  compGroupsList: string[] = [];
+  compSearchPattern = '';
+
+  constructor () {
+    super()
+    this.filterList()
+  }
+
+  /**
+   * Called when a flowdata component is drag from the list.
+   * Sets the selected component in event's dataTransfer in order to get it in the ConceptionFrid Vue.
+   * @public
+   */
+  dragstart (FDComp: FDComponent, event: DragEvent): void {
+    if (event.dataTransfer != null && event.dataTransfer !== undefined) {
+      event.dataTransfer.setData('text', FDComp.toString())
+    }
+  }
+
+  /**
+   * Called each time a key is typed in the search bar to filter the list of components.
+   * Takes FlowData components list, filters if there is a search pattern, groups them by type and finnaly sorts them
+   * to have Common components on top and then by Sring.localeCompare().
+   * @public
+   */
+  filterList (): void {
+    if (this.compSearchPattern !== undefined) {
+      this.compGroupsList = []
+      this.compList = {}
+
+      this.compBrutList.forEach(anFDComp => {
+        if (anFDComp.getTitle().toLowerCase().includes(this.compSearchPattern.toLowerCase())) {
+          if (!this.compGroupsList.includes(anFDComp.getGroup())) {
+            this.compGroupsList.push(anFDComp.getGroup())
+            this.compList[anFDComp.getGroup()] = new Array<FDComponent>()
+          }
+          this.compList[anFDComp.getGroup()].push(anFDComp)
+        }
+      })
+
+      // We sort component's group in order to get 'Common' group on top and then in alphabetical order.
+      this.compGroupsList.sort((a, b) => {
+        if (a === 'Common') return -1
+        else if (b === 'Common') return 1
+        else return a.localeCompare(b)
+      })
+    }
+  }
+
+  /**
+   * Used for search-bar's right icon.
+   * @public
+   * @returns true if no string is typed in the search-bar, false otherwise.
+   */
+  get isThereResearch (): boolean {
+    this.filterList()
+    return this.compSearchPattern === ''
+  }
+
+  /**
+   * Called when the user select 'Add Component' in the setting-tool-navbar.
+   * Opens modal from AddCompModal Vue.
+   * @public
+   */
+  openAddCompModal (): void {
+    this.$children[0].$bvModal.show('modal-add-component')
+  }
+
+  /**
+   * Called when the user click on times-icons (cross symbol).
+   * Clears the search-bar.
+   * @public
+   */
+  resetSearch (): void {
+    this.compSearchPattern = ''
+  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

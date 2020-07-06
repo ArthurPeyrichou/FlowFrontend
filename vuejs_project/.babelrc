@@ -1,4 +1,0 @@
-{
-  "presets": ["@vue/cli-plugin-babel/preset"],
-  "plugins": ["istanbul", "transform-class-properties"]
-}
