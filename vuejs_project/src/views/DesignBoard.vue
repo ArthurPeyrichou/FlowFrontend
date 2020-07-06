@@ -7,7 +7,6 @@
 </template>
 
 <script lang="ts">
-// @ is an alias to /src
 import ToolBar from '@/components/tool/ToolBar.vue'
 import ConceptionGrid from '@/components/conception/ConceptionGrid.vue'
 import ConsoleBar from '@/components/console/ConsoleBar.vue'
