@@ -40,14 +40,7 @@ jobs:
       run: |
         cd vuejs_project
         npm run test:unit
-    #- name: E2E
-    #  run: |
-    #    cd vuejs_project
-    #    npm run test:e2e
-    #Current error: 
-      #Unable to revert mtime: /usr/share/fonts/cMap
-      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-cns1
-      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-gb1
-      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-japan1
-      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-japan2
-      #Unable to revert mtime: /usr/share/fonts/cmap/adobe-korea1
+    - name: E2E
+      run: |
+        cd vuejs_project
+        npm run test:e2e
