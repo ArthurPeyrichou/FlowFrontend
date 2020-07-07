@@ -1,7 +1,8 @@
 import * as d3 from 'd3'
 import { lineFunction, getLineData } from '../gridServices/addLink'
 import { FDComponent } from '../../models/FDComponent'
-import { transfertData, TRANSFER_TYPE } from './transfertData'
+import { transfertData } from './transfertData'
+import { SVG_GRID_BORDER_WIDTH, TRANSFER_TYPE } from '../../config'
 
 /**
  * Create an animation for data transfer for each outputs of a component to his childrens.
@@ -32,7 +33,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
   const outputCount = fdCompToDrop.getOutput()
   const compHeight = 30 + Math.max(inputCount, outputCount) * 20
   const compWidth = 75 + fdCompToDrop.getTitle().length * 9
-  const svgGridBorder = 10
+  const svgGridBorder = SVG_GRID_BORDER_WIDTH
   const svgMax = 5000
   const newId: string = registerComponent(fdCompToDrop)
   const g = d3.select('#conception-grid-svg')

@@ -51,7 +51,7 @@ function dragDropD3 (source, target) {
 
 function giveSpace () {
   expect(cy.get('#console-bar').should('have.css', 'margin-right', '0px'))
-  cy.get('.home > .conception-grid > .header > .reduce-button-right').click()
+  cy.get('.home > #conception-grid > .header > .reduce-button-right').click()
   cy.wait(TIMELAPS)
 }
 

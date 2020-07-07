@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:class="'conception-grid ' + theme">
+  <div id="conception-grid" v-bind:class="theme">
     <div class="header">
       <div class="reduce-button" v-on:click="toggleBar('tool')">
         <b-icon v-if="isToolBarHide" icon="chevron-bar-left"></b-icon>
@@ -47,6 +47,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
 import { addComponentIntoGrid } from '../../services/gridServices/addComponent'
 import { addLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
+import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
 
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
@@ -286,8 +287,8 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   public zoomInSvg (): void {
-    if (this.svgScale < 2) {
-      this.svgScale += 0.1
+    if (this.svgScale < SVG_MAX_SCALE) {
+      this.svgScale += SVG_SCALE_STEP
       d3.select('#conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
@@ -297,8 +298,8 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   zoomOutSvg (): void {
-    if (this.svgScale > 0.2) {
-      this.svgScale -= 0.1
+    if (this.svgScale > SVG_MIN_SCALE + SVG_SCALE_STEP) {
+      this.svgScale -= SVG_SCALE_STEP
       d3.select('#conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
@@ -318,7 +319,7 @@ export default class ConceptionGrid extends Vue {
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style scoped>
-  .conception-grid {
+  #conception-grid {
     background-color: #c8c8c8;
     height: 100%;
     border-left: 1px solid rgba(0, 0, 0, 0.2);
@@ -393,7 +394,7 @@ export default class ConceptionGrid extends Vue {
   }
 
   /* Dark side */
-  .dark.conception-grid {
+  #conception-grid.dark {
     background-color: #202020;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
     border-right: 1px solid rgba(255, 255, 255, 0.1);

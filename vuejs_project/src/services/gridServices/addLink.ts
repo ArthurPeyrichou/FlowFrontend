@@ -1,8 +1,6 @@
 import * as d3 from 'd3'
-import { transfertData, TRANSFER_TYPE } from '../gridServices/transfertData'
-
-const LINK_FILL_COLOR = 'grey'
-const ACTIVE_LINK_FILL_COLOR = 'gold'
+import { transfertData } from '../gridServices/transfertData'
+import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE } from '../../config'
 
 /**
  * Constructs a line with the 4 points : [ from, q1, q3, to]
