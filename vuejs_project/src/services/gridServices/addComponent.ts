@@ -19,6 +19,22 @@ export function makeComponentTransferData (id: string): void {
   }
 }
 
+export function toggleComponentLoading (id: string): void {
+  if (!document.getElementById('component-loading-style')) {
+    d3.select('#conception-grid').append('style').attr('id', 'component-loading-style').html('@keyframes load_spin {\n' +
+        '\t0% { transform: rotate(0deg); }\n' +
+        '\t100% { transform: rotate(359deg); }\n' +
+        '}\n' +
+        '.loading {\n' +
+        '\tanimation: load_spin 2s linear infinite;\n' +
+        '}\n')
+  }
+  const icon = d3.select('#icon-' + id)
+  const isLoading = icon.attr('class').includes('loading')
+  icon.text(isLoading ? icon.attr('data-icon') : '\uf013')
+  icon.attr('class', isLoading ? icon.attr('class').replace(' loading', '') : icon.attr('class') + ' loading')
+}
+
 /**
  * Adds a new component into '#conception-grid-svg' and set his listeners.
  * @param mouse position of the cursor in the plan
@@ -31,7 +47,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
   const y = mouse[1]
   const inputCount = fdCompToDrop.getInput()
   const outputCount = fdCompToDrop.getOutput()
-  const compHeight = 30 + Math.max(inputCount, outputCount) * 20
+  const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, 65)
   const compWidth = 75 + fdCompToDrop.getTitle().length * 9
   const svgGridBorder = SVG_GRID_BORDER_WIDTH
   const svgMax = 5000
@@ -69,11 +85,11 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
   }
   const titlePlaceY = (y: number, theCompHeight: number) => {
     if (y < (svgGridBorder + (theCompHeight / 2))) {
-      return svgGridBorder - 3 + (theCompHeight / 2)
+      return svgGridBorder - 8 + (theCompHeight / 2)
     } else if (y > (svgMax - svgGridBorder - (theCompHeight / 2))) {
-      return svgMax - 3 - svgGridBorder - (theCompHeight / 2)
+      return svgMax - 8 - svgGridBorder - (theCompHeight / 2)
     }
-    return y - 3
+    return y - 8
   }
   const typePlaceX = (x: number, theCompWidth: number) => {
     if (x < (svgGridBorder + (theCompWidth / 2))) {
@@ -85,11 +101,28 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
   }
   const typePlaceY = (y: number, theCompHeight: number) => {
     if (y < (svgGridBorder + (theCompHeight / 2))) {
-      return svgGridBorder + 13 + (theCompHeight / 2)
+      return svgGridBorder + 7 + (theCompHeight / 2)
     } else if (y > (svgMax - svgGridBorder - (theCompHeight / 2))) {
-      return svgMax + 13 - svgGridBorder - (theCompHeight / 2)
+      return svgMax + 7 - svgGridBorder - (theCompHeight / 2)
     }
-    return y + 13
+    return y + 7
+  }
+  // io for input/output
+  const ioPlaceX = (x: number, theCompWidth: number) => {
+    if (x < (svgGridBorder + (theCompWidth / 2))) {
+      return svgGridBorder + 65
+    } else if (x > (svgMax - svgGridBorder - (theCompWidth / 2))) {
+      return svgMax + 65 - svgGridBorder - theCompWidth
+    }
+    return x - (theCompWidth / 2) + 65
+  }
+  const ioPlaceY = (y: number, theCompHeight: number) => {
+    if (y < (svgGridBorder + (theCompHeight / 2))) {
+      return svgGridBorder + 25 + (theCompHeight / 2)
+    } else if (y > (svgMax - svgGridBorder - (theCompHeight / 2))) {
+      return svgMax + 25 - svgGridBorder - (theCompHeight / 2)
+    }
+    return y + 25
   }
   const iconPlaceX = (x: number, theCompWidth: number) => {
     if (x < (svgGridBorder + (theCompWidth / 2))) {
@@ -204,16 +237,30 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     .on('click', () => {
       openModal(newId)
     })
-
   g.append('text')
     .attr('id', 'icon-' + newId)
     .attr('class', 'draggable unselectable-text icon')
     .attr('data-id', newId)
+    .attr('data-icon', fdCompToDrop.getIcon())
     .attr('fill', 'black')
     .style('font', '900 normal normal 24px \'Font Awesome 5 Free\'')
     .text(fdCompToDrop.getIcon())
     .attr('x', iconPlaceX(x, compWidth))
     .attr('y', iconPlaceY(y, compHeight))
+    .style('transform-origin', (iconPlaceX(x, compWidth) + 12) + 'px ' + (iconPlaceY(y, compHeight) - 9) + 'px')
+    .on('click', function () {
+      openModal(newId)
+    })
+
+  g.append('text')
+    .attr('id', 'io-' + newId)
+    .attr('class', 'draggable unselectable-text')
+    .attr('data-id', newId)
+    .attr('fill', 'black')
+    .style('font', '900 normal normal 12px \'Font Awesome 5 Free\'')
+    .text('IO: 0B \uf061 0B')
+    .attr('x', ioPlaceX(x, compWidth))
+    .attr('y', ioPlaceY(y, compHeight))
     .on('click', () => {
       openModal(newId)
     })
@@ -286,6 +333,11 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
       d3.select('#icon-' + theCompId)
         .attr('x', iconPlaceX(d3.event.x, theCompWidth))
         .attr('y', iconPlaceY(d3.event.y, theCompHeight))
+        .style('transform-origin', (iconPlaceX(d3.event.x, theCompWidth) + 12) + 'px ' + (iconPlaceY(d3.event.y, theCompHeight) - 9) + 'px')
+
+      d3.select('#io-' + theCompId)
+        .attr('x', ioPlaceX(d3.event.x, theCompWidth))
+        .attr('y', ioPlaceY(d3.event.y, theCompHeight))
 
       d3.select('#trigger-' + theCompId)
         .attr('points', getTriggerTrianglePoints(d3.event.x, theCompWidth, d3.event.y, theCompHeight))

@@ -30,14 +30,14 @@ function dragDropD3 (source, target) {
 
   cy.window().then((win) => {
     const dataTransfer = new DataTransfer()
-    cy.get(source).first().trigger('mousemove', { view: win })
-    cy.get(source).first().trigger('pointerdown', { which: 1, button: 0, view: win })
-      .trigger('mousedown', { which: 1, button: 0, view: win })
-      .trigger('dragstart', { dataTransfer, view: win })
+    cy.get(source).first().trigger('mousemove', { view: win, force: true })
+    cy.get(source).first().trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+      .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+      .trigger('dragstart', { dataTransfer, view: win, force: true })
 
-    cy.get(target).last().trigger('mousemove', { view: win })
+    cy.get(target).last().trigger('mousemove', { view: win, force: true })
 
-    cy.get(target).last().trigger('dragover', { dataTransfer, view: win })
+    cy.get(target).last().trigger('dragover', { dataTransfer, view: win, force: true })
     cy.wait(TIMELAPS)
 
     cy.get(target).last().trigger('drop', { dataTransfer, view: win }).then(() => {
@@ -79,12 +79,12 @@ describe('Grid conception tests', () => {
 
       cy.window().then((win) => {
         const dataTransfer = new DataTransfer()
-        cy.get('#rect-' + id).trigger('mousemove', { view: win })
-        cy.get('#rect-' + id).trigger('pointerdown', { which: 1, button: 0, view: win })
-          .trigger('mousedown', { which: 1, button: 0, view: win })
-          .trigger('dragstart', { dataTransfer, view: win })
+        cy.get('#rect-' + id).trigger('mousemove', { view: win, force: true })
+        cy.get('#rect-' + id).trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+          .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+          .trigger('dragstart', { dataTransfer, view: win, force: true })
 
-        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topLeft', force: true, view: win })
+        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topLeft', force: true, view: win, force: true })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
         cy.wait(TIMELAPS)
 
@@ -94,12 +94,12 @@ describe('Grid conception tests', () => {
           })
         })
 
-        cy.get('#title-text-' + id).trigger('mousemove', { view: win })
-        cy.get('#title-text-' + id).trigger('pointerdown', { which: 1, button: 0, view: win })
-          .trigger('mousedown', { which: 1, button: 0, view: win })
-          .trigger('dragstart', { dataTransfer, view: win })
+        cy.get('#title-text-' + id).trigger('mousemove', { view: win, force: true })
+        cy.get('#title-text-' + id).trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+          .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+          .trigger('dragstart', { dataTransfer, view: win, force: true })
 
-        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topRight', force: true, view: win })
+        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topRight', force: true, view: win, force: true })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
         cy.wait(TIMELAPS)
 
@@ -109,10 +109,10 @@ describe('Grid conception tests', () => {
           })
         })
 
-        cy.get('#type-text-' + id).trigger('mousemove', { view: win })
-        cy.get('#type-text-' + id).trigger('pointerdown', { which: 1, button: 0, view: win })
-          .trigger('mousedown', { which: 1, button: 0, view: win })
-          .trigger('dragstart', { dataTransfer, view: win })
+        cy.get('#type-text-' + id).trigger('mousemove', { view: win, force: true })
+        cy.get('#type-text-' + id).trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+          .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+          .trigger('dragstart', { dataTransfer, view: win, force: true })
 
         cy.get('#svg-grid-bg').trigger('mousemove', { position: 'bottomLeft', force: true, view: win })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
@@ -146,10 +146,10 @@ describe('Grid conception tests', () => {
       cy.get('.fdcomp').first().should('have.attr', 'id').then((theId) => {
         componentId1 = theId.replace('rect-', '')
 
-        cy.get('#rect-' + componentId1).trigger('mousemove', { view: win })
-        cy.get('#rect-' + componentId1).trigger('pointerdown', { which: 1, button: 0, view: win })
-          .trigger('mousedown', { which: 1, button: 0, view: win })
-          .trigger('dragstart', { dataTransfer, view: win })
+        cy.get('#rect-' + componentId1).trigger('mousemove', { view: win, force: true })
+        cy.get('#rect-' + componentId1).trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+          .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+          .trigger('dragstart', { dataTransfer, view: win, force: true })
 
         cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topRight', force: true, view: win })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
@@ -169,10 +169,10 @@ describe('Grid conception tests', () => {
         cy.get('.fdcomp').first().should('have.attr', 'id').then((theId) => {
           componentId2 = theId.replace('rect-', '')
 
-          cy.get('#rect-' + componentId2).trigger('mousemove', { view: win })
-          cy.get('#rect-' + componentId2).trigger('pointerdown', { which: 1, button: 0, view: win })
-            .trigger('mousedown', { which: 1, button: 0, view: win })
-            .trigger('dragstart', { dataTransfer, view: win })
+          cy.get('#rect-' + componentId2).trigger('mousemove', { view: win, force: true })
+          cy.get('#rect-' + componentId2).trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+            .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+            .trigger('dragstart', { dataTransfer, view: win, force: true })
 
           cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topLeft', force: true, view: win })
           cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
@@ -244,9 +244,9 @@ describe('Grid conception tests', () => {
     cy.get('.link-path').should('have.length', 1)
 
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'grey'))
-    cy.get('.link-path').click()
+    cy.get('.link-path').click({ force: true })
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'gold'))
-    cy.get('.link-path').click()
+    cy.get('.link-path').click({ force: true })
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'grey'))
   })
 
@@ -348,7 +348,7 @@ describe('Grid conception tests', () => {
     cy.get('.link-path').should('have.length', 1)
 
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'grey'))
-    cy.get('.link-path').click()
+    cy.get('.link-path').click({ force: true })
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'gold'))
   })
 
@@ -368,7 +368,7 @@ describe('Grid conception tests', () => {
     cy.get('.link-path').should('have.length', 1)
 
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'grey'))
-    cy.get('.link-path').click()
+    cy.get('.link-path').click({ force: true })
     expect(cy.get('.link-path').should('have.attr', 'stroke', 'gold'))
 
     cy.window().then((win) => {
@@ -378,10 +378,10 @@ describe('Grid conception tests', () => {
       cy.get('.fdcomp').first().should('have.attr', 'id').then((theId) => {
         componentId1 = theId.replace('rect-', '')
 
-        cy.get('#rect-' + componentId1).trigger('mousemove', { view: win })
-        cy.get('#rect-' + componentId1).trigger('pointerdown', { which: 1, button: 0, view: win })
-          .trigger('mousedown', { which: 1, button: 0, view: win })
-          .trigger('dragstart', { dataTransfer, view: win })
+        cy.get('#rect-' + componentId1).trigger('mousemove', { view: win, force: true })
+        cy.get('#rect-' + componentId1).trigger('pointerdown', { which: 1, button: 0, view: win, force: true })
+          .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
+          .trigger('dragstart', { dataTransfer, view: win, force: true })
 
         cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topRight', force: true, view: win })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
@@ -461,7 +461,7 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.attr', 'id').then((theId) => {
       id = theId.replace('rect-', '')
 
-      cy.get('#rect-' + id).click()
+      cy.get('#rect-' + id).click({ force: true })
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
@@ -476,6 +476,13 @@ describe('Grid conception tests', () => {
       cy.wait(TIMELAPS)
 
       cy.get('#type-text-' + id).click()
+      cy.wait(TIMELAPS)
+      cy.get('.modal-title').contains('Settings: ')
+
+      cy.get('#setting-modal-close').click()
+      cy.wait(TIMELAPS)
+
+      cy.get('#io-' + id).click()
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
@@ -496,7 +503,7 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.attr', 'id').then((theId) => {
       id = theId.replace('rect-', '')
 
-      cy.get('#rect-' + id).click()
+      cy.get('#rect-' + id).click({ force: true })
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
@@ -520,7 +527,7 @@ describe('Grid conception tests', () => {
     dragDropIntoSvg('#tool-bar > .board > .fdcomp-group-list:nth-child(3) > .list-group > .list-group-item:nth-child(1)', '#svg-grid-bg', 150, 100)
     cy.get('.fdcomp').should('have.length', 1)
 
-    cy.get('.fdcomp').click()
+    cy.get('.fdcomp').click({ force: true })
     cy.wait(TIMELAPS)
     cy.get('.modal-title').contains('Settings: ')
 
@@ -568,7 +575,7 @@ describe('Grid conception tests', () => {
     cy.wait(TIMELAPS)
     cy.get('.link-path').should('have.length', 2)
 
-    cy.get('.fdcomp').first().click()
+    cy.get('.fdcomp').first().click({ force: true })
     cy.wait(TIMELAPS)
     cy.get('.modal-title').contains('Settings: ')
 
