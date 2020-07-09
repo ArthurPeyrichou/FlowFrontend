@@ -24,6 +24,12 @@
           ></b-form-input>
         </b-form-group>
       </form-->
+      <Chrome class="color-picker" v-model="colors" v-bind:hidden="hideColorPicker"/>
+
+      <button id="setting-modal-close" v-on:click="hideColorPicker = !hideColorPicker" type="button" class="btn btn-light color-picker-button" v-bind:value="color">
+        <i class="fa fa-circle" :style="'color:' + fdComponent.component.getColor()"></i> Color
+      </button>
+
       <template v-slot:modal-footer>
         <div class="w-100">
           <button id="setting-modal-delete" v-on:click="handleDeleteSubmit" type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i> Delete the Component</button>
@@ -38,17 +44,24 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
+import { Chrome } from 'vue-color'
 
 /** Modal that allow users to update and delete Flowdata components from the #conception-grid-svg. */
-@Component
+@Component({
+  components: {
+    Chrome
+  }
+})
 export default class CompSettingModal extends Vue {
   /** The Flowdata component that the user can update or remove from the #conception-grid-svg. */
-  @Prop({ default: null }) fdComponent!: FDComponent | null;
+  @Prop({ default: null }) fdComponent!: FDComponent | null
   /** Method which come from parent ComceptionGrid vue. Used for deleting the current component. */
-  @Prop({ default: () => { console.log('Not implemented!') } }) deleteTheComp!: Function;
+  @Prop({ default: () => { console.log('Not implemented!') } }) deleteTheComp!: Function
 
-  name = '';
-  nameState: boolean | null = null;
+  name = ''
+  nameState: boolean | null = null
+  colors = { hex8: '' }
+  hideColorPicker = true
 
   /**
    * Check if the form is valide.
@@ -106,6 +119,27 @@ export default class CompSettingModal extends Vue {
   resetModal (): void {
     this.name = ''
     this.nameState = null
+    this.hideColorPicker = true
+  }
+
+  get color (): string {
+    const button = document.getElementsByClassName('color-picker-button')[0]
+    if (button && button.children[0]) {
+      button.children[0].setAttribute('style', 'color: ' + this.colors.hex8)
+    }
+    return this.colors.hex8
   }
 }
 </script>
+
+<style scoped>
+  .color-picker {
+    position: absolute;
+    transform: translate(0px, 70px);
+  }
+  .color-picker-button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+</style>

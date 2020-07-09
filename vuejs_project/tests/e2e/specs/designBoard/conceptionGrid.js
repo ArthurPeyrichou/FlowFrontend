@@ -468,21 +468,21 @@ describe('Grid conception tests', () => {
       cy.get('#setting-modal-close').click()
       cy.wait(TIMELAPS)
 
-      cy.get('#title-text-' + id).click()
+      cy.get('#title-text-' + id).click({ force: true })
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
       cy.get('#setting-modal-close').click()
       cy.wait(TIMELAPS)
 
-      cy.get('#type-text-' + id).click()
+      cy.get('#type-text-' + id).click({ force: true })
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
       cy.get('#setting-modal-close').click()
       cy.wait(TIMELAPS)
 
-      cy.get('#io-' + id).click()
+      cy.get('#io-' + id).click({ force: true })
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
@@ -510,7 +510,7 @@ describe('Grid conception tests', () => {
       cy.get('#setting-modal-close').click()
       cy.wait(TIMELAPS)
 
-      cy.get('#icon-' + id).click()
+      cy.get('#icon-' + id).click({ force: true })
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
