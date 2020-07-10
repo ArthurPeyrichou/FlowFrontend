@@ -36,7 +36,7 @@
         </button>
       </div>
     </div>
-    <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" :deleteTheComp="deleteTheComp" />
+    <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" :deleteTheComp="deleteTheComp" :updateCurrentComponent="updateCurrentComponent" />
   </div>
 </template>
 
@@ -45,7 +45,7 @@ import * as d3 from 'd3'
 import CompSettingModal from '@/components/conception/CompSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
-import { addComponentIntoGrid } from '../../services/gridServices/addComponent'
+import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
 import { addLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
 import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
 
@@ -60,7 +60,7 @@ export default class ConceptionGrid extends Vue {
 
   fdCompToDrop: FDComponent | undefined = undefined;
   currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
-  componentList: Array<{component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
+  componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
   idList: Array<string> = [];
   svgScale = 1;
   hideToolBar = false;
@@ -78,10 +78,10 @@ export default class ConceptionGrid extends Vue {
    * @public
    * @param fdComp the component to delete
    */
-  deleteTheComp (fdComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
+  deleteTheComp (fdCompId: string): void {
     this.componentList = this.componentList.filter(el => {
       el.links = el.links.filter(el => {
-        if (el.compId !== fdComp.compId) {
+        if (el.compId !== fdCompId) {
           return true
         } else {
           // eslint-disable-next-line no-unused-expressions
@@ -89,12 +89,12 @@ export default class ConceptionGrid extends Vue {
           return false
         }
       })
-      if (el.compId !== fdComp.compId) {
+      if (el.compId !== fdCompId) {
         return true
       } else {
         el.links.forEach(el => document.getElementById('link-' + el.linkId)?.remove())
         // eslint-disable-next-line no-unused-expressions
-        document.getElementById('comp-' + fdComp.compId)?.remove()
+        document.getElementById('comp-' + fdCompId)?.remove()
         return false
       }
     })
@@ -232,7 +232,7 @@ export default class ConceptionGrid extends Vue {
     while (this.idList.includes(newId)) {
       newId = this.makeId(10)
     }
-    this.componentList.push({ component: comp, compId: newId, links: [] })
+    this.componentList.push({ component: comp, compId: newId, color: comp.getColor(), name: comp.getTitle(), links: [] })
     return newId
   }
 
@@ -279,6 +279,25 @@ export default class ConceptionGrid extends Vue {
       case 'console':
         this.hideConsoleBar = isHide
         break
+    }
+  }
+
+  /**
+   *
+   */
+  updateCurrentComponent (compId: string, name: string, color: string): void {
+    let title = ''
+    this.componentList.forEach(el => {
+      if (el.compId === compId) {
+        el.color = color
+        el.name = name
+        title = el.component.getTitle()
+      }
+    })
+    if (title !== '') {
+      // eslint-disable-next-line no-unused-expressions
+      document.getElementById('rect-' + compId)?.setAttribute('fill', color)
+      setComponentName(compId, name, title)
     }
   }
 
