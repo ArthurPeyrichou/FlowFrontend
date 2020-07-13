@@ -5,7 +5,6 @@
 </template>
 
 <script lang="ts">
-// @ is an alias to /src
 import { Component, Vue, Prop } from 'vue-property-decorator'
 
 @Component

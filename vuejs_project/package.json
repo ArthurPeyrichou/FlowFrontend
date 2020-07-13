@@ -1,5 +1,5 @@
 {
-  "name": "tentative",
+  "name": "vuejs_project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,25 +7,24 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e --headless",
-    "lint": "vue-cli-service lint",
-    "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
-    "copy:reports": "cp e2e-coverage/coverage-final.json reports/from-cypress.json && cp unit-coverage/coverage-final.json reports/from-jest.json",
-    "mkdir:reports": "mkdir reports || true",
-    "posttest": "npm run report:combined",
-    "precombine:reports": "npm run copy:reports && mkdir .nyc_output || true",
-    "precopy:reports": "npm run mkdir:reports",
-    "prereport:combined": "npm run combine:reports",
+    "test:e2e-debug": "vue-cli-service test:e2e",
+    "precopy:reports": "mkdir reports || true",
+    "copy:reports": "cp e2e-coverage/coverage-final.json reports/from-e2e.json && cp unit-coverage/coverage-final.json reports/from-unit.json",
+    "prereport:combined": "npm run copy:reports",
+    "report:combined": "npx nyc report --report-dir coverage -t reports",
     "pretest": "rm -rf .nyc_output || true",
-    "report:combined": "npx nyc report --reporter lcov --reporter text --report-dir coverage",
+    "test": "npm run test:unit && npm run test:e2e",
+    "posttest": "npm run report:combined",
     "styleguide": "vue-cli-service styleguidist",
     "styleguide:build": "vue-cli-service styleguidist:build",
-    "test": "npm run test:unit && npm run test:e2e",
-    "test:e2e-debug": "vue-cli-service test:e2e",
-    "vue-docgen": "vue-docgen src/components/**/*.vue docs/components"
+    "vue-docgen": "vue-docgen src/components/**/*.vue docs/components",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@cypress/code-coverage": "^3.8.1",
     "@fortawesome/fontawesome-free": "^5.13.0",
+    "@types/istanbul-reports": "^1.1.2",
+    "@types/vue-color": "^2.4.2",
     "awesome-typescript-loader": "^5.2.1",
     "babel-preset-vue": "^2.0.2",
     "bootstrap": "^4.5.0",
@@ -36,6 +35,7 @@
     "nyc": "^15.1.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
+    "vue-color": "^2.7.1",
     "vue-docgen-cli": "^4.25.0",
     "vue-property-decorator": "^8.4.2",
     "vue-router": "^3.2.0"
@@ -59,6 +59,7 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-istanbul": "^0.1.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
@@ -85,7 +86,6 @@
     "parserOptions": {
       "ecmaVersion": 2020
     },
-    "rules": {},
     "overrides": [
       {
         "files": [
@@ -123,10 +123,12 @@
   "nyc": {
     "report-dir": "e2e-coverage",
     "include": [
-      "src/**/*.{ts,vue}"
+      "src/**/*.{ts,tsx,vue}"
     ],
     "extension": [
       ".ts",
+      ".tsx",
+      ".json",
       ".vue"
     ]
   }

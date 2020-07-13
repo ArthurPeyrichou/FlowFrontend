@@ -1,11 +1,6 @@
 import * as d3 from 'd3'
 import { lineFunction } from '../gridServices/addLink'
-
-const TRANSFER_DURATION = 1000
-const TRANSFER_RADIUS = 4
-const TRANSFER_FILL_COLOR = 'gold'
-const TRANSFER_STROKE_COLOR = 'black'
-export const TRANSFER_TYPE = 'PATH'
+import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR } from '../../config'
 
 /**
  * Generates an animation for data transfer between two components.

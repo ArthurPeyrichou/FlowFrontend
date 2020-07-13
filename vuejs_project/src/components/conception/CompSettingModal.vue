@@ -5,16 +5,14 @@
       id="modal-edit-component"
       size="lg"
       ref="modal"
-      :title="'Settings: ' + fdComponent.component.getTitle()"
-      @show="resetModal"
-      @hidden="resetModal"
+      :title="'Settings: ' + theName"
     >
-      <!--form ref="form" @submit.stop.prevent="handleSubmit">
+      <form ref="form" @submit.stop.prevent="handleSubmit">
         <b-form-group
           :state="nameState"
           label="Name"
           label-for="name-input"
-          invalid-feedback="Name is required"
+          :invalid-feedback="nameInvalidFeedback"
         >
           <b-form-input
             id="name-input"
@@ -23,7 +21,23 @@
             required
           ></b-form-input>
         </b-form-group>
-      </form-->
+
+        <b-form-group
+          label="Color"
+          label-for="setting-modal-color-picker-button"
+        >
+          <div class="color-picker-container" v-bind:hidden="hideColorPicker">
+            <Sketch class="color-picker" v-model="colors" :preset-colors="[ defaultColor ]"/>
+            <Compact class="color-picker" v-model="colors"/>
+          </div>
+          <div class="color-picker-bg" v-bind:hidden="hideColorPicker" v-on:click="hideColorPicker = true" ></div>
+
+          <button id="setting-modal-color-picker-button" v-on:click="hideColorPicker = !hideColorPicker" type="button" class="btn color-picker-button" v-bind:value="theColor">
+            <i class="fa fa-circle" :style="'border: 1px black solid; border-radius: 50%; color:' + theColor"></i> Choose
+          </button>
+        </b-form-group>
+      </form>
+
       <template v-slot:modal-footer>
         <div class="w-100">
           <button id="setting-modal-delete" v-on:click="handleDeleteSubmit" type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i> Delete the Component</button>
@@ -38,17 +52,29 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
+import { Sketch, Compact } from 'vue-color'
 
 /** Modal that allow users to update and delete Flowdata components from the #conception-grid-svg. */
-@Component
+@Component({
+  components: {
+    Sketch,
+    Compact
+  }
+})
 export default class CompSettingModal extends Vue {
   /** The Flowdata component that the user can update or remove from the #conception-grid-svg. */
-  @Prop({ default: null }) fdComponent!: FDComponent | null;
+  fdComponent: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>} | null = null;
   /** Method which come from parent ComceptionGrid vue. Used for deleting the current component. */
-  @Prop({ default: () => { console.log('Not implemented!') } }) deleteTheComp!: Function;
+  @Prop({ default: () => { console.log('Not implemented!') } }) deleteTheComp!: Function
+  /** Method which come from parent ComceptionGrid vue. Used for updating the current component. */
+  @Prop({ default: () => { console.log('Not implemented!') } }) updateCurrentComponent!: Function
 
-  name = '';
-  nameState: boolean | null = null;
+  name = ''
+  nameState: boolean | null = null
+  colors: {hex8: string} = { hex8: '' }
+  defaultColor = ''
+  hideColorPicker = true
+  nameInvalidFeedback = 'Name with length in between [3;50] characters is required.'
 
   /**
    * Check if the form is valide.
@@ -56,9 +82,13 @@ export default class CompSettingModal extends Vue {
    * @returns true if the form is valid, false otherwise
    */
   checkFormValidity (): boolean {
-    const valid = false
-    this.nameState = valid
-    return valid
+    if (this.fdComponent !== null) {
+      this.nameState = this.name.length >= 3 && this.name.length <= 50
+      this.nameInvalidFeedback = 'Name with length in between [3;50] characters is required. Current ' + this.name.length + '.'
+      const valid = this.nameState
+      return valid
+    }
+    return false
   }
 
   /**
@@ -68,7 +98,9 @@ export default class CompSettingModal extends Vue {
    * @public
    */
   handleDeleteSubmit (): void {
-    this.deleteTheComp(this.fdComponent)
+    if (this.fdComponent !== null) {
+      this.deleteTheComp(this.fdComponent.compId)
+    }
     // Hide the modal manually
     this.$nextTick(() => {
       this.$bvModal.hide('modal-edit-component')
@@ -85,6 +117,13 @@ export default class CompSettingModal extends Vue {
     if (!this.checkFormValidity()) {
       return
     }
+    if (this.fdComponent !== null) {
+      if (this.colors.hex8 === '') {
+        this.colors.hex8 = this.fdComponent.color
+      }
+      console.log('coucou')
+      this.updateCurrentComponent(this.fdComponent.compId, this.name, this.colors.hex8)
+    }
     // Hide the modal manually
     this.$nextTick(() => {
       this.$bvModal.hide('modal-edit-component')
@@ -100,12 +139,67 @@ export default class CompSettingModal extends Vue {
   }
 
   /**
-   * Resets the name's input of the modal form.
+   * Init name and color for the modal
    * @public
    */
-  resetModal (): void {
-    this.name = ''
+  public sendData (theFDComp: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
+    this.fdComponent = theFDComp
+    this.colors = { hex8: theFDComp.color }
+    this.defaultColor = theFDComp.color
+    this.name = this.fdComponent.name
     this.nameState = null
+    this.hideColorPicker = true
+    console.log(this.fdComponent)
+  }
+
+  get theColor (): string {
+    const button = document.getElementsByClassName('color-picker-button')[0]
+    if (button && button.children[0]) {
+      button.children[0].setAttribute('style', 'color: ' + this.colors.hex8)
+    }
+    return this.colors.hex8
+  }
+
+  get theName (): string {
+    return this.fdComponent ? this.fdComponent.name : ''
   }
 }
 </script>
+
+<style scoped>
+  .color-picker-container {
+    position: fixed;
+    background-color: white;
+    border: 1px black solid;
+    border-radius: 10px;
+    width: 80%;
+    min-width: 200px;
+    max-width: 500px;
+    left: 0;
+    margin-left: 10%;
+    top: 25%;
+    display: block;
+    z-index: 101;
+    padding:  10px 5px 10px 5px;
+  }
+  .color-picker {
+    width: auto;
+    box-shadow: none;
+  }
+  .color-picker-bg {
+    position: fixed;
+    width:200%;
+    height:200%;
+    background: black;
+    opacity:0.7;
+    z-index: 100;
+    transform: translate(-50%, -50%);
+  }
+  .color-picker-button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    border: 1px lightgrey solid;
+  }
+
+</style>
