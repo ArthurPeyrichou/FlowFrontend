@@ -754,4 +754,53 @@ describe('Grid conception tests', () => {
     dragDropIntoSvg('.header-content > h3', '#svg-grid-bg', 150, 100)
     cy.get('.fdcomp').should('have.length', 0)
   })
+
+  it('Open setting modal and change component\'s text' , function () {
+    cy.visit('/')
+    giveSpace()
+
+    cy.get('.fdcomp').should('have.length', 0)
+    dragDropIntoSvg('#tool-bar > .board > .fdcomp-group-list:nth-child(3) > .list-group > .list-group-item:nth-child(1)', '#svg-grid-bg', 150, 100)
+    cy.get('.fdcomp').should('have.length', 1)
+
+    let id = null
+    cy.get('.fdcomp').first().should('have.attr', 'id').then((theId) => {
+      id = theId.replace('rect-', '')
+
+      cy.get('#rect-' + id).click({ force: true })
+      cy.wait(TIMELAPS)
+      cy.get('.modal-title').contains('Settings: ')
+
+      cy.get('#name-input').click()
+      cy.get('#name-input').clear().type('ceciEstUnTest')
+      cy.get('.modal-dialog > #modal-edit-component___BV_modal_content_ > #modal-edit-component___BV_modal_footer_ > .w-100 > #setting-modal-update').click()
+      cy.wait(TIMELAPS)
+      cy.get('#title-text-' + id).contains('ceciEstUnTest')
+    })
+  })
+
+  it('Open setting modal and change component\'s background color' , function () {
+    cy.visit('/')
+    giveSpace()
+
+    cy.get('.fdcomp').should('have.length', 0)
+    dragDropIntoSvg('#tool-bar > .board > .fdcomp-group-list:nth-child(3) > .list-group > .list-group-item:nth-child(1)', '#svg-grid-bg', 150, 100)
+    cy.get('.fdcomp').should('have.length', 1)
+
+    let id = null
+    cy.get('.fdcomp').first().should('have.attr', 'id').then((theId) => {
+      id = theId.replace('rect-', '')
+
+      cy.get('#rect-' + id).click({ force: true })
+      cy.wait(TIMELAPS)
+      cy.get('.modal-title').contains('Settings: ')
+
+      cy.get('#setting-modal-color-picker-button').click({force: true})
+      cy.get('.color-picker-container > .vc-compact > .vc-compact-colors > .vc-compact-color-item:nth-child(5)').click({force: true})
+      cy.get('.color-picker-bg').click({force: true})
+      cy.get('.modal-dialog > #modal-edit-component___BV_modal_content_ > #modal-edit-component___BV_modal_footer_ > .w-100 > #setting-modal-update').click()
+      cy.wait(TIMELAPS)
+      cy.get('#rect-' + id).should('have.attr', 'fill', '#FE9200FF')
+    })
+  })
 })
