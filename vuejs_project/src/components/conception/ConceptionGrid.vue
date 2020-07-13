@@ -36,7 +36,7 @@
         </button>
       </div>
     </div>
-    <CompSettingModal ref="myCompSettingModal" :fdComponent="currentFDComp" :deleteTheComp="deleteTheComp" :updateCurrentComponent="updateCurrentComponent" />
+    <CompSettingModal ref="myCompSettingModal" :deleteTheComp="deleteTheComp" :updateCurrentComponent="updateCurrentComponent" />
   </div>
 </template>
 
@@ -59,18 +59,16 @@ export default class ConceptionGrid extends Vue {
   @Prop({ default: 'dark' }) theme!: string;
 
   fdCompToDrop: FDComponent | undefined = undefined;
-  currentFDComp: {component: FDComponent; compId: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>};
-  componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = [];
-  idList: Array<string> = [];
-  svgScale = 1;
-  hideToolBar = false;
-  hideConsoleBar = false;
+  componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = []
+  idList: Array<string> = []
+  svgScale = 1
+  hideToolBar = false
+  hideConsoleBar = false
 
   constructor () {
     super()
     // This way we execute the code after the redering of the template
     this.$nextTick(() => { this.initSvg() })
-    this.currentFDComp = { component: FDComponent.prototype, compId: '', links: [] }
   }
 
   /**
@@ -217,7 +215,8 @@ export default class ConceptionGrid extends Vue {
    * @param compId the id of the component
    */
   openSettingModal (compId: string): void {
-    this.currentFDComp = this.componentList.filter(el => el.compId === compId)[0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.$children[0] as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
     this.$children[0].$bvModal.show('modal-edit-component')
   }
 

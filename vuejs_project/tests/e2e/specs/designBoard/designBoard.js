@@ -35,7 +35,7 @@ describe('Bar hide and show tests', () => {
     cy.get('#console-bar')
     cy.get('body > #app > .nav > .nav-item:nth-child(2) > .nav-link').click()
     cy.wait(TIMELAPS)
-    cy.get('.home h3').contains("This is a demo blank board.")
+    cy.get('.home h3').contains('This is a demo blank board.')
     cy.get('body > #app > .nav > .nav-item:nth-child(1) > .nav-link').click()
     cy.wait(TIMELAPS)
     cy.get('#tool-bar')

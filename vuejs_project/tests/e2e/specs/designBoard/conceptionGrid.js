@@ -84,7 +84,7 @@ describe('Grid conception tests', () => {
           .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
           .trigger('dragstart', { dataTransfer, view: win, force: true })
 
-        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topLeft', force: true, view: win, force: true })
+        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topLeft', view: win, force: true })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
         cy.wait(TIMELAPS)
 
@@ -99,7 +99,7 @@ describe('Grid conception tests', () => {
           .trigger('mousedown', { which: 1, button: 0, view: win, force: true })
           .trigger('dragstart', { dataTransfer, view: win, force: true })
 
-        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topRight', force: true, view: win, force: true })
+        cy.get('#svg-grid-bg').trigger('mousemove', { position: 'topRight', view: win, force: true })
         cy.get('#svg-grid-bg').trigger('dragover', { dataTransfer, view: win, force: true })
         cy.wait(TIMELAPS)
 

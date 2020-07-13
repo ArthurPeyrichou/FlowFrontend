@@ -5,8 +5,7 @@
       id="modal-edit-component"
       size="lg"
       ref="modal"
-      :title="'Settings: ' + fdComponent.name"
-      @show="initModal()"
+      :title="'Settings: ' + theName"
     >
       <form ref="form" @submit.stop.prevent="handleSubmit">
         <b-form-group
@@ -17,7 +16,7 @@
         >
           <b-form-input
             id="name-input"
-            v-model="fdComponent.name"
+            v-model="name"
             :state="nameState"
             required
           ></b-form-input>
@@ -25,13 +24,16 @@
 
         <b-form-group
           label="Color"
-          label-for="setting-modal-dcolor-picker-button"
+          label-for="setting-modal-color-picker-button"
         >
-          <Chrome class="color-picker" v-model="colors" v-bind:hidden="hideColorPicker"/>
+          <div class="color-picker-container" v-bind:hidden="hideColorPicker">
+            <Sketch class="color-picker" v-model="colors" :preset-colors="[ defaultColor ]"/>
+            <Compact class="color-picker" v-model="colors"/>
+          </div>
           <div class="color-picker-bg" v-bind:hidden="hideColorPicker" v-on:click="hideColorPicker = true" ></div>
 
-          <button id="setting-modal-color-picker-button" v-on:click="hideColorPicker = !hideColorPicker" type="button" class="btn color-picker-button" v-bind:value="color">
-            <i class="fa fa-circle" :style="'border: 1px black solid; border-radius: 50%; color:' + fdComponent.color"></i> Choose
+          <button id="setting-modal-color-picker-button" v-on:click="hideColorPicker = !hideColorPicker" type="button" class="btn color-picker-button" v-bind:value="theColor">
+            <i class="fa fa-circle" :style="'border: 1px black solid; border-radius: 50%; color:' + theColor"></i> Choose
           </button>
         </b-form-group>
       </form>
@@ -50,24 +52,27 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
-import { Chrome } from 'vue-color'
+import { Sketch, Compact } from 'vue-color'
 
 /** Modal that allow users to update and delete Flowdata components from the #conception-grid-svg. */
 @Component({
   components: {
-    Chrome
+    Sketch,
+    Compact
   }
 })
 export default class CompSettingModal extends Vue {
   /** The Flowdata component that the user can update or remove from the #conception-grid-svg. */
-  @Prop({ default: null }) fdComponent!: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>} | null
+  fdComponent: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>} | null = null;
   /** Method which come from parent ComceptionGrid vue. Used for deleting the current component. */
   @Prop({ default: () => { console.log('Not implemented!') } }) deleteTheComp!: Function
   /** Method which come from parent ComceptionGrid vue. Used for updating the current component. */
   @Prop({ default: () => { console.log('Not implemented!') } }) updateCurrentComponent!: Function
 
+  name = ''
   nameState: boolean | null = null
   colors: {hex8: string} = { hex8: '' }
+  defaultColor = ''
   hideColorPicker = true
   nameInvalidFeedback = 'Name with length in between [3;50] characters is required.'
 
@@ -78,8 +83,8 @@ export default class CompSettingModal extends Vue {
    */
   checkFormValidity (): boolean {
     if (this.fdComponent !== null) {
-      this.nameState = this.fdComponent.name.length >= 3 && this.fdComponent.name.length <= 50
-      this.nameInvalidFeedback = 'Name with length in between [3;50] characters is required. Current ' + this.fdComponent.name.length + '.'
+      this.nameState = this.name.length >= 3 && this.name.length <= 50
+      this.nameInvalidFeedback = 'Name with length in between [3;50] characters is required. Current ' + this.name.length + '.'
       const valid = this.nameState
       return valid
     }
@@ -116,7 +121,8 @@ export default class CompSettingModal extends Vue {
       if (this.colors.hex8 === '') {
         this.colors.hex8 = this.fdComponent.color
       }
-      this.updateCurrentComponent(this.fdComponent.compId, this.fdComponent.name, this.colors.hex8)
+      console.log('coucou')
+      this.updateCurrentComponent(this.fdComponent.compId, this.name, this.colors.hex8)
     }
     // Hide the modal manually
     this.$nextTick(() => {
@@ -136,32 +142,49 @@ export default class CompSettingModal extends Vue {
    * Init name and color for the modal
    * @public
    */
-  initModal (): void {
-    if (this.fdComponent !== null && this.fdComponent.compId !== '') {
-      this.colors = { hex8: this.fdComponent.color }
-      this.nameState = null
-      this.hideColorPicker = true
-    }
+  public sendData (theFDComp: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
+    this.fdComponent = theFDComp
+    this.colors = { hex8: theFDComp.color }
+    this.defaultColor = theFDComp.color
+    this.name = this.fdComponent.name
+    this.nameState = null
+    this.hideColorPicker = true
+    console.log(this.fdComponent)
   }
 
-  get color (): string {
+  get theColor (): string {
     const button = document.getElementsByClassName('color-picker-button')[0]
     if (button && button.children[0]) {
       button.children[0].setAttribute('style', 'color: ' + this.colors.hex8)
     }
     return this.colors.hex8
   }
+
+  get theName (): string {
+    return this.fdComponent ? this.fdComponent.name : ''
+  }
 }
 </script>
 
 <style scoped>
-  .color-picker {
-    position: absolute;
-    transform: translate(50%, -50%);
-    width: 50%;
-    margin: auto;
+  .color-picker-container {
+    position: fixed;
+    background-color: white;
+    border: 1px black solid;
+    border-radius: 10px;
+    width: 80%;
+    min-width: 200px;
+    max-width: 500px;
+    left: 0;
+    margin-left: 10%;
+    top: 25%;
     display: block;
     z-index: 101;
+    padding:  10px 5px 10px 5px;
+  }
+  .color-picker {
+    width: auto;
+    box-shadow: none;
   }
   .color-picker-bg {
     position: fixed;

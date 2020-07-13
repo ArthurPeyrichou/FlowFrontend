@@ -14,7 +14,6 @@ describe('ConceptionGrid.vue', () => {
 
   it('Datas check', () => {
     expect(wrapper.vm.$data.fdCompToDrop).toEqual(undefined)
-    expect(wrapper.vm.$data.currentFDComp.compId).toEqual('')
     expect(wrapper.vm.$data.componentList.toString()).toEqual('')
     expect(wrapper.vm.$data.idList.toString()).toEqual('')
     expect(wrapper.vm.$data.svgScale).toEqual(1)
