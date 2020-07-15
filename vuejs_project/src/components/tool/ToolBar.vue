@@ -60,18 +60,27 @@ import { FDComponent } from '../../models/FDComponent'
   }
 })
 export default class ToolBar extends Vue {
-  /** FlowData components list got from DesignBoard vue, got itself by the api.  */
-  @Prop({ default: [] }) compBrutList!: FDComponent[];
   @Prop({ default: 'dark' }) theme!: string;
 
   // eslint-disable-next-line
   compList: Record<string, any> = {};
   compGroupsList: string[] = [];
   compSearchPattern = '';
+  /** FlowData components list got from DesignBoard vue, got itself by the api.  */
+  compBrutList: FDComponent[] = []
 
   constructor () {
     super()
     this.filterList()
+  }
+
+  /**
+   * Call by DesignBoard to update the components list
+   * @param compBrutList the new components list
+   * @public
+   */
+  setCompList (compBrutList: FDComponent[]): void {
+    this.compBrutList = compBrutList
   }
 
   /**

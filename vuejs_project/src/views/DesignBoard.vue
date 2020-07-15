@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <ToolBar :compBrutList="compBrutList" :theme="theme"/>
+    <ToolBar :theme="theme"/>
     <ConceptionGrid :theme="theme"/>
     <ConsoleBar :theme="theme"/>
   </div>
@@ -22,21 +22,30 @@ import { WEBSOCKET_URL, WEBSOCKET_PORT } from '../config'
   }
 })
 export default class DesignBoard extends Vue {
-  private compBrutList: Array<FDComponent> = [new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
-    new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
-    new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
-    new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
-    new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
-    new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')];
-
   // dark or light
   @Prop({ default: 'dark' }) public theme!: string;
 
   private connection: WebSocket | null = null
+  private data = null
 
   constructor () {
     super()
     console.log('Starting connection to WebSocket Server')
+
+    // eslint-disable-next-line
+    const setData = (data: any) => {
+      if (data.type === 'designer') {
+        this.data = data
+        const compBrutList: FDComponent[] = []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data.database.forEach((el: any) => {
+          compBrutList.push(new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options))
+        });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this.$children[0] as any).setCompList(compBrutList)
+      }
+    }
+
     const webSocketFactory = {
       connectionTries: 3,
       connect: function (url: string) {
@@ -49,13 +58,26 @@ export default class DesignBoard extends Vue {
             if (this.connectionTries > 0) {
               setTimeout(() => this.connect(url), 5000)
             } else {
+              setData([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
+                new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
+                new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
+                new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
+                new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
+                new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')])
               throw new Error('Maximum number of connection trials has been reached')
             }
           }
         })
-        ws.onopen = function (event) {
-          console.log(event)
+        ws.onopen = function () {
           console.log('Successfully connected to the echo websocket server...')
+        }
+        ws.onmessage = function (event) {
+          console.log('Got a message!')
+          try {
+            setData(JSON.parse(decodeURIComponent(event.data)))
+          } catch (error) {
+
+          }
         }
         return ws
       }

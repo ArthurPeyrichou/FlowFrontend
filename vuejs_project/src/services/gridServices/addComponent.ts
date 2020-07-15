@@ -20,23 +20,19 @@ export function makeComponentTransferData (id: string): void {
 }
 
 export function toggleComponentLoading (id: string): void {
-  if (!document.getElementById('component-loading-style')) {
-    d3.select('#conception-grid').append('style').attr('id', 'component-loading-style').html('@keyframes load_spin {\n' +
-        '\t0% { transform: rotate(0deg); }\n' +
-        '\t100% { transform: rotate(359deg); }\n' +
-        '}\n' +
-        '.loading {\n' +
-        '\tanimation: load_spin 2s linear infinite;\n' +
-        '}\n')
-  }
   const icon = d3.select('#icon-' + id)
   const isLoading = icon.attr('class').includes('loading')
-  icon.text(isLoading ? icon.attr('data-icon') : '\uf013')
+
   icon.attr('class', isLoading ? icon.attr('class').replace(' loading', '') : icon.attr('class') + ' loading')
+    .html('')
+
+  icon.append('xhtml:body')
+    .style('background-color', 'transparent')
+    .html('<i class="fa fa-' + (isLoading ? icon.attr('data-icon') : 'spin fa-cog') + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 }
 
 function getCompWidth (name: string, title: string): number {
-  return 75 + Math.max(name.length, title.length) * 8
+  return 75 + Math.max(name.length, title.length, 10) * 8
 }
 
 const rectPlaceX = (x: number, theCompWidth: number) => {
@@ -114,11 +110,11 @@ const iconPlaceX = (x: number, theCompWidth: number) => {
 }
 const iconPlaceY = (y: number, theCompHeight: number) => {
   if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
-    return SVG_GRID_BORDER_WIDTH + 8 + (theCompHeight / 2)
+    return SVG_GRID_BORDER_WIDTH - 10 + (theCompHeight / 2)
   } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
-    return SVG_GRID_SIZE + 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
+    return SVG_GRID_SIZE - 10 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
   }
-  return y + 8
+  return y - 10
 }
 const triggerPlaceX = (x: number, theCompWidth: number) => {
   if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
@@ -314,20 +310,22 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     .on('click', () => {
       openModal(newId)
     })
-  g.append('text')
+
+  g.append('svg:foreignObject')
     .attr('id', 'icon-' + newId)
     .attr('class', 'draggable unselectable-text icon')
     .attr('data-id', newId)
     .attr('data-icon', fdCompToDrop.getIcon())
-    .attr('fill', 'black')
-    .style('font', '900 normal normal 24px \'Font Awesome 5 Free\'')
-    .text(fdCompToDrop.getIcon())
     .attr('x', iconPlaceX(x, compWidth))
     .attr('y', iconPlaceY(y, compHeight))
-    .style('transform-origin', (iconPlaceX(x, compWidth) + 12) + 'px ' + (iconPlaceY(y, compHeight) - 9) + 'px')
+    .attr('width', 24)
+    .attr('height', 24)
     .on('click', function () {
       openModal(newId)
     })
+    .append('xhtml:body')
+    .style('background-color', 'transparent')
+    .html('<i class="icon-fixed-width fa fa-' + fdCompToDrop.getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 
   g.append('text')
     .attr('id', 'io-' + newId)
