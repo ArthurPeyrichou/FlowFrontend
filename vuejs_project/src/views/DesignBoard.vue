@@ -12,6 +12,7 @@ import ConceptionGrid from '@/components/conception/ConceptionGrid.vue'
 import ConsoleBar from '@/components/console/ConsoleBar.vue'
 import { FDComponent } from '../models/FDComponent'
 import { Component, Vue, Prop } from 'vue-property-decorator'
+import { WEBSOCKET_URL, WEBSOCKET_PORT } from '../config'
 
 @Component({
   components: {
@@ -30,6 +31,37 @@ export default class DesignBoard extends Vue {
 
   // dark or light
   @Prop({ default: 'dark' }) public theme!: string;
+
+  private connection: WebSocket | null = null
+
+  constructor () {
+    super()
+    console.log('Starting connection to WebSocket Server')
+    const webSocketFactory = {
+      connectionTries: 3,
+      connect: function (url: string) {
+        const ws = new WebSocket(url)
+        ws.addEventListener('error', e => {
+          // readyState === 3 is CLOSED
+          if ((e.target as WebSocket).readyState === 3) {
+            this.connectionTries--
+
+            if (this.connectionTries > 0) {
+              setTimeout(() => this.connect(url), 5000)
+            } else {
+              throw new Error('Maximum number of connection trials has been reached')
+            }
+          }
+        })
+        ws.onopen = function (event) {
+          console.log(event)
+          console.log('Successfully connected to the echo websocket server...')
+        }
+        return ws
+      }
+    }
+    this.connection = webSocketFactory.connect(WEBSOCKET_URL + WEBSOCKET_PORT)
+  }
 }
 </script>
 

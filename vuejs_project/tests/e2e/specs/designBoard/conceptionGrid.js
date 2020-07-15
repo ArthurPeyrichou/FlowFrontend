@@ -755,7 +755,7 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 0)
   })
 
-  it('Open setting modal and change component\'s text' , function () {
+  it('Open setting modal and change component\'s text', function () {
     cy.visit('/')
     giveSpace()
 
@@ -779,7 +779,7 @@ describe('Grid conception tests', () => {
     })
   })
 
-  it('Open setting modal and change component\'s background color' , function () {
+  it('Open setting modal and change component\'s background color', function () {
     cy.visit('/')
     giveSpace()
 
@@ -795,9 +795,9 @@ describe('Grid conception tests', () => {
       cy.wait(TIMELAPS)
       cy.get('.modal-title').contains('Settings: ')
 
-      cy.get('#setting-modal-color-picker-button').click({force: true})
-      cy.get('.color-picker-container > .vc-compact > .vc-compact-colors > .vc-compact-color-item:nth-child(5)').click({force: true})
-      cy.get('.color-picker-bg').click({force: true})
+      cy.get('#setting-modal-color-picker-button').click({ force: true })
+      cy.get('.color-picker-container > .vc-compact > .vc-compact-colors > .vc-compact-color-item:nth-child(5)').click({ force: true })
+      cy.get('.color-picker-bg').click({ force: true })
       cy.get('.modal-dialog > #modal-edit-component___BV_modal_content_ > #modal-edit-component___BV_modal_footer_ > .w-100 > #setting-modal-update').click()
       cy.wait(TIMELAPS)
       cy.get('#rect-' + id).should('have.attr', 'fill', '#FE9200FF')
