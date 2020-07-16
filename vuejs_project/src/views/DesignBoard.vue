@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <ToolBar :theme="theme"/>
-    <ConceptionGrid :theme="theme"/>
+    <ConceptionGrid ref="myConceptionGrid" :theme="theme"/>
     <ConsoleBar :theme="theme"/>
   </div>
 </template>
@@ -32,22 +32,36 @@ export default class DesignBoard extends Vue {
     super()
     console.log('Starting connection to WebSocket Server')
 
+    const sendData = (components: FDComponent[], tabs: {id: string; index: string; name: string}[]) => {
+      // eslint-disable-next-line
+      (this.$children[0] as any).setCompList(components);
+      // eslint-disable-next-line
+      (this.$children[1] as any).setTabs(tabs);
+    }
+
     // eslint-disable-next-line
     const setData = (data: any) => {
       if (data.type === 'designer') {
         this.data = data
+        console.log(this.data)
         const compBrutList: FDComponent[] = []
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.database.forEach((el: any) => {
           compBrutList.push(new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options))
-        });
+        })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this.$children[0] as any).setCompList(compBrutList)
+        sendData(compBrutList, data.tabs)
       }
     }
 
     const webSocketFactory = {
       connectionTries: 3,
+      defaultList: [new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
+        new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
+        new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
+        new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
+        new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
+        new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')],
       connect: function (url: string) {
         const ws = new WebSocket(url)
         ws.addEventListener('error', e => {
@@ -56,16 +70,14 @@ export default class DesignBoard extends Vue {
             this.connectionTries--
 
             if (this.connectionTries > 0) {
-              setTimeout(() => this.connect(url), 5000)
+              setTimeout(() => this.connect(url), 1000)
             } else {
-              setData([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
-                new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
-                new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
-                new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
-                new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
-                new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')])
+              sendData(this.defaultList, [])
               throw new Error('Maximum number of connection trials has been reached')
             }
+          } else {
+            sendData(this.defaultList, [])
+            throw new Error('Websocket error: ' + event?.target)
           }
         })
         ws.onopen = function () {

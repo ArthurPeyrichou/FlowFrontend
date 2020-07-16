@@ -6,7 +6,9 @@
         <b-icon v-else icon="chevron-bar-right"></b-icon>
       </div>
       <div class="header-content">
-        <h3>Conception Grid</h3>
+        <b-nav tabs class="navbar-menu">
+          <b-nav-item v-for="tab in tabs" :key="tab.id" :active="true">{{tab.name}}</b-nav-item>
+        </b-nav>
       </div>
       <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
         <b-icon v-if="isConsoleBarHide" icon="chevron-bar-right"></b-icon>
@@ -56,9 +58,10 @@ import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
   }
 })
 export default class ConceptionGrid extends Vue {
-  @Prop({ default: 'dark' }) theme!: string;
+  @Prop({ default: 'dark' }) theme!: string
+  @Prop({ default: () => { return new Array<{id: string; index: string; name: string}>() } }) tabs!: Array<{id: string; index: string; name: string}>
 
-  fdCompToDrop: FDComponent | undefined = undefined;
+  fdCompToDrop: FDComponent | undefined = undefined
   componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = []
   idList: Array<string> = []
   svgScale = 1
@@ -257,6 +260,11 @@ export default class ConceptionGrid extends Vue {
     return newId
   }
 
+  public setTabs (tabs: Array<{id: string; index: string; name: string}>) {
+    this.tabs = tabs
+    console.log(this.tabs)
+  }
+
   /**
    * Toggles bar visibility, use for console-bar and tool-bar.
    * @public
@@ -410,6 +418,19 @@ export default class ConceptionGrid extends Vue {
     padding-top: 0px;
     padding-bottom: 0px;
   }
+  .navbar-menu {
+    background-color: #b8b8b8;
+  }
+  .navbar-menu .nav-item .active {
+    background-color: #c8c8c8 !important;
+    border-color:  rgba(0, 0, 0, 0.3) !important;
+  }
+  .navbar-menu .nav-item a {
+    color: #2c3e50 !important;
+  }
+  .nav-tabs {
+    border-bottom: none;
+  }
 
   /* Dark side */
   #conception-grid.dark {
@@ -427,5 +448,21 @@ export default class ConceptionGrid extends Vue {
   .dark .reduce-button {
     background-color: #303030;
     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .navbar-menu {
+    background-color: #101010 !important;
+    color: #c8c8c8;
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark .navbar-menu .nav-item .active {
+    background-color: #202020 !important;
+    color: white !important;
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark .navbar-menu .nav-item a:hover {
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark .navbar-menu .nav-item a {
+    color: white !important;
   }
 </style>
