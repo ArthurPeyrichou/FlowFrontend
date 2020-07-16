@@ -121,7 +121,6 @@ export default class CompSettingModal extends Vue {
       if (this.colors.hex8 === '') {
         this.colors.hex8 = this.fdComponent.color
       }
-      console.log('coucou')
       this.updateCurrentComponent(this.fdComponent.compId, this.name, this.colors.hex8)
     }
     // Hide the modal manually
@@ -150,6 +149,14 @@ export default class CompSettingModal extends Vue {
     this.nameState = null
     this.hideColorPicker = true
     console.log(this.fdComponent)
+  }
+
+  /**
+   * Shows the modal from the user interface.
+   * @public
+   */
+  showModal (): void {
+    this.$bvModal.show('modal-edit-component')
   }
 
   get theColor (): string {

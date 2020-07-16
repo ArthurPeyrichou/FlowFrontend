@@ -7,7 +7,9 @@
       </div>
       <div class="header-content">
         <b-nav tabs class="navbar-menu">
-          <b-nav-item v-for="tab in tabs" :key="tab.id" :active="true">{{tab.name}}</b-nav-item>
+          <b-nav-item v-for="tab in tabs" :key="tab.id" :active="tab.id === currentTab" v-on:click="selectTab(tab.id)">{{tab.name}}</b-nav-item>
+          <b-nav-item v-on:click="openTabSettingModal()"><i class="fa fa-plus"></i> Tab</b-nav-item>
+          <TabSettingModal ref="myTabSettingModal" />
         </b-nav>
       </div>
       <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
@@ -45,6 +47,7 @@
 <script lang="ts">
 import * as d3 from 'd3'
 import CompSettingModal from '@/components/conception/CompSettingModal.vue'
+import TabSettingModal from '@/components/conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
 import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
@@ -54,16 +57,18 @@ import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
   components: {
-    CompSettingModal
+    CompSettingModal,
+    TabSettingModal
   }
 })
 export default class ConceptionGrid extends Vue {
   @Prop({ default: 'dark' }) theme!: string
-  @Prop({ default: () => { return new Array<{id: string; index: string; name: string}>() } }) tabs!: Array<{id: string; index: string; name: string}>
 
   fdCompToDrop: FDComponent | undefined = undefined
   componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = []
   idList: Array<string> = []
+  tabs: Array<{id: string; index: number; name: string}> = []
+  currentTab = ''
   svgScale = 1
   hideToolBar = false
   hideConsoleBar = false
@@ -130,7 +135,7 @@ export default class ConceptionGrid extends Vue {
   initSvg (): void {
     const actualize = (mouse: [number, number]) => {
       if (this.fdCompToDrop !== undefined) {
-        addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal)
+        addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openComponentSettingModal)
         addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
         this.fdCompToDrop = undefined
       }
@@ -217,10 +222,20 @@ export default class ConceptionGrid extends Vue {
    * @public
    * @param compId the id of the component
    */
-  openSettingModal (compId: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.$children[0] as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
-    this.$children[0].$bvModal.show('modal-edit-component')
+  openComponentSettingModal (compId: string): void {
+    // eslint-disable-next-line
+    (this.$refs.myCompSettingModal as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
+    // eslint-disable-next-line
+    (this.$refs.myCompSettingModal as any).showModal()
+  }
+
+  /**
+   * Called by add new tab navbar item.
+   * @public
+   */
+  openTabSettingModal (): void {
+    // eslint-disable-next-line
+    (this.$refs.myTabSettingModal as any).showModal()
   }
 
   /**
@@ -260,9 +275,25 @@ export default class ConceptionGrid extends Vue {
     return newId
   }
 
-  public setTabs (tabs: Array<{id: string; index: string; name: string}>) {
-    this.tabs = tabs
-    console.log(this.tabs)
+  /**
+   * Select a tab in the header
+   * @public
+   * @param tabId the tab's id
+   */
+  selectTab (tabId: string) {
+    this.currentTab = tabId
+  }
+
+  /**
+   * Set the tab list in conception grid header
+   * @public
+   * @param tabs the tab list: {id: string; index: number; name: string}
+   */
+  setTabs (tabs: Array<{id: string; index: number; name: string}>) {
+    this.tabs = tabs.sort((a, b) => a.index - b.index)
+    if (this.tabs.length > 0) {
+      this.currentTab = this.tabs[0].id
+    }
   }
 
   /**
