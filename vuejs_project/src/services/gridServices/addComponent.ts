@@ -1,8 +1,8 @@
 import * as d3 from 'd3'
 import { lineFunction, getLineData } from '../gridServices/addLink'
-import { FDComponent } from '../../models/FDComponent'
 import { transfertData } from './transfertData'
 import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH, TRANSFER_TYPE } from '../../config'
+import { FDElement } from '@/models/FDElement'
 
 /**
  * Create an animation for data transfer for each outputs of a component to his childrens.
@@ -20,23 +20,23 @@ export function makeComponentTransferData (id: string): void {
 }
 
 export function toggleComponentLoading (id: string): void {
-  if (!document.getElementById('component-loading-style')) {
-    d3.select('#conception-grid').append('style').attr('id', 'component-loading-style').html('@keyframes load_spin {\n' +
-        '\t0% { transform: rotate(0deg); }\n' +
-        '\t100% { transform: rotate(359deg); }\n' +
-        '}\n' +
-        '.loading {\n' +
-        '\tanimation: load_spin 2s linear infinite;\n' +
-        '}\n')
-  }
   const icon = d3.select('#icon-' + id)
   const isLoading = icon.attr('class').includes('loading')
-  icon.text(isLoading ? icon.attr('data-icon') : '\uf013')
+
   icon.attr('class', isLoading ? icon.attr('class').replace(' loading', '') : icon.attr('class') + ' loading')
+    .html('')
+
+  icon.append('xhtml:body')
+    .style('background-color', 'transparent')
+    .html('<i class="fa fa-' + (isLoading ? icon.attr('data-icon') : 'spin fa-cog') + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 }
 
+/**
+ * @param name is the FDElement's name
+ * @param title is the FDComponent title
+ */
 function getCompWidth (name: string, title: string): number {
-  return 75 + Math.max(name.length, title.length) * 8
+  return 75 + Math.max(name.length, title.length, 10) * 8
 }
 
 const rectPlaceX = (x: number, theCompWidth: number) => {
@@ -55,6 +55,22 @@ const rectPlaceY = (y: number, theCompHeight: number) => {
   }
   return y - (theCompHeight / 2)
 }
+const namePlaceX = (x: number, theCompWidth: number) => {
+  if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
+    return SVG_GRID_BORDER_WIDTH + 65
+  } else if (x > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompWidth / 2))) {
+    return SVG_GRID_SIZE + 65 - SVG_GRID_BORDER_WIDTH - theCompWidth
+  }
+  return x - (theCompWidth / 2) + 65
+}
+const namePlaceY = (y: number, theCompHeight: number) => {
+  if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
+    return SVG_GRID_BORDER_WIDTH - 8 + (theCompHeight / 2)
+  } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
+    return SVG_GRID_SIZE - 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
+  }
+  return y - 8
+}
 const titlePlaceX = (x: number, theCompWidth: number) => {
   if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
     return SVG_GRID_BORDER_WIDTH + 65
@@ -64,22 +80,6 @@ const titlePlaceX = (x: number, theCompWidth: number) => {
   return x - (theCompWidth / 2) + 65
 }
 const titlePlaceY = (y: number, theCompHeight: number) => {
-  if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
-    return SVG_GRID_BORDER_WIDTH - 8 + (theCompHeight / 2)
-  } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
-    return SVG_GRID_SIZE - 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
-  }
-  return y - 8
-}
-const typePlaceX = (x: number, theCompWidth: number) => {
-  if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
-    return SVG_GRID_BORDER_WIDTH + 65
-  } else if (x > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompWidth / 2))) {
-    return SVG_GRID_SIZE + 65 - SVG_GRID_BORDER_WIDTH - theCompWidth
-  }
-  return x - (theCompWidth / 2) + 65
-}
-const typePlaceY = (y: number, theCompHeight: number) => {
   if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
     return SVG_GRID_BORDER_WIDTH + 7 + (theCompHeight / 2)
   } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
@@ -114,11 +114,11 @@ const iconPlaceX = (x: number, theCompWidth: number) => {
 }
 const iconPlaceY = (y: number, theCompHeight: number) => {
   if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
-    return SVG_GRID_BORDER_WIDTH + 8 + (theCompHeight / 2)
+    return SVG_GRID_BORDER_WIDTH - 10 + (theCompHeight / 2)
   } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
-    return SVG_GRID_SIZE + 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
+    return SVG_GRID_SIZE - 10 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
   }
-  return y + 8
+  return y - 10
 }
 const triggerPlaceX = (x: number, theCompWidth: number) => {
   if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
@@ -196,13 +196,13 @@ function updateComponentPosition (theCompId: string, x: null | number = null, y:
     .attr('x', rectPlaceX(x, theCompWidth))
     .attr('y', rectPlaceY(y, theCompHeight))
 
+  d3.select('#name-text-' + theCompId)
+    .attr('x', namePlaceX(x, theCompWidth))
+    .attr('y', namePlaceY(y, theCompHeight))
+
   d3.select('#title-text-' + theCompId)
     .attr('x', titlePlaceX(x, theCompWidth))
     .attr('y', titlePlaceY(y, theCompHeight))
-
-  d3.select('#type-text-' + theCompId)
-    .attr('x', typePlaceX(x, theCompWidth))
-    .attr('y', typePlaceY(y, theCompHeight))
 
   d3.select('#icon-' + theCompId)
     .attr('x', iconPlaceX(x, theCompWidth))
@@ -244,9 +244,13 @@ function updateComponentPosition (theCompId: string, x: null | number = null, y:
   })
 }
 
+/**
+ * @param name is the FDElement's name
+ * @param title is the FDComponent title
+ */
 export function setComponentName (theCompId: string, name: string, title: string): void {
   d3.select('#rect-' + theCompId).attr('width', getCompWidth(name, title))
-  d3.select('#title-text-' + theCompId).text(name)
+  d3.select('#name-text-' + theCompId).text(name)
   updateComponentPosition(theCompId)
 }
 
@@ -257,25 +261,25 @@ export function setComponentName (theCompId: string, name: string, title: string
  * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
  * @param openModal function call by clicking on the component
  */
-export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDComponent, registerComponent: Function, openModal: Function): void {
+export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDElement, openModal: Function): void {
   const x = mouse[0]
   const y = mouse[1]
-  const inputCount = fdCompToDrop.getInput()
-  const outputCount = fdCompToDrop.getOutput()
+  const inputCount = fdCompToDrop.getFDComponent().getInput()
+  const outputCount = fdCompToDrop.getFDComponent().getOutput()
   const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, 65)
-  const compWidth = getCompWidth(fdCompToDrop.getTitle(), '')
-  const newId: string = registerComponent(fdCompToDrop)
+  const compWidth = getCompWidth(fdCompToDrop.getName(), '')
   const g = d3.select('#conception-grid-svg')
     .append('g')
-    .attr('id', 'comp-' + newId)
+    .attr('class', 'component')
+    .attr('id', 'comp-' + fdCompToDrop.getId())
     .attr('stroke-width', 1.5)
     .attr('style', 'cursor:pointer;')
     .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
 
   g.append('rect')
-    .attr('id', 'rect-' + newId)
+    .attr('id', 'rect-' + fdCompToDrop.getId())
     .attr('class', 'fdcomp draggable')
-    .attr('data-id', newId)
+    .attr('data-id', fdCompToDrop.getId())
     .attr('stroke', 'black')
     .attr('fill', fdCompToDrop.getColor())
     .attr('height', compHeight)
@@ -286,97 +290,99 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     .attr('x', rectPlaceX(x, compWidth))
     .attr('y', rectPlaceY(y, compHeight))
     .on('click', () => {
-      openModal(newId)
+      openModal(fdCompToDrop)
     })
 
   g.append('text')
-    .attr('id', 'title-text-' + newId)
+    .attr('id', 'name-text-' + fdCompToDrop.getId())
     .attr('class', 'draggable unselectable-text')
-    .attr('data-id', newId)
+    .attr('data-id', fdCompToDrop.getId())
     .attr('fill', 'black')
     .style('font-size', '14px')
-    .html(fdCompToDrop.getTitle())
+    .html(fdCompToDrop.getName())
+    .attr('x', namePlaceX(x, compWidth))
+    .attr('y', namePlaceY(y, compHeight))
+    .on('click', () => {
+      openModal(fdCompToDrop)
+    })
+
+  g.append('text')
+    .attr('id', 'title-text-' + fdCompToDrop.getId())
+    .attr('class', 'draggable unselectable-text')
+    .attr('data-id', fdCompToDrop.getId())
+    .attr('fill', 'black')
+    .style('font-size', '12px')
+    .html(fdCompToDrop.getFDComponent().getTitle())
     .attr('x', titlePlaceX(x, compWidth))
     .attr('y', titlePlaceY(y, compHeight))
     .on('click', () => {
-      openModal(newId)
+      openModal(fdCompToDrop)
     })
 
-  g.append('text')
-    .attr('id', 'type-text-' + newId)
-    .attr('class', 'draggable unselectable-text')
-    .attr('data-id', newId)
-    .attr('fill', 'black')
-    .style('font-size', '12px')
-    .html(fdCompToDrop.getTitle())
-    .attr('x', typePlaceX(x, compWidth))
-    .attr('y', typePlaceY(y, compHeight))
-    .on('click', () => {
-      openModal(newId)
-    })
-  g.append('text')
-    .attr('id', 'icon-' + newId)
+  g.append('svg:foreignObject')
+    .attr('id', 'icon-' + fdCompToDrop.getId())
     .attr('class', 'draggable unselectable-text icon')
-    .attr('data-id', newId)
-    .attr('data-icon', fdCompToDrop.getIcon())
-    .attr('fill', 'black')
-    .style('font', '900 normal normal 24px \'Font Awesome 5 Free\'')
-    .text(fdCompToDrop.getIcon())
+    .attr('data-id', fdCompToDrop.getId())
+    .attr('data-icon', fdCompToDrop.getFDComponent().getIcon())
     .attr('x', iconPlaceX(x, compWidth))
     .attr('y', iconPlaceY(y, compHeight))
-    .style('transform-origin', (iconPlaceX(x, compWidth) + 12) + 'px ' + (iconPlaceY(y, compHeight) - 9) + 'px')
+    .attr('width', 24)
+    .attr('height', 24)
     .on('click', function () {
-      openModal(newId)
+      openModal(fdCompToDrop)
     })
+    .append('xhtml:body')
+    .style('background-color', 'transparent')
+    .html('<i class="icon-fixed-width fa fa-' + fdCompToDrop.getFDComponent().getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 
   g.append('text')
-    .attr('id', 'io-' + newId)
+    .attr('id', 'io-' + fdCompToDrop.getId())
     .attr('class', 'draggable unselectable-text')
-    .attr('data-id', newId)
+    .attr('data-id', fdCompToDrop.getId())
     .attr('fill', 'black')
     .style('font', '900 normal normal 12px \'Font Awesome 5 Free\'')
     .text('IO: 0B \uf061 0B')
     .attr('x', ioPlaceX(x, compWidth))
     .attr('y', ioPlaceY(y, compHeight))
     .on('click', () => {
-      openModal(newId)
+      openModal(fdCompToDrop)
     })
 
-  if (fdCompToDrop.isClickable()) {
+  if (fdCompToDrop.getFDComponent().isClickable()) {
     g.append('polygon')
-      .attr('id', 'trigger-' + newId)
+      .attr('id', 'trigger-' + fdCompToDrop.getId())
       .attr('class', 'draggable')
       .attr('points', getTriggerTrianglePoints(x, compWidth, y, compHeight))
-      .attr('data-id', newId)
+      .attr('data-id', fdCompToDrop.getId())
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .on('click', () => {
         console.log('Component activated!')
-        makeComponentTransferData(newId)
+        makeComponentTransferData(fdCompToDrop.getId())
       })
   }
 
   for (let i = 0; i < inputCount; ++i) {
     g.append('circle')
-      .attr('id', 'input-' + i + '-' + newId)
-      .attr('class', 'input connector input-' + newId)
+      .attr('id', 'input-' + i + '-' + fdCompToDrop.getId())
+      .attr('class', 'input connector input-' + fdCompToDrop.getId())
       .attr('r', 7)
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .attr('data-index', i)
-      .attr('data-id', newId)
+      .attr('data-id', fdCompToDrop.getId())
       .attr('cx', inputCirclePlaceX(x, compWidth))
       .attr('cy', inputCirclePlaceY(y, compHeight, i, inputCount))
   }
   for (let i = 0; i < outputCount; ++i) {
     g.append('circle')
-      .attr('id', 'output-' + i + '-' + newId)
-      .attr('class', 'output connector output-' + newId)
+      .attr('id', 'output-' + i + '-' + fdCompToDrop.getId())
+      .attr('class', 'output connector output-' + fdCompToDrop.getId())
       .attr('r', 7)
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .attr('data-index', i)
-      .attr('data-id', newId)
+      .attr('data-id', fdCompToDrop.getId())
       .attr('cx', outputCirclePlaceX(x, compWidth))
       .attr('cy', outputCirclePlaceY(y, compHeight, i, outputCount))
   }

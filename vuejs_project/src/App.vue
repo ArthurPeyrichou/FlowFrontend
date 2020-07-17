@@ -1,21 +1,22 @@
 <template>
   <div id="app" v-bind:class="theme">
-    <b-nav tabs class="navbar-menu">
+    <b-nav tabs class="navbar-menu" style="height:50px">
       <b-nav-item v-bind:to="'/'" :active="currentRoute=='/'">Design Board</b-nav-item>
       <b-nav-item v-bind:to="'/blank-board'" :active="currentRoute=='/blank-board'">Blank Board</b-nav-item>
       <b-nav-item disabled>Disabled</b-nav-item>
     </b-nav>
-    <router-view style="" :theme="theme"/>
+    <router-view style="padding-bottom:50px" :theme="theme"/>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { THEME } from './config'
 
 @Component
 export default class App extends Vue {
   // Dark or light
-  private theme = 'dark';
+  private theme = THEME;
 
   get currentRoute () { return this.$route.path }
 }

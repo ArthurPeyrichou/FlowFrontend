@@ -36,6 +36,7 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
 
   d3.select('#conception-grid-svg').append('circle')
     .attr('id', dataTransfertId)
+    .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
     .attr('cx', theOuputCircle.attr('cx'))
     .attr('cy', theOuputCircle.attr('cy'))
     .attr('r', TRANSFER_RADIUS)
@@ -83,6 +84,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
 
   d3.select('#conception-grid-svg').append('path')
     .attr('id', dataTransfertId)
+    .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
     .datum([source, source])
     .attr('d', lineFunction)
     .attr('stroke', TRANSFER_FILL_COLOR)

@@ -13,7 +13,7 @@ export class FDComponent {
     private version: string;
     private readme: string;
     private click: boolean;
-    private options: {};
+    private options: JSON;
 
     /**
      * @param input Can be a positive or null integer (True = 1 and False = 0). Negative value = 0.
@@ -68,16 +68,16 @@ export class FDComponent {
           if (options[0] === '{' && options[options.length - 1] === '}') {
             this.options = JSON.parse(options)
           } else {
-            this.options = {}
+            this.options = JSON.parse('{}')
           }
         } else if (typeof options === 'object' && options != null && !(options instanceof Array)) {
           this.options = options
         } else {
-          this.options = {}
+          this.options = JSON.parse('{}')
         }
       } catch (error) {
         // console.log(error)
-        this.options = {}
+        this.options = JSON.parse('{}')
       }
 
       if (group === '' || group === undefined) {
@@ -140,7 +140,7 @@ export class FDComponent {
       return this.click
     }
 
-    getOptions (): {} {
+    getOptions (): JSON {
       return this.options
     }
 

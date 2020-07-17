@@ -6,7 +6,11 @@
         <b-icon v-else icon="chevron-bar-right"></b-icon>
       </div>
       <div class="header-content">
-        <h3>Conception Grid</h3>
+        <b-nav tabs class="navbar-menu">
+          <b-nav-item v-for="tab in tabs" :key="tab.id" :active="tab.id === currentTab" v-on:click="selectTab(tab.id)">{{tab.name}}</b-nav-item>
+          <b-nav-item id="new-tab-button" v-on:click="openTabSettingModal()"><i class="fa fa-plus"></i> Tab</b-nav-item>
+          <TabSettingModal ref="myTabSettingModal" :addNewTab="addNewTab" />
+        </b-nav>
       </div>
       <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
         <b-icon v-if="isConsoleBarHide" icon="chevron-bar-right"></b-icon>
@@ -43,24 +47,29 @@
 <script lang="ts">
 import * as d3 from 'd3'
 import CompSettingModal from '@/components/conception/CompSettingModal.vue'
+import TabSettingModal from '@/components/conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
 import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
-import { addLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
+import { addLinkBeetweenTwoComponentsIntoGrid, loadLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
 import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
+import { FDElement } from '../../models/FDElement'
 
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
   components: {
-    CompSettingModal
+    CompSettingModal,
+    TabSettingModal
   }
 })
 export default class ConceptionGrid extends Vue {
-  @Prop({ default: 'dark' }) theme!: string;
+  @Prop({ default: 'dark' }) theme!: string
 
-  fdCompToDrop: FDComponent | undefined = undefined;
-  componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = []
+  fdCompToDrop: FDComponent | undefined = undefined
+  graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
   idList: Array<string> = []
+  tabs: Array<{id: string; index: number; name: string}> = []
+  currentTab = ''
   svgScale = 1
   hideToolBar = false
   hideConsoleBar = false
@@ -72,12 +81,22 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Create a new tab and go into it
+   */
+  addNewTab (aName: string) {
+    const newId = this.makeId(10)
+    this.tabs.push({ id: newId, index: this.tabs.length, name: aName })
+    this.selectTab(newId)
+  }
+
+  /**
    * Called by CompSettingModal, delete the component and all links related from the Array and the screen.
    * @public
    * @param fdComp the component to delete
    */
   deleteTheComp (fdCompId: string): void {
-    this.componentList = this.componentList.filter(el => {
+    console.log(fdCompId)
+    /* this.componentList = this.componentList.filter(el => {
       el.links = el.links.filter(el => {
         if (el.compId !== fdCompId) {
           return true
@@ -95,7 +114,7 @@ export default class ConceptionGrid extends Vue {
         document.getElementById('comp-' + fdCompId)?.remove()
         return false
       }
-    })
+    }) */
   }
 
   /**
@@ -127,7 +146,15 @@ export default class ConceptionGrid extends Vue {
   initSvg (): void {
     const actualize = (mouse: [number, number]) => {
       if (this.fdCompToDrop !== undefined) {
-        addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openSettingModal)
+        // Should call Backend for add new component here
+        const fdElement = new FDElement(this.makeId(10), this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
+        addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal)
+        if (this.graphs.has(this.currentTab)) {
+          // eslint-disable-next-line
+          this.graphs.get(this.currentTab)?.push(fdElement)
+        } else {
+          this.graphs.set(this.currentTab, [fdElement])
+        }
         addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
         this.fdCompToDrop = undefined
       }
@@ -195,6 +222,24 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Load graphs elements list into the conception grid
+   * @public
+   * @param elementList a list of elements
+   */
+  setGraphsElements (elementList: FDElement[]) {
+    this.graphs = new Map<string, Array<FDElement>>()
+    elementList.forEach(el => {
+      if (this.graphs.has(el.getTabId())) {
+        // eslint-disable-next-line
+        this.graphs.get(el.getTabId())?.push(el)
+      } else {
+        this.graphs.set(el.getTabId(), [el])
+      }
+    })
+    this.populateSvg()
+  }
+
+  /**
    * Make a random string.
    * @public
    * @param length the length wish
@@ -214,25 +259,38 @@ export default class ConceptionGrid extends Vue {
    * @public
    * @param compId the id of the component
    */
-  openSettingModal (compId: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.$children[0] as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
-    this.$children[0].$bvModal.show('modal-edit-component')
+  openComponentSettingModal (element: FDElement): void {
+    // eslint-disable-next-line
+    (this.$refs.myCompSettingModal as any).showModal(element)
   }
 
   /**
-   * Called by addComponentIntoGrid() when a comp is drop into grid.
+   * Called by add new tab navbar item.
    * @public
-   * @param comp the flowdata component to add in svg
-   * @returns a new string identifiant generate with makeId()
    */
-  registerComponent (comp: FDComponent): string {
-    let newId = this.makeId(10)
-    while (this.idList.includes(newId)) {
-      newId = this.makeId(10)
-    }
-    this.componentList.push({ component: comp, compId: newId, color: comp.getColor(), name: comp.getTitle(), links: [] })
-    return newId
+  openTabSettingModal (): void {
+    // eslint-disable-next-line
+    (this.$refs.myTabSettingModal as any).showModal()
+  }
+
+  populateSvg (): void {
+    d3.selectAll('.component').remove()
+    d3.selectAll('.link').remove()
+    // eslint-disable-next-line
+    this.graphs.get(this.currentTab)?.forEach(el => {
+      addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
+    })
+    // eslint-disable-next-line
+    this.graphs.get(this.currentTab)?.forEach(component => {
+      if (component.getLinks().size !== 0) {
+        component.getLinks().forEach((links, index) => {
+          if (index !== 99) {
+            links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link))
+          }
+        })
+      }
+    })
+    addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
   }
 
   /**
@@ -243,18 +301,36 @@ export default class ConceptionGrid extends Vue {
    * @returns a new string identifiant generate with makeId()
    */
   registerLink (outputCompId: string, inputCompId: string): string {
+    console.log(outputCompId, inputCompId)
     let newId = this.makeId(10)
-    const outputComp = outputCompId.split('-')
-    const inputComp = inputCompId.split('-')
     while (this.idList.includes(newId)) {
       newId = this.makeId(10)
     }
-    this.componentList.forEach(el => {
-      if (el.compId === outputComp[1]) {
-        el.links.push({ linkId: newId, compId: inputComp[1], fromOutput: outputComp[0], toInput: inputComp[0] })
-      }
-    })
     return newId
+  }
+
+  /**
+   * Select a tab in the header
+   * @public
+   * @param tabId the tab's id
+   */
+  selectTab (tabId: string) {
+    if (this.currentTab !== tabId) {
+      this.currentTab = tabId
+      this.populateSvg()
+    }
+  }
+
+  /**
+   * Set the tab list in conception grid header
+   * @public
+   * @param tabs the tab list: {id: string; index: number; name: string}
+   */
+  setTabs (tabs: Array<{id: string; index: number; name: string}>) {
+    this.tabs = tabs.sort((a, b) => a.index - b.index)
+    if (this.tabs.length > 0) {
+      this.currentTab = this.tabs[0].id
+    }
   }
 
   /**
@@ -282,21 +358,15 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   *
+   * Update current FDElement in the graph
    */
-  updateCurrentComponent (compId: string, name: string, color: string): void {
-    let title = ''
-    this.componentList.forEach(el => {
-      if (el.compId === compId) {
-        el.color = color
-        el.name = name
-        title = el.component.getTitle()
-      }
-    })
-    if (title !== '') {
+  updateCurrentComponent (fdElement: FDElement, name: string, color: string): void {
+    if (name !== '') {
+      fdElement.setName(name)
+      fdElement.setColor(color)
       // eslint-disable-next-line no-unused-expressions
-      document.getElementById('rect-' + compId)?.setAttribute('fill', color)
-      setComponentName(compId, name, title)
+      document.getElementById('rect-' + fdElement.getId())?.setAttribute('fill', color)
+      setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
     }
   }
 
@@ -410,6 +480,19 @@ export default class ConceptionGrid extends Vue {
     padding-top: 0px;
     padding-bottom: 0px;
   }
+  .navbar-menu {
+    background-color: #b8b8b8;
+  }
+  .navbar-menu .nav-item .active {
+    background-color: #c8c8c8 !important;
+    border-color:  rgba(0, 0, 0, 0.3) !important;
+  }
+  .navbar-menu .nav-item a {
+    color: #2c3e50 !important;
+  }
+  .nav-tabs {
+    border-bottom: none;
+  }
 
   /* Dark side */
   #conception-grid.dark {
@@ -427,5 +510,21 @@ export default class ConceptionGrid extends Vue {
   .dark .reduce-button {
     background-color: #303030;
     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dark .navbar-menu {
+    background-color: #101010 !important;
+    color: #c8c8c8;
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark .navbar-menu .nav-item .active {
+    background-color: #202020 !important;
+    color: white !important;
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark .navbar-menu .nav-item a:hover {
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark .navbar-menu .nav-item a {
+    color: white !important;
   }
 </style>
