@@ -174,9 +174,10 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
 export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputIndex: number, link: {index: number; id: string}): void {
   const outputCircle = d3.select('#output-' + outputIndex + '-' + sourceId)
   const inputCircle = d3.select('#input-' + link.index + '-' + link.id)
-  console.log(sourceId, outputIndex, link)
+
   const outputXY: [number, number] = [Number.parseInt(outputCircle.attr('cx')), Number.parseInt(outputCircle.attr('cy'))]
   const inputXY: [number, number] = [Number.parseInt(inputCircle.attr('cx')), Number.parseInt(inputCircle.attr('cy'))]
+
   const path = d3.select('#conception-grid-svg').append('g')
     .attr('class', 'link')
     .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
@@ -189,7 +190,6 @@ export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputI
     .attr('data-output', outputIndex + '-' + sourceId)
     .attr('data-input-index', outputIndex)
     .attr('data-output-index', link.index)
-    .attr('d', lineFunction)
     .attr('stroke', LINK_FILL_COLOR)
     .attr('stroke-width', '3px')
     .attr('fill', 'none')

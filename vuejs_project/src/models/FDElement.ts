@@ -147,4 +147,13 @@ export class FDElement {
         this.links.set(index, (list === undefined ? [] : list))
       }
     }
+
+    toString (): string {
+      return JSON.stringify(this)
+    }
+
+    static fromString (s: string): FDElement {
+      const j = JSON.parse(s)
+      return new FDElement(j.id, j.hisFDComponent, j.tabId, j.name, j.color, j.x, j.y, j.notes, j.state, j.options, j.links)
+    }
 }

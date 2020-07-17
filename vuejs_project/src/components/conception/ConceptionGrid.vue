@@ -244,11 +244,9 @@ export default class ConceptionGrid extends Vue {
    * @public
    * @param compId the id of the component
    */
-  openComponentSettingModal (compId: string): void {
+  openComponentSettingModal (element: FDElement): void {
     // eslint-disable-next-line
-  //(this.$refs.myCompSettingModal as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
-    // eslint-disable-next-line
-    (this.$refs.myCompSettingModal as any).showModal()
+    (this.$refs.myCompSettingModal as any).showModal(element)
   }
 
   /**
@@ -261,16 +259,12 @@ export default class ConceptionGrid extends Vue {
   }
 
   populateSvg (): void {
-    console.log(this.currentTab)
-    console.log(this.graphs)
-    console.log(this.graphs.get(this.currentTab))
     d3.selectAll('.component').remove()
     d3.selectAll('.link').remove()
     this.graphs.get(this.currentTab).forEach(el => {
       addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
     })
     this.graphs.get(this.currentTab).forEach(component => {
-      console.log(component.getLinks())
       if (component.getLinks().size !== 0) {
         component.getLinks().forEach((links, index) => {
           if (index !== 99) {
@@ -279,21 +273,7 @@ export default class ConceptionGrid extends Vue {
         })
       }
     })
-  }
-
-  /**
-   * Called by addComponentIntoGrid() when a comp is drop into grid.
-   * @public
-   * @param comp the flowdata component to add in svg
-   * @returns a new string identifiant generate with makeId()
-   */
-  registerComponent (comp: FDComponent): string {
-    let newId = this.makeId(10)
-    while (this.idList.includes(newId)) {
-      newId = this.makeId(10)
-    }
-    // this.componentList.push({ component: comp, compId: newId, color: comp.getColor(), name: comp.getTitle(), links: [] })
-    return newId
+    addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
   }
 
   /**
@@ -369,19 +349,13 @@ export default class ConceptionGrid extends Vue {
   /**
    *
    */
-  updateCurrentComponent (compId: string, name: string, color: string): void {
-    const title = ''
-    /* this.componentList.forEach(el => {
-      if (el.compId === compId) {
-        el.color = color
-        el.name = name
-        title = el.component.getTitle()
-      }
-    }) */
-    if (title !== '') {
+  updateCurrentComponent (fdElement: FDElement, name: string, color: string): void {
+    if (name !== '') {
+      fdElement.setName(name)
+      fdElement.setColor(color)
       // eslint-disable-next-line no-unused-expressions
-      document.getElementById('rect-' + compId)?.setAttribute('fill', color)
-      setComponentName(compId, name, title)
+      document.getElementById('rect-' + fdElement.getId())?.setAttribute('fill', color)
+      setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
     }
   }
 

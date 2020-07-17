@@ -283,7 +283,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     .attr('x', rectPlaceX(x, compWidth))
     .attr('y', rectPlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop.getId())
+      openModal(fdCompToDrop)
     })
 
   g.append('text')
@@ -296,7 +296,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     .attr('x', titlePlaceX(x, compWidth))
     .attr('y', titlePlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop.getId())
+      openModal(fdCompToDrop)
     })
 
   g.append('text')
@@ -309,7 +309,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     .attr('x', typePlaceX(x, compWidth))
     .attr('y', typePlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop.getId())
+      openModal(fdCompToDrop)
     })
 
   g.append('svg:foreignObject')
@@ -322,7 +322,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     .attr('width', 24)
     .attr('height', 24)
     .on('click', function () {
-      openModal(fdCompToDrop.getId())
+      openModal(fdCompToDrop)
     })
     .append('xhtml:body')
     .style('background-color', 'transparent')
@@ -338,7 +338,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     .attr('x', ioPlaceX(x, compWidth))
     .attr('y', ioPlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop.getId())
+      openModal(fdCompToDrop)
     })
 
   if (fdCompToDrop.getFDComponent().isClickable()) {

@@ -52,6 +52,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
+import { FDElement } from '../../models/FDElement'
 import { Sketch, Compact } from 'vue-color'
 
 /** Modal that allow users to update and delete Flowdata components from the #conception-grid-svg. */
@@ -63,7 +64,7 @@ import { Sketch, Compact } from 'vue-color'
 })
 export default class CompSettingModal extends Vue {
   /** The Flowdata component that the user can update or remove from the #conception-grid-svg. */
-  fdComponent: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>} | null = null;
+  fdElement: FDElement | null = null;
   /** Method which come from parent ComceptionGrid vue. Used for deleting the current component. */
   @Prop({ default: () => { console.log('Not implemented!') } }) deleteTheComp!: Function
   /** Method which come from parent ComceptionGrid vue. Used for updating the current component. */
@@ -82,7 +83,7 @@ export default class CompSettingModal extends Vue {
    * @returns true if the form is valid, false otherwise
    */
   checkFormValidity (): boolean {
-    if (this.fdComponent !== null) {
+    if (this.fdElement !== null) {
       this.nameState = this.name.length >= 3 && this.name.length <= 50
       this.nameInvalidFeedback = 'Name with length in between [3;50] characters is required. Current ' + this.name.length + '.'
       const valid = this.nameState
@@ -98,8 +99,8 @@ export default class CompSettingModal extends Vue {
    * @public
    */
   handleDeleteSubmit (): void {
-    if (this.fdComponent !== null) {
-      this.deleteTheComp(this.fdComponent.compId)
+    if (this.fdElement !== null) {
+      this.deleteTheComp(this.fdElement.getId())
     }
     // Hide the modal manually
     this.$nextTick(() => {
@@ -117,11 +118,11 @@ export default class CompSettingModal extends Vue {
     if (!this.checkFormValidity()) {
       return
     }
-    if (this.fdComponent !== null) {
+    if (this.fdElement !== null) {
       if (this.colors.hex8 === '') {
-        this.colors.hex8 = this.fdComponent.color
+        this.colors.hex8 = this.fdElement.getColor()
       }
-      this.updateCurrentComponent(this.fdComponent.compId, this.name, this.colors.hex8)
+      this.updateCurrentComponent(this.fdElement, this.name, this.colors.hex8)
     }
     // Hide the modal manually
     this.$nextTick(() => {
@@ -139,23 +140,16 @@ export default class CompSettingModal extends Vue {
 
   /**
    * Init name and color for the modal
+   * Then shows the modal from the user interface.
    * @public
    */
-  public sendData (theFDComp: {component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}): void {
-    this.fdComponent = theFDComp
-    this.colors = { hex8: theFDComp.color }
-    this.defaultColor = theFDComp.color
-    this.name = this.fdComponent.name
+  showModal (theFDElement: FDElement): void {
+    this.fdElement = theFDElement
+    this.colors = { hex8: theFDElement.getColor() }
+    this.defaultColor = theFDElement.getColor()
+    this.name = theFDElement.getName()
     this.nameState = null
     this.hideColorPicker = true
-    console.log(this.fdComponent)
-  }
-
-  /**
-   * Shows the modal from the user interface.
-   * @public
-   */
-  showModal (): void {
     this.$bvModal.show('modal-edit-component')
   }
 
@@ -168,7 +162,7 @@ export default class CompSettingModal extends Vue {
   }
 
   get theName (): string {
-    return this.fdComponent ? this.fdComponent.name : ''
+    return this.fdElement ? this.fdElement.getName() : ''
   }
 }
 </script>
