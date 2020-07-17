@@ -23,6 +23,21 @@ function isCrossLine (source: [number, number], target: [number, number], isSour
 }
 
 /**
+ * Moove links to the top and components to the bottom of the svg childrens list
+ * Make link under component in UI
+ */
+function mooveLinkAndComponents (): void {
+  // eslint-disable-next-line
+  const svg: HTMLElement  = document.getElementById('conception-grid-svg')!
+  for (let i = 0; i < svg.children.length; ++i) {
+    const theClass: string | null = svg.children[i].getAttribute('class')
+    if (theClass !== null && theClass.includes('link')) {
+      svg.insertBefore(svg.children[i], svg.children[2]) // 2 because 0 is defs and 1 is svggridbg
+    }
+  }
+}
+
+/**
  * Return data for a curve line from to points in the svg (source and target)
  * @param source the start of the line
  * @param target the end of the line
@@ -86,14 +101,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
           }
         })
 
-        // eslint-disable-next-line
-                const svg: HTMLElement  = document.getElementById('conception-grid-svg')!
-        for (let i = 0; i < svg.children.length; ++i) {
-          const theClass: string | null = svg.children[i].getAttribute('class')
-          if (theClass !== null && theClass.includes('link')) {
-            svg.insertBefore(svg.children[i], svg.children[2]) // 2 because 0 is defs and 1 is svggridbg
-          }
-        }
+        mooveLinkAndComponents()
       } else { // If a temp <g><path/></g> already exist we just edit the line positions.
         d3.select('#link-' + theSourceCompId)
           .datum(getLineData(source, target, isSourceInput))
@@ -138,7 +146,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
               const newId = registerLink(outputInput.output.id, outputInput.input.id)
               isFounded = true
                 // eslint-disable-next-line no-unused-expressions
-                document.getElementById('link-' + theSourceCirleCode)?.parentElement?.setAttribute('class', '')
+                document.getElementById('link-' + theSourceCirleCode)?.parentElement?.setAttribute('class', 'link')
                 // eslint-disable-next-line no-unused-expressions
                 document.getElementById('link-' + theSourceCirleCode)?.parentElement?.setAttribute('id', 'link-' + newId)
                 d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
@@ -161,4 +169,46 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
     })
 
   dragLinkCompHandler(d3.select('#conception-grid-svg').selectAll('.connector'))
+}
+
+export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputIndex: number, link: {index: number; id: string}): void {
+  const outputCircle = d3.select('#output-' + outputIndex + '-' + sourceId)
+  const inputCircle = d3.select('#input-' + link.index + '-' + link.id)
+  console.log(sourceId, outputIndex, link)
+  const outputXY: [number, number] = [Number.parseInt(outputCircle.attr('cx')), Number.parseInt(outputCircle.attr('cy'))]
+  const inputXY: [number, number] = [Number.parseInt(inputCircle.attr('cx')), Number.parseInt(inputCircle.attr('cy'))]
+  const path = d3.select('#conception-grid-svg').append('g')
+    .attr('class', 'link')
+    .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
+    .append('path')
+    .attr('id', 'link-' + outputIndex + '-' + sourceId + '-to-' + link.index + '-' + link.id)
+    .attr('class', 'link-path link-' + sourceId + ' link-' + link.id)
+    .datum(getLineData(outputXY, inputXY, false))
+    .attr('d', lineFunction)
+    .attr('data-input', link.index + '-' + link.id)
+    .attr('data-output', outputIndex + '-' + sourceId)
+    .attr('data-input-index', outputIndex)
+    .attr('data-output-index', link.index)
+    .attr('d', lineFunction)
+    .attr('stroke', LINK_FILL_COLOR)
+    .attr('stroke-width', '3px')
+    .attr('fill', 'none')
+    .style('cursor', 'pointer')
+
+  path.on('mouseover', () => {
+    path.attr('stroke-width', '5px')
+  })
+  path.on('mouseout', () => {
+    path.attr('stroke-width', '3px')
+  })
+  path.on('click', () => {
+    if (path.attr('stroke') === LINK_FILL_COLOR) {
+      d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
+      path.attr('stroke', ACTIVE_LINK_FILL_COLOR)
+    } else {
+      d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
+      path.attr('stroke', LINK_FILL_COLOR)
+    }
+  })
+  mooveLinkAndComponents()
 }

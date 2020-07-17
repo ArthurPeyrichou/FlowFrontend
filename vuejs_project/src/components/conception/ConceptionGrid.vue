@@ -51,7 +51,7 @@ import TabSettingModal from '@/components/conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
 import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
-import { addLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
+import { addLinkBeetweenTwoComponentsIntoGrid, loadLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
 import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
 import { FDElement } from '../../models/FDElement'
 
@@ -137,7 +137,8 @@ export default class ConceptionGrid extends Vue {
   initSvg (): void {
     const actualize = (mouse: [number, number]) => {
       if (this.fdCompToDrop !== undefined) {
-        addComponentIntoGrid(mouse, this.fdCompToDrop, this.registerComponent, this.openComponentSettingModal)
+        console.log(mouse)
+        // Should call Backend for add new component here
         addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
         this.fdCompToDrop = undefined
       }
@@ -220,11 +221,7 @@ export default class ConceptionGrid extends Vue {
         this.graphs.set(el.getTabId(), [el])
       }
     })
-    this.graphs.forEach(value => {
-      value.forEach(el => {
-        addComponentIntoGrid([el.getX(), el.getY()], el, this.registerComponent, this.openComponentSettingModal)
-      })
-    })
+    this.populateSvg()
   }
 
   /**
@@ -261,6 +258,27 @@ export default class ConceptionGrid extends Vue {
   openTabSettingModal (): void {
     // eslint-disable-next-line
     (this.$refs.myTabSettingModal as any).showModal()
+  }
+
+  populateSvg (): void {
+    console.log(this.currentTab)
+    console.log(this.graphs)
+    console.log(this.graphs.get(this.currentTab))
+    d3.selectAll('.component').remove()
+    d3.selectAll('.link').remove()
+    this.graphs.get(this.currentTab).forEach(el => {
+      addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
+    })
+    this.graphs.get(this.currentTab).forEach(component => {
+      console.log(component.getLinks())
+      if (component.getLinks().size !== 0) {
+        component.getLinks().forEach((links, index) => {
+          if (index !== 99) {
+            links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link))
+          }
+        })
+      }
+    })
   }
 
   /**
@@ -306,7 +324,10 @@ export default class ConceptionGrid extends Vue {
    * @param tabId the tab's id
    */
   selectTab (tabId: string) {
-    this.currentTab = tabId
+    if (this.currentTab !== tabId) {
+      this.currentTab = tabId
+      this.populateSvg()
+    }
   }
 
   /**

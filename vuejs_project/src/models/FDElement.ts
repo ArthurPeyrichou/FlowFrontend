@@ -45,7 +45,10 @@ export class FDElement {
       this.notes = notes
       this.state = state
       this.options = options
-      this.links = links
+      this.links = new Map<number, Array<{index: number; id: string}>>()
+      for (const [key, value] of Object.entries(links)) {
+        this.links.set(Number.parseInt(key), value)
+      }
     }
 
     getId (): string {
