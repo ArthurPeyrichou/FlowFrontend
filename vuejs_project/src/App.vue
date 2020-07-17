@@ -11,11 +11,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { THEME } from './config'
 
 @Component
 export default class App extends Vue {
   // Dark or light
-  private theme = 'dark';
+  private theme = THEME;
 
   get currentRoute () { return this.$route.path }
 }

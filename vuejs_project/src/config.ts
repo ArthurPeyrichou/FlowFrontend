@@ -1,3 +1,6 @@
+/* Theme */
+export const THEME: 'dark' | 'light' = 'dark'
+
 /* Websocket Parameters */
 export const WEBSOCKET_URL = 'ws://localhost:'
 export const WEBSOCKET_PORT = 5001

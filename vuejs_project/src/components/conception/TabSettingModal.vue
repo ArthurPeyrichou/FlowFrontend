@@ -34,12 +34,13 @@
 </template>
 
 <script lang="ts">
-import { Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 /** Modal that allow users to add new tab in the #conception-grid-svg. */
+@Component
 export default class TabSettingModal extends Vue {
   /** Method which come from parent ComceptionGrid vue. Used for updating the current component. */
-  @Prop({ default: () => { console.log('Not implemented!') } }) updateCurrentComponent!: Function
+  @Prop({ default: () => { console.log('Not implemented!') } }) addNewTab!: Function
 
   name = ''
   nameState: boolean | null = null
@@ -62,11 +63,13 @@ export default class TabSettingModal extends Vue {
    * @public
    */
   handleAddSubmit (): void {
+    console.log('cc')
     // Exit when the form isn't valid
     if (!this.checkFormValidity()) {
       return
     }
     // Do something here
+    this.addNewTab(this.name)
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -87,6 +90,8 @@ export default class TabSettingModal extends Vue {
    * @public
    */
   showModal (): void {
+    this.name = ''
+    this.nameState = null
     this.$bvModal.show('modal-edit-tab')
   }
 }

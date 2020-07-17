@@ -51,7 +51,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { FDComponent } from '../../models/FDComponent'
 import { FDElement } from '../../models/FDElement'
 import { Sketch, Compact } from 'vue-color'
 

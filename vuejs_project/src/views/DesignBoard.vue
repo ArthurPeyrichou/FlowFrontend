@@ -27,88 +27,102 @@ export default class DesignBoard extends Vue {
   @Prop({ default: 'dark' }) public theme!: string;
 
   private connection: WebSocket | null = null
-  private data = null
 
   constructor () {
     super()
-    console.log('Starting connection to WebSocket Server')
+    // This way we execute the code after the redering of the template
+    this.$nextTick(() => {
+      this.sendBlankDesignerData()
+      console.log('Starting connection to WebSocket Server')
 
-    const sendData = (components: FDComponent[], graphs: FDElement[], data: any) => {
       // eslint-disable-next-line
-      (this.$refs.myToolBar as any).setCompList(components);
-      // eslint-disable-next-line
-      (this.$refs.myConceptionGrid as any).setTabs(data.tabs);
-      // eslint-disable-next-line
-      (this.$refs.myConceptionGrid as any).loadGraphIntoGrid(graphs);
-    }
+      const treatMessage = (data: Record<string, any>) => {
+        switch (data.type) {
+          case 'designer':
+            this.sendDesignerData(data)
+            console.log(JSON.stringify(data.components[2].connections))
+            break
+          default:
+            console.error('Message type "' + data.type + '" not treated.')
+            break
+        }
+      }
+
+      const webSocketFactory = {
+        connectionTries: 3,
+        connect: function (url: string) {
+          const ws = new WebSocket(url)
+          ws.addEventListener('error', e => {
+            // readyState === 3 is CLOSED
+            if ((e.target as WebSocket).readyState === 3) {
+              this.connectionTries--
+
+              if (this.connectionTries > 0) {
+                setTimeout(() => this.connect(url), 1000)
+              } else {
+                console.error('Maximum number of connection trials has been reached')
+              }
+            } else {
+              console.error('Websocket error: ' + event?.target)
+            }
+          })
+          ws.onopen = function () {
+            console.log('Successfully connected to the echo websocket server...')
+          }
+          ws.onmessage = function (event) {
+            console.log('Got a message!')
+            treatMessage(JSON.parse(decodeURIComponent(event.data)))
+          }
+          return ws
+        }
+      }
+
+      this.connection = webSocketFactory.connect(WEBSOCKET_URL + WEBSOCKET_PORT)
+    })
+  }
+
+  sendBlankDesignerData (): void {
+    // eslint-disable-next-line
+    (this.$refs.myToolBar as any).setCompList([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
+      new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
+      new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
+      new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
+      new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
+      new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')])
+  }
+
+  /**
+   * Send components from database to toolbar
+   * Send tabs to conception grid
+   * And send all graphs element to conception grid
+   */
+  // eslint-disable-next-line
+  sendDesignerData (data: Record<string, any>): void {
+    const databaseCompList: FDComponent[] = []
+    const map: Map<string, FDComponent> = new Map()
+    // eslint-disable-next-line
+    data.database.forEach((el: Record<string, any>) => {
+      const comp = new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options)
+      databaseCompList.push(comp)
+      map.set(el.id, comp)
+    });
+    // eslint-disable-next-line
+    (this.$refs.myToolBar as any).setCompList(databaseCompList);
 
     // eslint-disable-next-line
-    const setData = (data: any) => {
-      if (data.type === 'designer') {
-        this.data = data
-        console.log(this.data)
-        const database: FDComponent[] = []
-        const map: Map<string, FDComponent> = new Map()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data.database.forEach((el: any) => {
-          const comp = new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options)
-          database.push(comp)
-          map.set(el.id, comp)
-        })
-        const graphs: FDElement[] = []
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data.components.forEach((el: any) => {
-          const comp = map.get(el.component)
-          if (comp !== undefined) {
-            graphs.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
-          }
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sendData(database, graphs, data)
+    (this.$refs.myConceptionGrid as any).setTabs(data.tabs);
+
+    const graphs: FDElement[] = []
+
+    // eslint-disable-next-line
+    data.components.forEach((el: Record<string, any>) => {
+      const comp = map.get(el.component)
+      if (comp !== undefined) {
+        graphs.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
       }
-    }
-
-    const webSocketFactory = {
-      connectionTries: 3,
-      defaultList: [new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
-        new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
-        new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
-        new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
-        new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
-        new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')],
-      connect: function (url: string) {
-        const ws = new WebSocket(url)
-        ws.addEventListener('error', e => {
-          // readyState === 3 is CLOSED
-          if ((e.target as WebSocket).readyState === 3) {
-            this.connectionTries--
-
-            if (this.connectionTries > 0) {
-              setTimeout(() => this.connect(url), 1000)
-            } else {
-              sendData(this.defaultList, [], { tabs: [], components: [] })
-              throw new Error('Maximum number of connection trials has been reached')
-            }
-          } else {
-            sendData(this.defaultList, [], { tabs: [], components: [] })
-            throw new Error('Websocket error: ' + event?.target)
-          }
-        })
-        ws.onopen = function () {
-          console.log('Successfully connected to the echo websocket server...')
-        }
-        ws.onmessage = function (event) {
-          console.log('Got a message!')
-          try {
-            setData(JSON.parse(decodeURIComponent(event.data)))
-          } catch (error) {
-
-          }
-        }
-        return ws
-      }
-    }
-    this.connection = webSocketFactory.connect(WEBSOCKET_URL + WEBSOCKET_PORT)
+    });
+    // eslint-disable-next-line
+    (this.$refs.myConceptionGrid as any).setGraphsElements(graphs);
   }
 }
 </script>

@@ -8,8 +8,8 @@
       <div class="header-content">
         <b-nav tabs class="navbar-menu">
           <b-nav-item v-for="tab in tabs" :key="tab.id" :active="tab.id === currentTab" v-on:click="selectTab(tab.id)">{{tab.name}}</b-nav-item>
-          <b-nav-item v-on:click="openTabSettingModal()"><i class="fa fa-plus"></i> Tab</b-nav-item>
-          <TabSettingModal ref="myTabSettingModal" />
+          <b-nav-item id="new-tab-button" v-on:click="openTabSettingModal()"><i class="fa fa-plus"></i> Tab</b-nav-item>
+          <TabSettingModal ref="myTabSettingModal" :addNewTab="addNewTab" />
         </b-nav>
       </div>
       <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
@@ -81,6 +81,15 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Create a new tab and go into it
+   */
+  addNewTab (aName: string) {
+    const newId = this.makeId(10)
+    this.tabs.push({ id: newId, index: this.tabs.length, name: aName })
+    this.selectTab(newId)
+  }
+
+  /**
    * Called by CompSettingModal, delete the component and all links related from the Array and the screen.
    * @public
    * @param fdComp the component to delete
@@ -137,8 +146,15 @@ export default class ConceptionGrid extends Vue {
   initSvg (): void {
     const actualize = (mouse: [number, number]) => {
       if (this.fdCompToDrop !== undefined) {
-        console.log(mouse)
         // Should call Backend for add new component here
+        const fdElement = new FDElement(this.makeId(10), this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
+        addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal)
+        if (this.graphs.has(this.currentTab)) {
+          // eslint-disable-next-line
+          this.graphs.get(this.currentTab)?.push(fdElement)
+        } else {
+          this.graphs.set(this.currentTab, [fdElement])
+        }
         addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
         this.fdCompToDrop = undefined
       }
@@ -206,14 +222,13 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   * Load component list into the conception grid
+   * Load graphs elements list into the conception grid
    * @public
-   * @param components a list of components
+   * @param elementList a list of elements
    */
-  // eslint-disable-next-line
-  loadGraphIntoGrid (graphs: FDElement[]) {
+  setGraphsElements (elementList: FDElement[]) {
     this.graphs = new Map<string, Array<FDElement>>()
-    graphs.forEach(el => {
+    elementList.forEach(el => {
       if (this.graphs.has(el.getTabId())) {
         // eslint-disable-next-line
         this.graphs.get(el.getTabId())?.push(el)
@@ -261,10 +276,12 @@ export default class ConceptionGrid extends Vue {
   populateSvg (): void {
     d3.selectAll('.component').remove()
     d3.selectAll('.link').remove()
-    this.graphs.get(this.currentTab).forEach(el => {
+    // eslint-disable-next-line
+    this.graphs.get(this.currentTab)?.forEach(el => {
       addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
     })
-    this.graphs.get(this.currentTab).forEach(component => {
+    // eslint-disable-next-line
+    this.graphs.get(this.currentTab)?.forEach(component => {
       if (component.getLinks().size !== 0) {
         component.getLinks().forEach((links, index) => {
           if (index !== 99) {
@@ -284,17 +301,11 @@ export default class ConceptionGrid extends Vue {
    * @returns a new string identifiant generate with makeId()
    */
   registerLink (outputCompId: string, inputCompId: string): string {
+    console.log(outputCompId, inputCompId)
     let newId = this.makeId(10)
-    const outputComp = outputCompId.split('-')
-    const inputComp = inputCompId.split('-')
     while (this.idList.includes(newId)) {
       newId = this.makeId(10)
     }
-    /* this.componentList.forEach(el => {
-      if (el.compId === outputComp[1]) {
-        el.links.push({ linkId: newId, compId: inputComp[1], fromOutput: outputComp[0], toInput: inputComp[0] })
-      }
-    }) */
     return newId
   }
 
@@ -347,7 +358,7 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   *
+   * Update current FDElement in the graph
    */
   updateCurrentComponent (fdElement: FDElement, name: string, color: string): void {
     if (name !== '') {

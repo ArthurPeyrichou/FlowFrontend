@@ -1,6 +1,5 @@
 import * as d3 from 'd3'
 import { lineFunction, getLineData } from '../gridServices/addLink'
-import { FDComponent } from '../../models/FDComponent'
 import { transfertData } from './transfertData'
 import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH, TRANSFER_TYPE } from '../../config'
 import { FDElement } from '@/models/FDElement'
@@ -32,6 +31,10 @@ export function toggleComponentLoading (id: string): void {
     .html('<i class="fa fa-' + (isLoading ? icon.attr('data-icon') : 'spin fa-cog') + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 }
 
+/**
+ * @param name is the FDElement's name
+ * @param title is the FDComponent title
+ */
 function getCompWidth (name: string, title: string): number {
   return 75 + Math.max(name.length, title.length, 10) * 8
 }
@@ -52,6 +55,22 @@ const rectPlaceY = (y: number, theCompHeight: number) => {
   }
   return y - (theCompHeight / 2)
 }
+const namePlaceX = (x: number, theCompWidth: number) => {
+  if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
+    return SVG_GRID_BORDER_WIDTH + 65
+  } else if (x > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompWidth / 2))) {
+    return SVG_GRID_SIZE + 65 - SVG_GRID_BORDER_WIDTH - theCompWidth
+  }
+  return x - (theCompWidth / 2) + 65
+}
+const namePlaceY = (y: number, theCompHeight: number) => {
+  if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
+    return SVG_GRID_BORDER_WIDTH - 8 + (theCompHeight / 2)
+  } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
+    return SVG_GRID_SIZE - 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
+  }
+  return y - 8
+}
 const titlePlaceX = (x: number, theCompWidth: number) => {
   if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
     return SVG_GRID_BORDER_WIDTH + 65
@@ -61,22 +80,6 @@ const titlePlaceX = (x: number, theCompWidth: number) => {
   return x - (theCompWidth / 2) + 65
 }
 const titlePlaceY = (y: number, theCompHeight: number) => {
-  if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
-    return SVG_GRID_BORDER_WIDTH - 8 + (theCompHeight / 2)
-  } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
-    return SVG_GRID_SIZE - 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
-  }
-  return y - 8
-}
-const typePlaceX = (x: number, theCompWidth: number) => {
-  if (x < (SVG_GRID_BORDER_WIDTH + (theCompWidth / 2))) {
-    return SVG_GRID_BORDER_WIDTH + 65
-  } else if (x > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompWidth / 2))) {
-    return SVG_GRID_SIZE + 65 - SVG_GRID_BORDER_WIDTH - theCompWidth
-  }
-  return x - (theCompWidth / 2) + 65
-}
-const typePlaceY = (y: number, theCompHeight: number) => {
   if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
     return SVG_GRID_BORDER_WIDTH + 7 + (theCompHeight / 2)
   } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
@@ -193,13 +196,13 @@ function updateComponentPosition (theCompId: string, x: null | number = null, y:
     .attr('x', rectPlaceX(x, theCompWidth))
     .attr('y', rectPlaceY(y, theCompHeight))
 
+  d3.select('#name-text-' + theCompId)
+    .attr('x', namePlaceX(x, theCompWidth))
+    .attr('y', namePlaceY(y, theCompHeight))
+
   d3.select('#title-text-' + theCompId)
     .attr('x', titlePlaceX(x, theCompWidth))
     .attr('y', titlePlaceY(y, theCompHeight))
-
-  d3.select('#type-text-' + theCompId)
-    .attr('x', typePlaceX(x, theCompWidth))
-    .attr('y', typePlaceY(y, theCompHeight))
 
   d3.select('#icon-' + theCompId)
     .attr('x', iconPlaceX(x, theCompWidth))
@@ -241,9 +244,13 @@ function updateComponentPosition (theCompId: string, x: null | number = null, y:
   })
 }
 
+/**
+ * @param name is the FDElement's name
+ * @param title is the FDComponent title
+ */
 export function setComponentName (theCompId: string, name: string, title: string): void {
   d3.select('#rect-' + theCompId).attr('width', getCompWidth(name, title))
-  d3.select('#title-text-' + theCompId).text(name)
+  d3.select('#name-text-' + theCompId).text(name)
   updateComponentPosition(theCompId)
 }
 
@@ -287,27 +294,27 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     })
 
   g.append('text')
-    .attr('id', 'title-text-' + fdCompToDrop.getId())
+    .attr('id', 'name-text-' + fdCompToDrop.getId())
     .attr('class', 'draggable unselectable-text')
     .attr('data-id', fdCompToDrop.getId())
     .attr('fill', 'black')
     .style('font-size', '14px')
     .html(fdCompToDrop.getName())
-    .attr('x', titlePlaceX(x, compWidth))
-    .attr('y', titlePlaceY(y, compHeight))
+    .attr('x', namePlaceX(x, compWidth))
+    .attr('y', namePlaceY(y, compHeight))
     .on('click', () => {
       openModal(fdCompToDrop)
     })
 
   g.append('text')
-    .attr('id', 'type-text-' + fdCompToDrop.getId())
+    .attr('id', 'title-text-' + fdCompToDrop.getId())
     .attr('class', 'draggable unselectable-text')
     .attr('data-id', fdCompToDrop.getId())
     .attr('fill', 'black')
     .style('font-size', '12px')
     .html(fdCompToDrop.getFDComponent().getTitle())
-    .attr('x', typePlaceX(x, compWidth))
-    .attr('y', typePlaceY(y, compHeight))
+    .attr('x', titlePlaceX(x, compWidth))
+    .attr('y', titlePlaceY(y, compHeight))
     .on('click', () => {
       openModal(fdCompToDrop)
     })

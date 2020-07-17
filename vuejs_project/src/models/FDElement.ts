@@ -13,8 +13,8 @@ export class FDElement {
     private x: number;
     private y: number;
     private notes: string;
-    private state: {};
-    private options: {};
+    private state: JSON;
+    private options: JSON;
     private links: Map<number, Array<{index: number; id: string}>>;
 
     /**
@@ -28,7 +28,7 @@ export class FDElement {
      * @param state JSON Object or string parsable into JSON Object.
      * @param links JSON Object or string parsable into JSON Object.
      */
-    constructor (id: string, aFDComponent: FDComponent, tabId: string, name: string, color: string, x: number | string, y: number | string, notes: string, state: any, options: any, links: Map<number, Array<{index: number; id: string}>>) {
+    constructor (id: string, aFDComponent: FDComponent, tabId: string, name: string, color: string, x: number | string, y: number | string, notes: string, state: JSON, options: JSON, links: Map<number, Array<{index: number; id: string}>>) {
       this.id = id
       this.hisFDComponent = aFDComponent
       this.tabId = tabId
@@ -36,11 +36,11 @@ export class FDElement {
       this.color = color
       this.x = (typeof x === 'string') ? Number.parseInt(x) : x
       if (this.x < 0 || this.x > SVG_GRID_SIZE) {
-        throw new Error("x attribut of Component '" + id + "' should be an integer in interval [0;" + SVG_GRID_SIZE + "]. Got '" + x + "'.")
+        throw new Error('x attribut of Component "' + id + '" should be an integer in interval [0;' + SVG_GRID_SIZE + ']. Got "' + x + '".')
       }
       this.y = (typeof y === 'string') ? Number.parseInt(y) : y
       if (this.y < 0 || this.y > SVG_GRID_SIZE) {
-        throw new Error("y attribut of Component '" + id + "' should be an integer in interval [0;" + SVG_GRID_SIZE + "]. Got '" + y + "'.")
+        throw new Error('y attribut of Component "' + id + '" should be an integer in interval [0;' + SVG_GRID_SIZE + ']. Got "' + y + '".')
       }
       this.notes = notes
       this.state = state
@@ -83,11 +83,11 @@ export class FDElement {
       return this.notes
     }
 
-    getOptions (): any {
+    getOptions (): JSON {
       return this.options
     }
 
-    getState (): any {
+    getState (): JSON {
       return this.state
     }
 
@@ -106,14 +106,14 @@ export class FDElement {
     setX (x: number | string): void {
       this.x = (typeof x === 'string') ? Number.parseInt(x) : x
       if (this.x < 0 || this.x > SVG_GRID_SIZE) {
-        throw new Error("Can't set x. x attribut of Component '" + this.id + "' should be an integer in interval [0;" + SVG_GRID_SIZE + "]. Got '" + x + "'.")
+        throw new Error('Can\'t set x. x attribut of Component "' + this.id + '" should be an integer in interval [0;' + SVG_GRID_SIZE + ']. Got "' + x + '".')
       }
     }
 
     setY (y: number | string): void {
       this.y = (typeof y === 'string') ? Number.parseInt(y) : y
       if (this.y < 0 || this.y > SVG_GRID_SIZE) {
-        throw new Error("Can't set y. y attribut of Component '" + this.id + "' should be an integer in interval [0;" + SVG_GRID_SIZE + "]. Got '" + y + "'.")
+        throw new Error('Can\'t set y. y attribut of Component "' + this.id + '" should be an integer in interval [0;' + SVG_GRID_SIZE + ']. Got "' + y + '".')
       }
     }
 
@@ -123,7 +123,10 @@ export class FDElement {
     }
 
     setLinks (links: Map<number, Array<{index: number; id: string}>>): void {
-      this.links = links
+      this.links = new Map<number, Array<{index: number; id: string}>>()
+      for (const [key, value] of Object.entries(links)) {
+        this.links.set(Number.parseInt(key), value)
+      }
     }
 
     addLink (index: number, link: {index: number; id: string}): void {
@@ -144,7 +147,11 @@ export class FDElement {
       if (this.links.has(index)) {
         // eslint-disable-next-line
         const list: Array<{index: number; id: string}> | undefined = this.links.get(index)?.filter(el => !(el.id === link.id && el.index === el.index))
-        this.links.set(index, (list === undefined ? [] : list))
+        if (list === undefined || list.length === 0) {
+          this.links.delete(index)
+        } else {
+          this.links.set(index, list)
+        }
       }
     }
 
