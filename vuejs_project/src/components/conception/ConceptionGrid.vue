@@ -53,6 +53,7 @@ import { FDComponent } from '../../models/FDComponent'
 import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
 import { addLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
 import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
+import { FDElement } from '../../models/FDElement'
 
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
@@ -65,7 +66,7 @@ export default class ConceptionGrid extends Vue {
   @Prop({ default: 'dark' }) theme!: string
 
   fdCompToDrop: FDComponent | undefined = undefined
-  componentList: Array<{component: FDComponent; compId: string; color: string; name: string; links: Array<{linkId: string; compId: string; fromOutput: string; toInput: string}>}> = []
+  graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
   idList: Array<string> = []
   tabs: Array<{id: string; index: number; name: string}> = []
   currentTab = ''
@@ -85,7 +86,8 @@ export default class ConceptionGrid extends Vue {
    * @param fdComp the component to delete
    */
   deleteTheComp (fdCompId: string): void {
-    this.componentList = this.componentList.filter(el => {
+    console.log(fdCompId)
+    /* this.componentList = this.componentList.filter(el => {
       el.links = el.links.filter(el => {
         if (el.compId !== fdCompId) {
           return true
@@ -103,7 +105,7 @@ export default class ConceptionGrid extends Vue {
         document.getElementById('comp-' + fdCompId)?.remove()
         return false
       }
-    })
+    }) */
   }
 
   /**
@@ -203,6 +205,29 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Load component list into the conception grid
+   * @public
+   * @param components a list of components
+   */
+  // eslint-disable-next-line
+  loadGraphIntoGrid (graphs: FDElement[]) {
+    this.graphs = new Map<string, Array<FDElement>>()
+    graphs.forEach(el => {
+      if (this.graphs.has(el.getTabId())) {
+        // eslint-disable-next-line
+        this.graphs.get(el.getTabId())?.push(el)
+      } else {
+        this.graphs.set(el.getTabId(), [el])
+      }
+    })
+    this.graphs.forEach(value => {
+      value.forEach(el => {
+        addComponentIntoGrid([el.getX(), el.getY()], el, this.registerComponent, this.openComponentSettingModal)
+      })
+    })
+  }
+
+  /**
    * Make a random string.
    * @public
    * @param length the length wish
@@ -224,7 +249,7 @@ export default class ConceptionGrid extends Vue {
    */
   openComponentSettingModal (compId: string): void {
     // eslint-disable-next-line
-    (this.$refs.myCompSettingModal as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
+  //(this.$refs.myCompSettingModal as any).sendData(this.componentList.filter(el => el.compId === compId)[0])
     // eslint-disable-next-line
     (this.$refs.myCompSettingModal as any).showModal()
   }
@@ -249,7 +274,7 @@ export default class ConceptionGrid extends Vue {
     while (this.idList.includes(newId)) {
       newId = this.makeId(10)
     }
-    this.componentList.push({ component: comp, compId: newId, color: comp.getColor(), name: comp.getTitle(), links: [] })
+    // this.componentList.push({ component: comp, compId: newId, color: comp.getColor(), name: comp.getTitle(), links: [] })
     return newId
   }
 
@@ -267,11 +292,11 @@ export default class ConceptionGrid extends Vue {
     while (this.idList.includes(newId)) {
       newId = this.makeId(10)
     }
-    this.componentList.forEach(el => {
+    /* this.componentList.forEach(el => {
       if (el.compId === outputComp[1]) {
         el.links.push({ linkId: newId, compId: inputComp[1], fromOutput: outputComp[0], toInput: inputComp[0] })
       }
-    })
+    }) */
     return newId
   }
 
@@ -324,14 +349,14 @@ export default class ConceptionGrid extends Vue {
    *
    */
   updateCurrentComponent (compId: string, name: string, color: string): void {
-    let title = ''
-    this.componentList.forEach(el => {
+    const title = ''
+    /* this.componentList.forEach(el => {
       if (el.compId === compId) {
         el.color = color
         el.name = name
         title = el.component.getTitle()
       }
-    })
+    }) */
     if (title !== '') {
       // eslint-disable-next-line no-unused-expressions
       document.getElementById('rect-' + compId)?.setAttribute('fill', color)

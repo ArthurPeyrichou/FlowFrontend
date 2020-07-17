@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-    <ToolBar :theme="theme"/>
+    <ToolBar ref="myToolBar" :theme="theme"/>
     <ConceptionGrid ref="myConceptionGrid" :theme="theme"/>
-    <ConsoleBar :theme="theme"/>
+    <ConsoleBar ref="myConsoleBar" :theme="theme"/>
   </div>
 </template>
 
@@ -11,6 +11,7 @@ import ToolBar from '@/components/tool/ToolBar.vue'
 import ConceptionGrid from '@/components/conception/ConceptionGrid.vue'
 import ConsoleBar from '@/components/console/ConsoleBar.vue'
 import { FDComponent } from '../models/FDComponent'
+import { FDElement } from '../models/FDElement'
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { WEBSOCKET_URL, WEBSOCKET_PORT } from '../config'
 
@@ -32,11 +33,13 @@ export default class DesignBoard extends Vue {
     super()
     console.log('Starting connection to WebSocket Server')
 
-    const sendData = (components: FDComponent[], tabs: {id: string; index: string; name: string}[]) => {
+    const sendData = (components: FDComponent[], graphs: FDElement[], data: any) => {
       // eslint-disable-next-line
-      (this.$children[0] as any).setCompList(components);
+      (this.$refs.myToolBar as any).setCompList(components);
       // eslint-disable-next-line
-      (this.$children[1] as any).setTabs(tabs);
+      (this.$refs.myConceptionGrid as any).setTabs(data.tabs);
+      // eslint-disable-next-line
+      (this.$refs.myConceptionGrid as any).loadGraphIntoGrid(graphs);
     }
 
     // eslint-disable-next-line
@@ -44,13 +47,24 @@ export default class DesignBoard extends Vue {
       if (data.type === 'designer') {
         this.data = data
         console.log(this.data)
-        const compBrutList: FDComponent[] = []
+        const database: FDComponent[] = []
+        const map: Map<string, FDComponent> = new Map()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data.database.forEach((el: any) => {
-          compBrutList.push(new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options))
+          const comp = new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options)
+          database.push(comp)
+          map.set(el.id, comp)
+        })
+        const graphs: FDElement[] = []
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data.components.forEach((el: any) => {
+          const comp = map.get(el.component)
+          if (comp !== undefined) {
+            graphs.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
+          }
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sendData(compBrutList, data.tabs)
+        sendData(database, graphs, data)
       }
     }
 
@@ -72,11 +86,11 @@ export default class DesignBoard extends Vue {
             if (this.connectionTries > 0) {
               setTimeout(() => this.connect(url), 1000)
             } else {
-              sendData(this.defaultList, [])
+              sendData(this.defaultList, [], { tabs: [], components: [] })
               throw new Error('Maximum number of connection trials has been reached')
             }
           } else {
-            sendData(this.defaultList, [])
+            sendData(this.defaultList, [], { tabs: [], components: [] })
             throw new Error('Websocket error: ' + event?.target)
           }
         })

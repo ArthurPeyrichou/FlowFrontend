@@ -3,6 +3,7 @@ import { lineFunction, getLineData } from '../gridServices/addLink'
 import { FDComponent } from '../../models/FDComponent'
 import { transfertData } from './transfertData'
 import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH, TRANSFER_TYPE } from '../../config'
+import { FDElement } from '@/models/FDElement'
 
 /**
  * Create an animation for data transfer for each outputs of a component to his childrens.
@@ -253,13 +254,13 @@ export function setComponentName (theCompId: string, name: string, title: string
  * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
  * @param openModal function call by clicking on the component
  */
-export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDComponent, registerComponent: Function, openModal: Function): void {
+export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDElement, registerComponent: Function, openModal: Function): void {
   const x = mouse[0]
   const y = mouse[1]
-  const inputCount = fdCompToDrop.getInput()
-  const outputCount = fdCompToDrop.getOutput()
+  const inputCount = fdCompToDrop.getFDComponent().getInput()
+  const outputCount = fdCompToDrop.getFDComponent().getOutput()
   const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, 65)
-  const compWidth = getCompWidth(fdCompToDrop.getTitle(), '')
+  const compWidth = getCompWidth(fdCompToDrop.getName(), '')
   const newId: string = registerComponent(fdCompToDrop)
   const g = d3.select('#conception-grid-svg')
     .append('g')
@@ -291,7 +292,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     .attr('data-id', newId)
     .attr('fill', 'black')
     .style('font-size', '14px')
-    .html(fdCompToDrop.getTitle())
+    .html(fdCompToDrop.getName())
     .attr('x', titlePlaceX(x, compWidth))
     .attr('y', titlePlaceY(y, compHeight))
     .on('click', () => {
@@ -304,7 +305,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     .attr('data-id', newId)
     .attr('fill', 'black')
     .style('font-size', '12px')
-    .html(fdCompToDrop.getTitle())
+    .html(fdCompToDrop.getFDComponent().getTitle())
     .attr('x', typePlaceX(x, compWidth))
     .attr('y', typePlaceY(y, compHeight))
     .on('click', () => {
@@ -315,7 +316,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     .attr('id', 'icon-' + newId)
     .attr('class', 'draggable unselectable-text icon')
     .attr('data-id', newId)
-    .attr('data-icon', fdCompToDrop.getIcon())
+    .attr('data-icon', fdCompToDrop.getFDComponent().getIcon())
     .attr('x', iconPlaceX(x, compWidth))
     .attr('y', iconPlaceY(y, compHeight))
     .attr('width', 24)
@@ -325,7 +326,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
     })
     .append('xhtml:body')
     .style('background-color', 'transparent')
-    .html('<i class="icon-fixed-width fa fa-' + fdCompToDrop.getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
+    .html('<i class="icon-fixed-width fa fa-' + fdCompToDrop.getFDComponent().getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 
   g.append('text')
     .attr('id', 'io-' + newId)
@@ -340,7 +341,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDC
       openModal(newId)
     })
 
-  if (fdCompToDrop.isClickable()) {
+  if (fdCompToDrop.getFDComponent().isClickable()) {
     g.append('polygon')
       .attr('id', 'trigger-' + newId)
       .attr('class', 'draggable')
