@@ -50,9 +50,10 @@ import CompSettingModal from '@/components/conception/CompSettingModal.vue'
 import TabSettingModal from '@/components/conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
-import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
+import { addComponentIntoGrid, setComponentName, setComponentIO, setComponentLoading } from '../../services/gridServices/addComponent'
 import { addLinkBeetweenTwoComponentsIntoGrid, loadLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
-import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
+import { transfertData } from '../../services/gridServices/transfertData'
+import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE } from '../../config'
 import { FDElement } from '../../models/FDElement'
 import { BaseType, ContainerElement } from 'd3'
 
@@ -238,6 +239,32 @@ export default class ConceptionGrid extends Vue {
       }
     })
     this.populateSvg()
+  }
+
+  setTraffic (traffic: any) {
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      graph.forEach(el => {
+        if (traffic[el.getId()]) {
+          if(el.getFDComponent().getOutput() > 0) {
+            if (traffic[el.getId()].output === 0) {
+              setComponentLoading(el.getId(), true)
+            } else {
+              setComponentLoading(el.getId(), false)
+            }
+          }
+          setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
+          el.getLinks().forEach((links, index) => {
+            links.forEach(link => {
+              // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
+              if (index !== 99) {
+                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE)
+              }
+            })
+          })
+        }
+      })
+    }
   }
 
   /**

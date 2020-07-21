@@ -37,8 +37,21 @@ export default class DesignBoard extends Vue {
 
       const treatMessage = (data: any) => {
         switch (data.type) {
+          case 'debug':
+            console.log('Debug: ', data)
+            break
           case 'designer':
             this.sendDesignerData(data)
+            break
+          case 'online':
+            console.log('Count of client connected: ' + data.count)
+            break
+          case 'status':
+            console.log('Message type "' + data.type + '".')
+            console.log(data)
+            break
+          case 'traffic':
+            (this.$refs.myConceptionGrid as ConceptionGrid).setTraffic(data.body)
             break
           default:
             console.error('Message type "' + data.type + '" not treated.')

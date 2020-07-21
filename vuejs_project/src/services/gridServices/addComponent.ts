@@ -1,23 +1,7 @@
 import * as d3 from 'd3'
 import { lineFunction, getLineData } from '../gridServices/addLink'
-import { transfertData } from './transfertData'
-import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH, TRANSFER_TYPE } from '../../config'
+import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH } from '../../config'
 import { FDElement } from '@/models/FDElement'
-
-/**
- * Create an animation for data transfer for each outputs of a component to his childrens.
- * @param id the component's id
- */
-export function makeComponentTransferData (id: string): void {
-  const links = document.getElementsByClassName('link-' + id)
-  for (let i = 0; i < links.length; ++i) {
-    const output = '#output-' + links[i].getAttribute('data-output')
-    const intput = '#input-' + links[i].getAttribute('data-input')
-    if (output.includes(id)) {
-      transfertData(output, intput, TRANSFER_TYPE)
-    }
-  }
-}
 
 export function toggleComponentLoading (id: string): void {
   const icon = d3.select('#icon-' + id)
@@ -31,12 +15,27 @@ export function toggleComponentLoading (id: string): void {
     .html('<i class="fa fa-' + (isLoading ? icon.attr('data-icon') : 'spin fa-cog') + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 }
 
+export function setComponentLoading (id: string, isLoading: boolean): void {
+  const icon = d3.select('#icon-' + id)
+
+  icon.attr('class', isLoading ? icon.attr('class') + ' loading' : icon.attr('class').replace(' loading', ''))
+    .html('')
+
+  icon.append('xhtml:body')
+    .style('background-color', 'transparent')
+    .html('<i class="fa fa-' + (isLoading ? 'spin fa-cog' : icon.attr('data-icon')) + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
+}
+
 /**
  * @param name is the FDElement's name
  * @param title is the FDComponent title
  */
-function getCompWidth (name: string, title: string): number {
-  return 75 + Math.max(name.length, title.length, 10) * 8
+function getCompWidth (name: string, title: string, compId: undefined | string): number {
+  let ioLength = 0
+  if (compId !== undefined) {
+    ioLength = d3.select('#io-' + compId).text().length
+  }
+  return 75 + Math.max(name.length, title.length, (ioLength - 3), 10) * 8
 }
 
 const rectPlaceX = (x: number, theCompWidth: number) => {
@@ -249,8 +248,16 @@ function updateComponentPosition (theCompId: string, x: null | number = null, y:
  * @param title is the FDComponent title
  */
 export function setComponentName (theCompId: string, name: string, title: string): void {
-  d3.select('#rect-' + theCompId).attr('width', getCompWidth(name, title))
+  d3.select('#rect-' + theCompId).attr('width', getCompWidth(name, title, theCompId))
   d3.select('#name-text-' + theCompId).text(name)
+  updateComponentPosition(theCompId)
+}
+
+export function setComponentIO (theCompId: string, input: string, output: string): void {
+  d3.select('#io-' + theCompId).text('IO: ' + input + 'B \uf061 ' + output + 'B')
+  const name = d3.select('#name-text-' + theCompId).html()
+  const title = d3.select('#title-text-' + theCompId).html()
+  d3.select('#rect-' + theCompId).attr('width', getCompWidth(name, title, theCompId))
   updateComponentPosition(theCompId)
 }
 
@@ -267,7 +274,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
   const inputCount = fdCompToDrop.getFDComponent().getInput()
   const outputCount = fdCompToDrop.getFDComponent().getOutput()
   const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, 65)
-  const compWidth = getCompWidth(fdCompToDrop.getName(), '')
+  const compWidth = getCompWidth(fdCompToDrop.getName(), '', undefined)
   const g = d3.select('#conception-grid-svg')
     .append('g')
     .attr('class', 'component')
@@ -358,7 +365,6 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
       .attr('fill', 'white')
       .on('click', () => {
         console.log('Component activated!')
-        makeComponentTransferData(fdCompToDrop.getId())
       })
   }
 

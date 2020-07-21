@@ -61,6 +61,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
   const source: [number, number] = [Number.parseInt(theOuputCircle.attr('cx')), Number.parseInt(theOuputCircle.attr('cy'))]
 
   // Make the circle follow the path line from the output to the input
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function pathTween (path: any) {
     const length = path.node().getTotalLength()
     const r = d3.interpolate(0, length)
