@@ -35,12 +35,10 @@ export default class DesignBoard extends Vue {
       this.sendBlankDesignerData()
       console.log('Starting connection to WebSocket Server')
 
-      // eslint-disable-next-line
-      const treatMessage = (data: Record<string, any>) => {
+      const treatMessage = (data: any) => {
         switch (data.type) {
           case 'designer':
             this.sendDesignerData(data)
-            console.log(JSON.stringify(data.components[2].connections))
             break
           default:
             console.error('Message type "' + data.type + '" not treated.')
@@ -82,13 +80,12 @@ export default class DesignBoard extends Vue {
   }
 
   sendBlankDesignerData (): void {
-    // eslint-disable-next-line
-    (this.$refs.myToolBar as any).setCompList([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, '\uf188', '1.0', 'readme', true, '{}'),
-      new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, '\uf188', '1.0', 'readme', false, '{}'),
-      new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, '\uf188', '1.0', 'readme', false, '{}'),
-      new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, '\uf188', '1.0', 'readme', false, '{}'),
-      new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, '\uf188', '1.0', 'readme', false, '{}'),
-      new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, '\uf188', '1.0', 'readme', true, '{}')])
+    (this.$refs.myToolBar as ToolBar).setCompList([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, 'bug', '1.0', 'readme', true, '{}'),
+      new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, 'bug', '1.0', 'readme', false, '{}'),
+      new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, 'bug', '1.0', 'readme', false, '{}'),
+      new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, 'bug', '1.0', 'readme', false, '{}'),
+      new FDComponent('id4', 'FakeType1', 'FComp(2-1)', '#EFC467', 'autor', 2, true, 'bug', '1.0', 'readme', false, '{}'),
+      new FDComponent('id5', '', 'FakeCompLongName(0-2)', '#77C0F4', 'autor', false, 2, 'bug', '1.0', 'readme', true, '{}')])
   }
 
   /**
@@ -96,33 +93,26 @@ export default class DesignBoard extends Vue {
    * Send tabs to conception grid
    * And send all graphs element to conception grid
    */
-  // eslint-disable-next-line
-  sendDesignerData (data: Record<string, any>): void {
+  sendDesignerData (data: any): void {
     const databaseCompList: FDComponent[] = []
     const map: Map<string, FDComponent> = new Map()
-    // eslint-disable-next-line
-    data.database.forEach((el: Record<string, any>) => {
+    data.database.forEach((el: any) => {
       const comp = new FDComponent(el.id, el.group, el.title, el.color, el.author, el.input, el.output, el.icon, el.version, el.readme, el.click, el.options)
       databaseCompList.push(comp)
       map.set(el.id, comp)
     });
-    // eslint-disable-next-line
-    (this.$refs.myToolBar as any).setCompList(databaseCompList);
-
-    // eslint-disable-next-line
-    (this.$refs.myConceptionGrid as any).setTabs(data.tabs);
+    (this.$refs.myToolBar as ToolBar).setCompList(databaseCompList);
+    (this.$refs.myConceptionGrid as ConceptionGrid).setTabs(data.tabs)
 
     const graphs: FDElement[] = []
 
-    // eslint-disable-next-line
-    data.components.forEach((el: Record<string, any>) => {
+    data.components.forEach((el: any) => {
       const comp = map.get(el.component)
       if (comp !== undefined) {
         graphs.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
       }
     });
-    // eslint-disable-next-line
-    (this.$refs.myConceptionGrid as any).setGraphsElements(graphs);
+    (this.$refs.myConceptionGrid as ConceptionGrid).setGraphsElements(graphs)
   }
 }
 </script>

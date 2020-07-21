@@ -54,6 +54,7 @@ import { addComponentIntoGrid, setComponentName } from '../../services/gridServi
 import { addLinkBeetweenTwoComponentsIntoGrid, loadLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
 import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
 import { FDElement } from '../../models/FDElement'
+import { BaseType, ContainerElement } from 'd3'
 
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
@@ -101,17 +102,15 @@ export default class ConceptionGrid extends Vue {
         if (el.compId !== fdCompId) {
           return true
         } else {
-          // eslint-disable-next-line no-unused-expressions
-          document.getElementById('link-' + el.linkId)?.remove()
+          d3.select('#link-' + el.linkId).remove()
           return false
         }
       })
       if (el.compId !== fdCompId) {
         return true
       } else {
-        el.links.forEach(el => document.getElementById('link-' + el.linkId)?.remove())
-        // eslint-disable-next-line no-unused-expressions
-        document.getElementById('comp-' + fdCompId)?.remove()
+        el.links.forEach(el => { d3.select('#link-' + el.linkId).remove() })
+        d3.select('#comp-' + fdCompId).remove()
         return false
       }
     }) */
@@ -150,8 +149,10 @@ export default class ConceptionGrid extends Vue {
         const fdElement = new FDElement(this.makeId(10), this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
         addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal)
         if (this.graphs.has(this.currentTab)) {
-          // eslint-disable-next-line
-          this.graphs.get(this.currentTab)?.push(fdElement)
+          const graph = this.graphs.get(this.currentTab)
+          if (graph) {
+            graph.push(fdElement)
+          }
         } else {
           this.graphs.set(this.currentTab, [fdElement])
         }
@@ -160,13 +161,11 @@ export default class ConceptionGrid extends Vue {
       }
     }
 
-    d3.select('#svg-grid-bg').on('mousemove', function () {
-      // eslint-disable-next-line
-      actualize(d3.mouse(this as any));
+    d3.select('#svg-grid-bg').on('mousemove', function (this: BaseType) {
+      actualize(d3.mouse(this as ContainerElement))
     })
 
     // This part allows the conception grid positioning by drag and drop
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const svgBoard = document.getElementById('conception-board')
     if (svgBoard !== null) {
       let isDown = false
@@ -230,8 +229,10 @@ export default class ConceptionGrid extends Vue {
     this.graphs = new Map<string, Array<FDElement>>()
     elementList.forEach(el => {
       if (this.graphs.has(el.getTabId())) {
-        // eslint-disable-next-line
-        this.graphs.get(el.getTabId())?.push(el)
+        const graph = this.graphs.get(el.getTabId())
+        if (graph) {
+          graph.push(el)
+        }
       } else {
         this.graphs.set(el.getTabId(), [el])
       }
@@ -260,8 +261,7 @@ export default class ConceptionGrid extends Vue {
    * @param compId the id of the component
    */
   openComponentSettingModal (element: FDElement): void {
-    // eslint-disable-next-line
-    (this.$refs.myCompSettingModal as any).showModal(element)
+    (this.$refs.myCompSettingModal as CompSettingModal).showModal(element)
   }
 
   /**
@@ -269,27 +269,27 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   openTabSettingModal (): void {
-    // eslint-disable-next-line
-    (this.$refs.myTabSettingModal as any).showModal()
+    (this.$refs.myTabSettingModal as TabSettingModal).showModal()
   }
 
   populateSvg (): void {
     d3.selectAll('.component').remove()
     d3.selectAll('.link').remove()
-    // eslint-disable-next-line
-    this.graphs.get(this.currentTab)?.forEach(el => {
-      addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
-    })
-    // eslint-disable-next-line
-    this.graphs.get(this.currentTab)?.forEach(component => {
-      if (component.getLinks().size !== 0) {
-        component.getLinks().forEach((links, index) => {
-          if (index !== 99) {
-            links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link))
-          }
-        })
-      }
-    })
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      graph.forEach(el => {
+        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
+      })
+      graph.forEach(component => {
+        if (component.getLinks().size !== 0) {
+          component.getLinks().forEach((links, index) => {
+            if (index !== 99) {
+              links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link))
+            }
+          })
+        }
+      })
+    }
     addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
   }
 
@@ -339,21 +339,22 @@ export default class ConceptionGrid extends Vue {
    * @param barName the id's prefix of the bar's div
    */
   toggleBar (barName: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const element: HTMLElement = document.getElementById(barName + '-bar')!
-    const isHide = element.className.includes(' hide')
-    if (isHide) {
-      element.className = element.className.replace(' hide', '')
-    } else {
-      element.className += ' hide'
-    }
-    switch (barName) {
-      case 'tool':
-        this.hideToolBar = isHide
-        break
-      case 'console':
-        this.hideConsoleBar = isHide
-        break
+    const element: HTMLElement | null = document.getElementById(barName + '-bar')
+    if (element) {
+      const isHide = element.className.includes(' hide')
+      if (isHide) {
+        element.className = element.className.replace(' hide', '')
+      } else {
+        element.className += ' hide'
+      }
+      switch (barName) {
+        case 'tool':
+          this.hideToolBar = isHide
+          break
+        case 'console':
+          this.hideConsoleBar = isHide
+          break
+      }
     }
   }
 
@@ -362,11 +363,13 @@ export default class ConceptionGrid extends Vue {
    */
   updateCurrentComponent (fdElement: FDElement, name: string, color: string): void {
     if (name !== '') {
-      fdElement.setName(name)
-      fdElement.setColor(color)
-      // eslint-disable-next-line no-unused-expressions
-      document.getElementById('rect-' + fdElement.getId())?.setAttribute('fill', color)
-      setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
+      const componentRect = document.getElementById('rect-' + fdElement.getId())
+      if (componentRect) {
+        fdElement.setName(name)
+        fdElement.setColor(color)
+        componentRect.setAttribute('fill', color)
+        setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
+      }
     }
   }
 

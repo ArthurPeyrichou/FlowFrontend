@@ -132,12 +132,13 @@ export class FDElement {
     addLink (index: number, link: {index: number; id: string}): void {
       let alreadyExist = false
       if (this.links.has(index)) {
-            // eslint-disable-next-line
-            this.links.get(index)?.forEach(el => alreadyExist = alreadyExist || (el.id === link.id && el.index === el.index))
-            if (!alreadyExist) {
-                // eslint-disable-next-line
-                this.links.get(index)?.push(link)
-            }
+        const links = this.links.get(index)
+        if (links) {
+          links.forEach(el => { alreadyExist = alreadyExist || (el.id === link.id && el.index === link.index) })
+          if (!alreadyExist) {
+            links.push(link)
+          }
+        }
       } else {
         this.links.set(index, [link])
       }
@@ -145,12 +146,14 @@ export class FDElement {
 
     removeLink (index: number, link: {index: number; id: string}): void {
       if (this.links.has(index)) {
-        // eslint-disable-next-line
-        const list: Array<{index: number; id: string}> | undefined = this.links.get(index)?.filter(el => !(el.id === link.id && el.index === el.index))
-        if (list === undefined || list.length === 0) {
-          this.links.delete(index)
-        } else {
-          this.links.set(index, list)
+        const links = this.links.get(index)
+        if (links) {
+          const list: Array<{index: number; id: string}> | undefined = links.filter(el => !(el.id === link.id && el.index === link.index))
+          if (list === undefined || list.length === 0) {
+            this.links.delete(index)
+          } else {
+            this.links.set(index, list)
+          }
         }
       }
     }

@@ -17,8 +17,7 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
   const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
 
   // Make the circle follow the path line from the output to the input
-  // eslint-disable-next-line
-    function pathTween(path: any) {
+  function pathTween (path: any) {
     const length = path.node().getTotalLength()
     const r = d3.interpolate(0, length)
     return function (t: number) {
@@ -28,8 +27,7 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
         d3.select('#' + dataTransfertId).attr('cx', point.x)
           .attr('cy', point.y)
       } else {
-                // eslint-disable-next-line no-unused-expressions
-                document.getElementById(dataTransfertId)?.remove()
+        d3.select('#' + dataTransfertId).remove()
       }
     }
   }
@@ -63,8 +61,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
   const source: [number, number] = [Number.parseInt(theOuputCircle.attr('cx')), Number.parseInt(theOuputCircle.attr('cy'))]
 
   // Make the circle follow the path line from the output to the input
-  // eslint-disable-next-line
-    function pathTween (path: any) {
+  function pathTween (path: any) {
     const length = path.node().getTotalLength()
     const r = d3.interpolate(0, length)
     const xy: Array<[number, number]> = []
@@ -76,8 +73,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
         d3.select('#' + dataTransfertId).datum(xy)
           .attr('d', lineFunction)
       } else {
-                // eslint-disable-next-line no-unused-expressions
-                document.getElementById(dataTransfertId)?.remove()
+        d3.select('#' + dataTransfertId).remove()
       }
     }
   }

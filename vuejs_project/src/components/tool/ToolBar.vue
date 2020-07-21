@@ -62,8 +62,7 @@ import { FDComponent } from '../../models/FDComponent'
 export default class ToolBar extends Vue {
   @Prop({ default: 'dark' }) theme!: string;
 
-  // eslint-disable-next-line
-  compList: Record<string, any> = {};
+  compList: any = {};
   compGroupsList: string[] = [];
   compSearchPattern = '';
   /** FlowData components list got from DesignBoard vue, got itself by the api.  */

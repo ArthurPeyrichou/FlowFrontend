@@ -27,12 +27,13 @@ function isCrossLine (source: [number, number], target: [number, number], isSour
  * Make link under component in UI
  */
 function mooveLinkAndComponents (): void {
-  // eslint-disable-next-line
-  const svg: HTMLElement  = document.getElementById('conception-grid-svg')!
-  for (let i = 0; i < svg.children.length; ++i) {
-    const theClass: string | null = svg.children[i].getAttribute('class')
-    if (theClass !== null && theClass.includes('link')) {
-      svg.insertBefore(svg.children[i], svg.children[2]) // 2 because 0 is defs and 1 is svggridbg
+  const svg: HTMLElement | null = document.getElementById('conception-grid-svg')
+  if (svg) {
+    for (let i = 0; i < svg.children.length; ++i) {
+      const theClass: string | null = svg.children[i].getAttribute('class')
+      if (theClass !== null && theClass.includes('link')) {
+        svg.insertBefore(svg.children[i], svg.children[2]) // 2 because 0 is defs and 1 is svggridbg
+      }
     }
   }
 }
@@ -145,26 +146,29 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
                     document.getElementById('link-' + outputInput.output.id + '-to-' + outputInput.input.id) === null) {
               const newId = registerLink(outputInput.output.id, outputInput.input.id)
               isFounded = true
-                // eslint-disable-next-line no-unused-expressions
-                document.getElementById('link-' + theSourceCirleCode)?.parentElement?.setAttribute('class', 'link')
-                // eslint-disable-next-line no-unused-expressions
-                document.getElementById('link-' + theSourceCirleCode)?.parentElement?.setAttribute('id', 'link-' + newId)
-                d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
-                  .attr('class', 'link-path link-' + outputInput.output.compId + ' link-' + outputInput.input.compId)
-                  .datum(getLineData(outputInput.output.xy, outputInput.input.xy, false))
-                  .attr('d', lineFunction)
-                  .attr('data-input', outputInput.input.id)
-                  .attr('data-output', outputInput.output.id)
-                  .attr('data-input-index', (isSourceInput ? theSourceCirle.attr('data-index') : theTargetCirle.attr('data-index')))
-                  .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
+              const g = document.getElementById('link-' + theSourceCirleCode)?.parentElement
+              if (g) {
+                g.setAttribute('class', 'link')
+                g.setAttribute('id', 'link-' + newId)
+              }
+              d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
+                .attr('class', 'link-path link-' + outputInput.output.compId + ' link-' + outputInput.input.compId)
+                .datum(getLineData(outputInput.output.xy, outputInput.input.xy, false))
+                .attr('d', lineFunction)
+                .attr('data-input', outputInput.input.id)
+                .attr('data-output', outputInput.output.id)
+                .attr('data-input-index', (isSourceInput ? theSourceCirle.attr('data-index') : theTargetCirle.attr('data-index')))
+                .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
 
-                transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE)
+              transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE)
             }
           }
         })
       if (!isFounded) {
-            // eslint-disable-next-line no-unused-expressions
-            document.getElementById('link-' + theSourceCirleCode)?.parentElement?.remove()
+        const g = document.getElementById('link-' + theSourceCirleCode)?.parentElement
+        if (g) {
+          g.remove()
+        }
       }
     })
 
