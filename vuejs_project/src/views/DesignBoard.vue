@@ -38,10 +38,15 @@ export default class DesignBoard extends Vue {
       const treatMessage = (data: any) => {
         switch (data.type) {
           case 'debug':
-            console.log('Debug: ', data)
+            console.log('Debug: ', data);
+            (this.$refs.myConsoleBar as ConsoleBar).addLog(data.body)
             break
           case 'designer':
             this.sendDesignerData(data)
+            break
+          case 'error':
+          case 'errors':
+            console.error(data.type, data)
             break
           case 'online':
             console.log('Count of client connected: ' + data.count)
@@ -54,7 +59,7 @@ export default class DesignBoard extends Vue {
             (this.$refs.myConceptionGrid as ConceptionGrid).setTraffic(data.body)
             break
           default:
-            console.error('Message type "' + data.type + '" not treated.')
+            console.warn('Message type "' + data.type + '" not treated.')
             break
         }
       }
@@ -81,7 +86,6 @@ export default class DesignBoard extends Vue {
             console.log('Successfully connected to the echo websocket server...')
           }
           ws.onmessage = function (event) {
-            console.log('Got a message!')
             treatMessage(JSON.parse(decodeURIComponent(event.data)))
           }
           return ws
