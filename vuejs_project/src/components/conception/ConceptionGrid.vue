@@ -84,6 +84,7 @@ export default class ConceptionGrid extends Vue {
 
   /**
    * Create a new tab and go into it
+   * @public
    */
   addNewTab (aName: string) {
     const newId = this.makeId(10)
@@ -241,12 +242,18 @@ export default class ConceptionGrid extends Vue {
     this.populateSvg()
   }
 
-  setTraffic (traffic: any) {
+  /**
+   * Set all input and output debit in elements into the svg conception grid
+   * @param traffic { elementId: {ci: number, co: number, duration: number, input: number, ni: number, no: number, no0: number, output: number, pending: number}, etc}
+   * @public
+   */
+  setTraffic (traffic: any): void {
+    console.log(traffic)
     const graph = this.graphs.get(this.currentTab)
     if (graph) {
       graph.forEach(el => {
         if (traffic[el.getId()]) {
-          if(el.getFDComponent().getOutput() > 0) {
+          if (el.getFDComponent().getOutput() > 0) {
             if (traffic[el.getId()].output === 0) {
               setComponentLoading(el.getId(), true)
             } else {
@@ -299,6 +306,12 @@ export default class ConceptionGrid extends Vue {
     (this.$refs.myTabSettingModal as TabSettingModal).showModal()
   }
 
+  /**
+   * Remove all components and links from the svg conception grid
+   * Then for each elements in the targeted graph
+   * Add the componenent and all his links into the svg
+   * @public
+   */
   populateSvg (): void {
     d3.selectAll('.component').remove()
     d3.selectAll('.link').remove()

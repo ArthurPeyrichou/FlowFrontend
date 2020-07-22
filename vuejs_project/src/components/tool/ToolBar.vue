@@ -74,15 +74,6 @@ export default class ToolBar extends Vue {
   }
 
   /**
-   * Call by DesignBoard to update the components list
-   * @param compBrutList the new components list
-   * @public
-   */
-  setCompList (compBrutList: FDComponent[]): void {
-    this.compBrutList = compBrutList
-  }
-
-  /**
    * Called when a flowdata component is drag from the list.
    * Sets the selected component in event's dataTransfer in order to get it in the ConceptionFrid Vue.
    * @public
@@ -149,6 +140,15 @@ export default class ToolBar extends Vue {
    */
   resetSearch (): void {
     this.compSearchPattern = ''
+  }
+
+  /**
+   * Call by DesignBoard to update the components list
+   * @param compBrutList the new components list
+   * @public
+   */
+  setCompList (compBrutList: FDComponent[]): void {
+    this.compBrutList = compBrutList
   }
 }
 </script>

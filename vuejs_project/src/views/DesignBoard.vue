@@ -26,6 +26,8 @@ export default class DesignBoard extends Vue {
   // dark or light
   @Prop({ default: 'dark' }) public theme!: string;
 
+  private databaseElementList: Array<FDElement> = []
+  private tabList: Array<{id: string; index: number; name: string}> = []
   private connection: WebSocket | null = null
 
   constructor () {
@@ -38,8 +40,7 @@ export default class DesignBoard extends Vue {
       const treatMessage = (data: any) => {
         switch (data.type) {
           case 'debug':
-            console.log('Debug: ', data);
-            (this.$refs.myConsoleBar as ConsoleBar).addLog(data.body)
+            this.sendMessage(data)
             break
           case 'designer':
             this.sendDesignerData(data)
@@ -109,6 +110,7 @@ export default class DesignBoard extends Vue {
    * Send components from database to toolbar
    * Send tabs to conception grid
    * And send all graphs element to conception grid
+   * @public
    */
   sendDesignerData (data: any): void {
     const databaseCompList: FDComponent[] = []
@@ -118,18 +120,33 @@ export default class DesignBoard extends Vue {
       databaseCompList.push(comp)
       map.set(el.id, comp)
     });
-    (this.$refs.myToolBar as ToolBar).setCompList(databaseCompList);
-    (this.$refs.myConceptionGrid as ConceptionGrid).setTabs(data.tabs)
+    (this.$refs.myToolBar as ToolBar).setCompList(databaseCompList)
+    this.tabList = data.tabs;
+    (this.$refs.myConceptionGrid as ConceptionGrid).setTabs(this.tabList)
 
-    const graphs: FDElement[] = []
+    this.databaseElementList = []
 
     data.components.forEach((el: any) => {
       const comp = map.get(el.component)
       if (comp !== undefined) {
-        graphs.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
+        this.databaseElementList.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
       }
     });
-    (this.$refs.myConceptionGrid as ConceptionGrid).setGraphsElements(graphs)
+    (this.$refs.myConceptionGrid as ConceptionGrid).setGraphsElements(this.databaseElementList)
+  }
+
+  /**
+   * Send message as a log into console bar
+   * @public
+   */
+  sendMessage (data: any): void {
+    const theElement: FDElement[] = this.databaseElementList.filter(el => el.getId() === data.id)
+    if (theElement.length === 1) {
+      const tab = this.tabList.filter(el => el.id === theElement[0].getTabId());
+      (this.$refs.myConsoleBar as ConsoleBar).addLog((tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.body, theElement[0].getColor())
+    } else {
+      (this.$refs.myConsoleBar as ConsoleBar).addLog('Unknown', data.body, '#CF1D1D')
+    }
   }
 }
 </script>
