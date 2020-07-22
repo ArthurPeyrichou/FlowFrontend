@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <ToolBar ref="myToolBar" :theme="theme"/>
-    <ConceptionGrid ref="myConceptionGrid" :theme="theme"/>
+    <ConceptionGrid ref="myConceptionGrid" :theme="theme" :onTriggerableElementClick="onTriggerableElementClick"/>
     <ConsoleBar ref="myConsoleBar" :theme="theme"/>
   </div>
 </template>
@@ -35,68 +35,83 @@ export default class DesignBoard extends Vue {
     // This way we execute the code after the redering of the template
     this.$nextTick(() => {
       this.sendBlankDesignerData()
-      console.log('Starting connection to WebSocket Server')
-
-      const treatMessage = (data: any) => {
-        switch (data.type) {
-          case 'debug':
-            this.sendMessage(data)
-            break
-          case 'designer':
-            this.sendDesignerData(data)
-            break
-          case 'error':
-          case 'errors':
-            console.error(data.type, data)
-            break
-          case 'online':
-            console.log('Count of client connected: ' + data.count)
-            break
-          case 'status':
-            console.log('Message type "' + data.type + '".')
-            console.log(data)
-            break
-          case 'traffic':
-            (this.$refs.myConceptionGrid as ConceptionGrid).setTraffic(data.body)
-            break
-          default:
-            console.warn('Message type "' + data.type + '" not treated.')
-            break
-        }
-      }
-
-      const webSocketFactory = {
-        connectionTries: 3,
-        connect: function (url: string) {
-          const ws = new WebSocket(url)
-          ws.addEventListener('error', e => {
-            // readyState === 3 is CLOSED
-            if ((e.target as WebSocket).readyState === 3) {
-              this.connectionTries--
-
-              if (this.connectionTries > 0) {
-                setTimeout(() => this.connect(url), 1000)
-              } else {
-                console.error('Maximum number of connection trials has been reached')
-              }
-            } else {
-              console.error('Websocket error: ' + event?.target)
-            }
-          })
-          ws.onopen = function () {
-            console.log('Successfully connected to the echo websocket server...')
-          }
-          ws.onmessage = function (event) {
-            treatMessage(JSON.parse(decodeURIComponent(event.data)))
-          }
-          return ws
-        }
-      }
-
-      this.connection = webSocketFactory.connect(WEBSOCKET_URL + WEBSOCKET_PORT)
+      this.connect(3, WEBSOCKET_URL + WEBSOCKET_PORT)
     })
   }
 
+  /**
+   * Connect to backend by WebSocket
+   * And initialize listeners for communication
+   * @param connectionTries the maximum number of connections we want tries before give up
+   * @param url the backend url. Ex: ws://localhost:5001
+   * @public
+   */
+  connect (connectionTries: number, url: string): void {
+    const treatMessage = (data: any) => {
+      switch (data.type) {
+        case 'debug':
+          this.sendMessage(data)
+          break
+        case 'designer':
+          this.sendDesignerData(data)
+          break
+        case 'error':
+        case 'errors':
+          console.error(data.type, data)
+          break
+        case 'online':
+          console.log('Count of client connected: ' + data.count)
+          break
+        case 'status':
+          console.log('Message type "' + data.type + '".')
+          console.log(data)
+          break
+        case 'traffic':
+          (this.$refs.myConceptionGrid as ConceptionGrid).setTraffic(data.body)
+          break
+        default:
+          console.warn('Message type "' + data.type + '" not treated.')
+          break
+      }
+    }
+    console.log('Starting connection to WebSocket Server...')
+    this.connection = new WebSocket(WEBSOCKET_URL + WEBSOCKET_PORT)
+    this.connection.addEventListener('error', e => {
+      // readyState === 3 is CLOSED
+      if ((e.target as WebSocket).readyState === 3) {
+        if (connectionTries > 0) {
+          setTimeout(() => this.connect(connectionTries - 1, url), 1000)
+        } else {
+          console.error('Maximum number of connection trials has been reached')
+        }
+      } else {
+        console.error('Websocket error: ' + event?.target)
+      }
+    })
+    this.connection.onopen = function () {
+      console.log('Successfully connected to the echo websocket server...')
+    }
+    this.connection.onmessage = function (event) {
+      treatMessage(JSON.parse(decodeURIComponent(event.data)))
+    }
+  }
+
+  /**
+   * Call by a listener in addComponent.ts
+   * Will send a message to backend for trigger clicked component
+   * @public
+   */
+  onTriggerableElementClick (elementId: string): void {
+    if (this.connection !== null) {
+      this.connection.send(JSON.stringify({ target: elementId, event: 'click' }))
+    } else {
+      console.log('Element "' + elementId + '" clicked but no connection to send the message found.')
+    }
+  }
+
+  /**
+   * @public
+   */
   sendBlankDesignerData (): void {
     (this.$refs.myToolBar as ToolBar).setCompList([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, 'bug', '1.0', 'readme', true, '{}'),
       new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, 'bug', '1.0', 'readme', false, '{}'),

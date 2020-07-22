@@ -162,7 +162,6 @@ export default class ToolBar extends Vue {
     display: flex;
     flex-flow: column;
     width: 215px;
-    padding-bottom: 50px;
     background-color: #c8c8c8;
   }
   #tool-bar {

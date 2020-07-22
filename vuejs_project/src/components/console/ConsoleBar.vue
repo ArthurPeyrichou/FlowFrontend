@@ -27,7 +27,6 @@ export default class ConsoleBar extends Vue {
    */
   addLog (from: string, log: string, color: string): void {
     const when: Date = new Date(Date.now())
-    console.log(when)
     let newText = log
     while (newText.indexOf('\n') >= 0) {
       newText = newText.replace('\n', '<br/>')

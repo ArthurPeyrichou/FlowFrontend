@@ -66,6 +66,7 @@ import { BaseType, ContainerElement } from 'd3'
 })
 export default class ConceptionGrid extends Vue {
   @Prop({ default: 'dark' }) theme!: string
+  @Prop({ default: (id: string) => { console.log('Trigger component: ' + id) } }) onTriggerableElementClick!: Function
 
   fdCompToDrop: FDComponent | undefined = undefined
   graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
@@ -149,7 +150,7 @@ export default class ConceptionGrid extends Vue {
       if (this.fdCompToDrop !== undefined) {
         // Should call Backend for add new component here
         const fdElement = new FDElement(this.makeId(10), this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
-        addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal)
+        addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal, this.onTriggerableElementClick)
         if (this.graphs.has(this.currentTab)) {
           const graph = this.graphs.get(this.currentTab)
           if (graph) {
@@ -248,7 +249,6 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   setTraffic (traffic: any): void {
-    console.log(traffic)
     const graph = this.graphs.get(this.currentTab)
     if (graph) {
       graph.forEach(el => {
@@ -318,7 +318,7 @@ export default class ConceptionGrid extends Vue {
     const graph = this.graphs.get(this.currentTab)
     if (graph) {
       graph.forEach(el => {
-        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
+        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onTriggerableElementClick)
       })
       graph.forEach(component => {
         if (component.getLinks().size !== 0) {

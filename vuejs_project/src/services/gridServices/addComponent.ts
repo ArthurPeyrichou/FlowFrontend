@@ -264,31 +264,31 @@ export function setComponentIO (theCompId: string, input: string, output: string
 /**
  * Adds a new component into '#conception-grid-svg' and set his listeners.
  * @param mouse position of the cursor in the plan
- * @param fdCompToDrop the FDComponent to drop
+ * @param fdElementToDrop the FDComponent to drop
  * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
  * @param openModal function call by clicking on the component
  */
-export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDElement, openModal: Function): void {
+export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, onTriggerableElementClick: Function): void {
   const x = mouse[0]
   const y = mouse[1]
-  const inputCount = fdCompToDrop.getFDComponent().getInput()
-  const outputCount = fdCompToDrop.getFDComponent().getOutput()
+  const inputCount = fdElementToDrop.getFDComponent().getInput()
+  const outputCount = fdElementToDrop.getFDComponent().getOutput()
   const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, 65)
-  const compWidth = getCompWidth(fdCompToDrop.getName(), '', undefined)
+  const compWidth = getCompWidth(fdElementToDrop.getName(), '', undefined)
   const g = d3.select('#conception-grid-svg')
     .append('g')
     .attr('class', 'component')
-    .attr('id', 'comp-' + fdCompToDrop.getId())
+    .attr('id', 'comp-' + fdElementToDrop.getId())
     .attr('stroke-width', 1.5)
     .attr('style', 'cursor:pointer;')
     .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
 
   g.append('rect')
-    .attr('id', 'rect-' + fdCompToDrop.getId())
+    .attr('id', 'rect-' + fdElementToDrop.getId())
     .attr('class', 'fdcomp draggable')
-    .attr('data-id', fdCompToDrop.getId())
+    .attr('data-id', fdElementToDrop.getId())
     .attr('stroke', 'black')
-    .attr('fill', fdCompToDrop.getColor())
+    .attr('fill', fdElementToDrop.getColor())
     .attr('height', compHeight)
     .attr('width', compWidth)
     .attr('data-input', inputCount)
@@ -297,98 +297,98 @@ export function addComponentIntoGrid (mouse: [number, number], fdCompToDrop: FDE
     .attr('x', rectPlaceX(x, compWidth))
     .attr('y', rectPlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop)
+      openModal(fdElementToDrop)
     })
 
   g.append('text')
-    .attr('id', 'name-text-' + fdCompToDrop.getId())
+    .attr('id', 'name-text-' + fdElementToDrop.getId())
     .attr('class', 'draggable unselectable-text')
-    .attr('data-id', fdCompToDrop.getId())
+    .attr('data-id', fdElementToDrop.getId())
     .attr('fill', 'black')
     .style('font-size', '14px')
-    .html(fdCompToDrop.getName())
+    .html(fdElementToDrop.getName())
     .attr('x', namePlaceX(x, compWidth))
     .attr('y', namePlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop)
+      openModal(fdElementToDrop)
     })
 
   g.append('text')
-    .attr('id', 'title-text-' + fdCompToDrop.getId())
+    .attr('id', 'title-text-' + fdElementToDrop.getId())
     .attr('class', 'draggable unselectable-text')
-    .attr('data-id', fdCompToDrop.getId())
+    .attr('data-id', fdElementToDrop.getId())
     .attr('fill', 'black')
     .style('font-size', '12px')
-    .html(fdCompToDrop.getFDComponent().getTitle())
+    .html(fdElementToDrop.getFDComponent().getTitle())
     .attr('x', titlePlaceX(x, compWidth))
     .attr('y', titlePlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop)
+      openModal(fdElementToDrop)
     })
 
   g.append('svg:foreignObject')
-    .attr('id', 'icon-' + fdCompToDrop.getId())
+    .attr('id', 'icon-' + fdElementToDrop.getId())
     .attr('class', 'draggable unselectable-text icon')
-    .attr('data-id', fdCompToDrop.getId())
-    .attr('data-icon', fdCompToDrop.getFDComponent().getIcon())
+    .attr('data-id', fdElementToDrop.getId())
+    .attr('data-icon', fdElementToDrop.getFDComponent().getIcon())
     .attr('x', iconPlaceX(x, compWidth))
     .attr('y', iconPlaceY(y, compHeight))
     .attr('width', 24)
     .attr('height', 24)
     .on('click', function () {
-      openModal(fdCompToDrop)
+      openModal(fdElementToDrop)
     })
     .append('xhtml:body')
     .style('background-color', 'transparent')
-    .html('<i class="icon-fixed-width fa fa-' + fdCompToDrop.getFDComponent().getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
+    .html('<i class="icon-fixed-width fa fa-' + fdElementToDrop.getFDComponent().getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 
   g.append('text')
-    .attr('id', 'io-' + fdCompToDrop.getId())
+    .attr('id', 'io-' + fdElementToDrop.getId())
     .attr('class', 'draggable unselectable-text')
-    .attr('data-id', fdCompToDrop.getId())
+    .attr('data-id', fdElementToDrop.getId())
     .attr('fill', 'black')
     .style('font', '900 normal normal 12px \'Font Awesome 5 Free\'')
     .text('IO: 0B \uf061 0B')
     .attr('x', ioPlaceX(x, compWidth))
     .attr('y', ioPlaceY(y, compHeight))
     .on('click', () => {
-      openModal(fdCompToDrop)
+      openModal(fdElementToDrop)
     })
 
-  if (fdCompToDrop.getFDComponent().isClickable()) {
+  if (fdElementToDrop.getFDComponent().isClickable()) {
     g.append('polygon')
-      .attr('id', 'trigger-' + fdCompToDrop.getId())
+      .attr('id', 'trigger-' + fdElementToDrop.getId())
       .attr('class', 'draggable')
       .attr('points', getTriggerTrianglePoints(x, compWidth, y, compHeight))
-      .attr('data-id', fdCompToDrop.getId())
+      .attr('data-id', fdElementToDrop.getId())
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .on('click', () => {
-        console.log('Component activated!')
+        onTriggerableElementClick(fdElementToDrop.getId())
       })
   }
 
   for (let i = 0; i < inputCount; ++i) {
     g.append('circle')
-      .attr('id', 'input-' + i + '-' + fdCompToDrop.getId())
-      .attr('class', 'input connector input-' + fdCompToDrop.getId())
+      .attr('id', 'input-' + i + '-' + fdElementToDrop.getId())
+      .attr('class', 'input connector input-' + fdElementToDrop.getId())
       .attr('r', 7)
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .attr('data-index', i)
-      .attr('data-id', fdCompToDrop.getId())
+      .attr('data-id', fdElementToDrop.getId())
       .attr('cx', inputCirclePlaceX(x, compWidth))
       .attr('cy', inputCirclePlaceY(y, compHeight, i, inputCount))
   }
   for (let i = 0; i < outputCount; ++i) {
     g.append('circle')
-      .attr('id', 'output-' + i + '-' + fdCompToDrop.getId())
-      .attr('class', 'output connector output-' + fdCompToDrop.getId())
+      .attr('id', 'output-' + i + '-' + fdElementToDrop.getId())
+      .attr('class', 'output connector output-' + fdElementToDrop.getId())
       .attr('r', 7)
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .attr('data-index', i)
-      .attr('data-id', fdCompToDrop.getId())
+      .attr('data-id', fdElementToDrop.getId())
       .attr('cx', outputCirclePlaceX(x, compWidth))
       .attr('cy', outputCirclePlaceY(y, compHeight, i, outputCount))
   }
