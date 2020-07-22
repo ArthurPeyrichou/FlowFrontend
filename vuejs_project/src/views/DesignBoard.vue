@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <ToolBar ref="myToolBar" :theme="theme"/>
-    <ConceptionGrid ref="myConceptionGrid" :theme="theme" :onTriggerableElementClick="onTriggerableElementClick"/>
+    <ConceptionGrid ref="myConceptionGrid" :theme="theme" :sendMessageToBackend="sendMessageToBackend"/>
     <ConsoleBar ref="myConsoleBar" :theme="theme"/>
   </div>
 </template>
@@ -97,19 +97,6 @@ export default class DesignBoard extends Vue {
   }
 
   /**
-   * Call by a listener in addComponent.ts
-   * Will send a message to backend for trigger clicked component
-   * @public
-   */
-  onTriggerableElementClick (elementId: string): void {
-    if (this.connection !== null) {
-      this.connection.send(JSON.stringify({ target: elementId, event: 'click' }))
-    } else {
-      console.log('Element "' + elementId + '" clicked but no connection to send the message found.')
-    }
-  }
-
-  /**
    * @public
    */
   sendBlankDesignerData (): void {
@@ -161,6 +148,19 @@ export default class DesignBoard extends Vue {
       (this.$refs.myConsoleBar as ConsoleBar).addLog((tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.body, theElement[0].getColor())
     } else {
       (this.$refs.myConsoleBar as ConsoleBar).addLog('Unknown', data.body, '#CF1D1D')
+    }
+  }
+
+  /**
+   * Call by a listener in addComponent.ts
+   * Will send a message to backend for trigger clicked component
+   * @public
+   */
+  sendMessageToBackend (data: string): void {
+    if (this.connection !== null) {
+      this.connection.send(data)
+    } else {
+      console.log('Data received but no connection to send the message found.')
     }
   }
 }

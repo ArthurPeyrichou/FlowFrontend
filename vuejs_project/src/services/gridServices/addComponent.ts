@@ -268,7 +268,7 @@ export function setComponentIO (theCompId: string, input: string, output: string
  * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
  * @param openModal function call by clicking on the component
  */
-export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, onTriggerableElementClick: Function): void {
+export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, sendMessageToBackend: Function): void {
   const x = mouse[0]
   const y = mouse[1]
   const inputCount = fdElementToDrop.getFDComponent().getInput()
@@ -364,7 +364,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .on('click', () => {
-        onTriggerableElementClick(fdElementToDrop.getId())
+        sendMessageToBackend(JSON.stringify({ target: fdElementToDrop.getId(), event: 'click' }))
       })
   }
 
@@ -400,6 +400,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     })
     .on('end', function () {
       d3.selectAll('rect').style('opacity', 1)
+      const msg = { type: 'apply', body: [{ type: 'mov', com: { id: d3.select(this).attr('data-id'), x: Number.parseInt(d3.event.x), y: Number.parseInt(d3.event.y) } }] }
+      sendMessageToBackend(JSON.stringify(msg))
     })
 
   dragCompHandler(d3.select('#conception-grid-svg').selectAll('.draggable'))

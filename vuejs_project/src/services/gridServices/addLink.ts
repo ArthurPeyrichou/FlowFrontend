@@ -60,9 +60,9 @@ export function getLineData (source: [number, number], target: [number, number],
 
 /**
  * Selects all connectors of '#conception-grid-svg' and sets drag&drop listeners for links creation.
- * @param registerLink function who register the link in component's links of ConceptionGrid's Vue and return his unique id
+ * @param addAndRemoveLink function who register the link in component's links of ConceptionGrid's Vue and return his unique id
  */
-export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): void{
+export function addLinkBeetweenTwoComponentsIntoGrid (addAndRemoveLink: Function): void{
   const dragLinkCompHandler = d3.drag()
     .on('drag', function () {
       // The data for our line
@@ -144,14 +144,15 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
             // - there is no any link who already exist between those two components.
             if (outputInput.output.compId !== outputInput.input.compId && isSourceInput !== isTargetInput &&
                     document.getElementById('link-' + outputInput.output.id + '-to-' + outputInput.input.id) === null) {
-              const newId = registerLink(outputInput.output.id, outputInput.input.id)
+              addAndRemoveLink(outputInput.output.id, outputInput.input.id, true)
               isFounded = true
               const g = document.getElementById('link-' + theSourceCirleCode)?.parentElement
               if (g) {
-                g.setAttribute('class', 'link')
-                g.setAttribute('id', 'link-' + newId)
+                g.remove()
+                // g.setAttribute('class', 'link')
+                // g.setAttribute('id', 'link-tempory')
               }
-              d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
+              /* d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
                 .attr('class', 'link-path link-' + outputInput.output.compId + ' link-' + outputInput.input.compId)
                 .datum(getLineData(outputInput.output.xy, outputInput.input.xy, false))
                 .attr('d', lineFunction)
@@ -161,6 +162,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
                 .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
 
               transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE)
+              */
             }
           }
         })
@@ -175,7 +177,7 @@ export function addLinkBeetweenTwoComponentsIntoGrid (registerLink: Function): v
   dragLinkCompHandler(d3.select('#conception-grid-svg').selectAll('.connector'))
 }
 
-export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputIndex: number, link: {index: number; id: string}): void {
+export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputIndex: number, link: {index: number; id: string}, addAndRemoveLink: Function): void {
   const outputCircle = d3.select('#output-' + outputIndex + '-' + sourceId)
   const inputCircle = d3.select('#input-' + link.index + '-' + link.id)
 
@@ -213,6 +215,9 @@ export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputI
       d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
       path.attr('stroke', LINK_FILL_COLOR)
     }
+  })
+  path.on('dblclick', () => {
+    addAndRemoveLink(outputIndex + '-' + sourceId, link.index + '-' + link.id, false)
   })
   mooveLinkAndComponents()
 }

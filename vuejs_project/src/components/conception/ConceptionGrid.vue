@@ -66,7 +66,7 @@ import { BaseType, ContainerElement } from 'd3'
 })
 export default class ConceptionGrid extends Vue {
   @Prop({ default: 'dark' }) theme!: string
-  @Prop({ default: (id: string) => { console.log('Trigger component: ' + id) } }) onTriggerableElementClick!: Function
+  @Prop({ default: (data: string) => { console.log('Data:' + data) } }) sendMessageToBackend!: Function
 
   fdCompToDrop: FDComponent | undefined = undefined
   graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
@@ -84,6 +84,36 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Called by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+   * @public
+   * @param outputCompId the component source. Ex: '0-4561283'
+   * @param inputCompId the component target. Ex: '1-5986157'
+   */
+  addAndRemoveLink (outputId: string, inputId: string, shouldAdd: boolean): void {
+    const output = outputId.split('-')
+    const input = inputId.split('-')
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      const fdElement = graph.filter(el => el.getId() === output[1])[0]
+      if (fdElement) {
+        const msg = { type: 'apply', body: [{ type: 'conn', id: output[1], conn: {} }] }
+        if (shouldAdd) {
+          fdElement.addLink(Number.parseInt(output[0]), { index: Number.parseInt(input[0]), id: input[1] })
+        } else {
+          fdElement.removeLink(Number.parseInt(output[0]), { index: Number.parseInt(input[0]), id: input[1] })
+        }
+        let conn = '{'
+        fdElement.getLinks().forEach((links, index) => {
+          conn += '"' + index + '": ' + JSON.stringify(links) + ', '
+        })
+        conn += '}'
+        msg.body[0].conn = JSON.parse(conn.replace(', }', ' }'))
+        this.sendMessageToBackend(JSON.stringify(msg))
+      }
+    }
+  }
+
+  /**
    * Create a new tab and go into it
    * @public
    */
@@ -98,25 +128,9 @@ export default class ConceptionGrid extends Vue {
    * @public
    * @param fdComp the component to delete
    */
-  deleteTheComp (fdCompId: string): void {
-    console.log(fdCompId)
-    /* this.componentList = this.componentList.filter(el => {
-      el.links = el.links.filter(el => {
-        if (el.compId !== fdCompId) {
-          return true
-        } else {
-          d3.select('#link-' + el.linkId).remove()
-          return false
-        }
-      })
-      if (el.compId !== fdCompId) {
-        return true
-      } else {
-        el.links.forEach(el => { d3.select('#link-' + el.linkId).remove() })
-        d3.select('#comp-' + fdCompId).remove()
-        return false
-      }
-    }) */
+  deleteTheComp (fdElementId: string): void {
+    const msg = { type: 'apply', body: [{ type: 'rem', id: fdElementId }] }
+    this.sendMessageToBackend(JSON.stringify(msg))
   }
 
   /**
@@ -148,18 +162,12 @@ export default class ConceptionGrid extends Vue {
   initSvg (): void {
     const actualize = (mouse: [number, number]) => {
       if (this.fdCompToDrop !== undefined) {
-        // Should call Backend for add new component here
-        const fdElement = new FDElement(this.makeId(10), this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
-        addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal, this.onTriggerableElementClick)
-        if (this.graphs.has(this.currentTab)) {
-          const graph = this.graphs.get(this.currentTab)
-          if (graph) {
-            graph.push(fdElement)
-          }
-        } else {
-          this.graphs.set(this.currentTab, [fdElement])
+        let newId = this.makeId(13)
+        while (this.idList.includes(newId)) {
+          newId = this.makeId(13)
         }
-        addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
+        const msg = { type: 'apply', body: [{ type: 'add', com: { component: this.fdCompToDrop.getId(), state: { text: '', color: '' }, x: mouse[0], y: mouse[1], tab: this.currentTab, connections: {}, id: newId, disabledio: { input: [], output: [] } } }] }
+        this.sendMessageToBackend(JSON.stringify(msg))
         this.fdCompToDrop = undefined
       }
     }
@@ -224,57 +232,6 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   * Load graphs elements list into the conception grid
-   * @public
-   * @param elementList a list of elements
-   */
-  setGraphsElements (elementList: FDElement[]) {
-    this.graphs = new Map<string, Array<FDElement>>()
-    elementList.forEach(el => {
-      if (this.graphs.has(el.getTabId())) {
-        const graph = this.graphs.get(el.getTabId())
-        if (graph) {
-          graph.push(el)
-        }
-      } else {
-        this.graphs.set(el.getTabId(), [el])
-      }
-    })
-    this.populateSvg()
-  }
-
-  /**
-   * Set all input and output debit in elements into the svg conception grid
-   * @param traffic { elementId: {ci: number, co: number, duration: number, input: number, ni: number, no: number, no0: number, output: number, pending: number}, etc}
-   * @public
-   */
-  setTraffic (traffic: any): void {
-    const graph = this.graphs.get(this.currentTab)
-    if (graph) {
-      graph.forEach(el => {
-        if (traffic[el.getId()]) {
-          if (el.getFDComponent().getOutput() > 0) {
-            if (traffic[el.getId()].output === 0) {
-              setComponentLoading(el.getId(), true)
-            } else {
-              setComponentLoading(el.getId(), false)
-            }
-          }
-          setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
-          el.getLinks().forEach((links, index) => {
-            links.forEach(link => {
-              // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
-              if (index !== 99) {
-                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE)
-              }
-            })
-          })
-        }
-      })
-    }
-  }
-
-  /**
    * Make a random string.
    * @public
    * @param length the length wish
@@ -282,7 +239,7 @@ export default class ConceptionGrid extends Vue {
    */
   makeId (length: number): string {
     let result = ''
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const characters = '0123456789'
     for (let i = 0; i < length; ++i) {
       result += characters.charAt(Math.floor(Math.random() * characters.length))
     }
@@ -318,35 +275,19 @@ export default class ConceptionGrid extends Vue {
     const graph = this.graphs.get(this.currentTab)
     if (graph) {
       graph.forEach(el => {
-        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onTriggerableElementClick)
+        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.sendMessageToBackend)
       })
       graph.forEach(component => {
         if (component.getLinks().size !== 0) {
           component.getLinks().forEach((links, index) => {
             if (index !== 99) {
-              links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link))
+              links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link, this.addAndRemoveLink))
             }
           })
         }
       })
     }
-    addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
-  }
-
-  /**
-   * Called by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
-   * @public
-   * @param outputCompId the component source
-   * @param inputCompId the component target
-   * @returns a new string identifiant generate with makeId()
-   */
-  registerLink (outputCompId: string, inputCompId: string): string {
-    console.log(outputCompId, inputCompId)
-    let newId = this.makeId(10)
-    while (this.idList.includes(newId)) {
-      newId = this.makeId(10)
-    }
-    return newId
+    addLinkBeetweenTwoComponentsIntoGrid(this.addAndRemoveLink)
   }
 
   /**
@@ -362,6 +303,27 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Load graphs elements list into the conception grid
+   * @public
+   * @param elementList a list of elements
+   */
+  setGraphsElements (elementList: FDElement[]) {
+    this.graphs = new Map<string, Array<FDElement>>()
+    elementList.forEach(el => {
+      this.idList.push(el.getId())
+      if (this.graphs.has(el.getTabId())) {
+        const graph = this.graphs.get(el.getTabId())
+        if (graph) {
+          graph.push(el)
+        }
+      } else {
+        this.graphs.set(el.getTabId(), [el])
+      }
+    })
+    this.populateSvg()
+  }
+
+  /**
    * Set the tab list in conception grid header
    * @public
    * @param tabs the tab list: {id: string; index: number; name: string}
@@ -370,6 +332,37 @@ export default class ConceptionGrid extends Vue {
     this.tabs = tabs.sort((a, b) => a.index - b.index)
     if (this.tabs.length > 0) {
       this.currentTab = this.tabs[0].id
+    }
+  }
+
+  /**
+   * Set all input and output debit in elements into the svg conception grid
+   * @param traffic { elementId: {ci: number, co: number, duration: number, input: number, ni: number, no: number, no0: number, output: number, pending: number}, etc}
+   * @public
+   */
+  setTraffic (traffic: any): void {
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      graph.forEach(el => {
+        if (traffic[el.getId()]) {
+          if (el.getFDComponent().getOutput() > 0) {
+            if (traffic[el.getId()].output === 0) {
+              setComponentLoading(el.getId(), true)
+            } else {
+              setComponentLoading(el.getId(), false)
+            }
+          }
+          setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
+          el.getLinks().forEach((links, index) => {
+            links.forEach(link => {
+              // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
+              if (index !== 99) {
+                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE)
+              }
+            })
+          })
+        }
+      })
     }
   }
 
