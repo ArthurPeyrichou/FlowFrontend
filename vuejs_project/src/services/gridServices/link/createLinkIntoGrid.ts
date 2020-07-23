@@ -1,68 +1,16 @@
 import * as d3 from 'd3'
-import { transfertData } from '../gridServices/transfertData'
-import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE } from '../../config'
-
-/**
- * Constructs a line with the 4 points : [ from, q1, q3, to]
- */
-export const lineFunction = d3.line()
-  .x(function (d) { return d[0] })
-  .y(function (d) { return d[1] })
-  .curve(d3.curveBasis)
-
-/**
- * Used when two component are aligned in y plan and there are linked.
- * We want to avoid a cross line (if the output component is more on the right and the input component more on the left).
- * @param source
- * @param sourceRect
- * @param targetRect
- * @param target
- */
-function isCrossLine (source: [number, number], target: [number, number], isSourceInput: boolean): boolean {
-  return (isSourceInput && (source[0] < target[0])) || (!isSourceInput && (source[0] > target[0]))
-}
-
-/**
- * Moove links to the top and components to the bottom of the svg childrens list
- * Make link under component in UI
- */
-function mooveLinkAndComponents (): void {
-  const svg: HTMLElement | null = document.getElementById('conception-grid-svg')
-  if (svg) {
-    for (let i = 0; i < svg.children.length; ++i) {
-      const theClass: string | null = svg.children[i].getAttribute('class')
-      if (theClass !== null && theClass.includes('link')) {
-        svg.insertBefore(svg.children[i], svg.children[2]) // 2 because 0 is defs and 1 is svggridbg
-      }
-    }
-  }
-}
-
-/**
- * Return data for a curve line from to points in the svg (source and target)
- * @param source the start of the line
- * @param target the end of the line
- * @returns an array of 2DPoints for line draw
- */
-export function getLineData (source: [number, number], target: [number, number], isSourceInput: boolean): Array<[number, number]> {
-  const isACrossLine = isCrossLine(source, target, isSourceInput)
-  let q1: [number, number]
-  let q3: [number, number]
-  if (isACrossLine) {
-    q1 = [source[0] + ((source[0] - target[0]) / 4 * 1.5), source[1] - ((source[1] - target[1]) / 4 * 1.5)]
-    q3 = [target[0] - ((source[0] - target[0]) / 4 * 1.5), target[1] + ((source[1] - target[1]) / 4 * 1.5)]
-  } else {
-    q1 = [source[0] + ((target[0] - source[0]) / 4), source[1]]
-    q3 = [source[0] + (((target[0] - source[0]) * 3) / 4), target[1]]
-  }
-  return [source, q1, q3, target]
-}
+import * as linkCalculators from './linkCalculators'
+import { organizeCompAndLinksOverlay } from './organizeCompAndLinksOverlay'
+import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR } from '../../../config'
 
 /**
  * Selects all connectors of '#conception-grid-svg' and sets drag&drop listeners for links creation.
- * @param addAndRemoveLink function who register the link in component's links of ConceptionGrid's Vue and return his unique id
+ * When a user select a component's input or output and make a drag and drop
+ * Generates a link which start from the component's outlet and follow the user mouse
+ * On drag end, creates a link for the graph if find an other component to link on mouse position
+ * @param addAndRemoveLink function who register the link in component's links of ConceptionGrid's Vue
  */
-export function addLinkBeetweenTwoComponentsIntoGrid (addAndRemoveLink: Function): void{
+export function createLinkIntoGrid (addAndRemoveLink: Function): void {
   const dragLinkCompHandler = d3.drag()
     .on('drag', function () {
       // The data for our line
@@ -80,8 +28,8 @@ export function addLinkBeetweenTwoComponentsIntoGrid (addAndRemoveLink: Function
           .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
           .append('path')
           .attr('id', 'link-' + theSourceCompId)
-          .datum(getLineData(source, target, isSourceInput))
-          .attr('d', lineFunction)
+          .datum(linkCalculators.getLineData(source, target, isSourceInput))
+          .attr('d', linkCalculators.lineFunction)
           .attr('stroke', LINK_FILL_COLOR)
           .attr('stroke-width', '3px')
           .attr('fill', 'none')
@@ -102,11 +50,11 @@ export function addLinkBeetweenTwoComponentsIntoGrid (addAndRemoveLink: Function
           }
         })
 
-        mooveLinkAndComponents()
+        organizeCompAndLinksOverlay()
       } else { // If a temp <g><path/></g> already exist we just edit the line positions.
         d3.select('#link-' + theSourceCompId)
-          .datum(getLineData(source, target, isSourceInput))
-          .attr('d', lineFunction)
+          .datum(linkCalculators.getLineData(source, target, isSourceInput))
+          .attr('d', linkCalculators.lineFunction)
       }
     })
     .on('end', function () {
@@ -175,49 +123,4 @@ export function addLinkBeetweenTwoComponentsIntoGrid (addAndRemoveLink: Function
     })
 
   dragLinkCompHandler(d3.select('#conception-grid-svg').selectAll('.connector'))
-}
-
-export function loadLinkBeetweenTwoComponentsIntoGrid (sourceId: string, outputIndex: number, link: {index: number; id: string}, addAndRemoveLink: Function): void {
-  const outputCircle = d3.select('#output-' + outputIndex + '-' + sourceId)
-  const inputCircle = d3.select('#input-' + link.index + '-' + link.id)
-
-  const outputXY: [number, number] = [Number.parseInt(outputCircle.attr('cx')), Number.parseInt(outputCircle.attr('cy'))]
-  const inputXY: [number, number] = [Number.parseInt(inputCircle.attr('cx')), Number.parseInt(inputCircle.attr('cy'))]
-
-  const path = d3.select('#conception-grid-svg').append('g')
-    .attr('class', 'link')
-    .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
-    .append('path')
-    .attr('id', 'link-' + outputIndex + '-' + sourceId + '-to-' + link.index + '-' + link.id)
-    .attr('class', 'link-path link-' + sourceId + ' link-' + link.id)
-    .datum(getLineData(outputXY, inputXY, false))
-    .attr('d', lineFunction)
-    .attr('data-input', link.index + '-' + link.id)
-    .attr('data-output', outputIndex + '-' + sourceId)
-    .attr('data-input-index', outputIndex)
-    .attr('data-output-index', link.index)
-    .attr('stroke', LINK_FILL_COLOR)
-    .attr('stroke-width', '3px')
-    .attr('fill', 'none')
-    .style('cursor', 'pointer')
-
-  path.on('mouseover', () => {
-    path.attr('stroke-width', '5px')
-  })
-  path.on('mouseout', () => {
-    path.attr('stroke-width', '3px')
-  })
-  path.on('click', () => {
-    if (path.attr('stroke') === LINK_FILL_COLOR) {
-      d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
-      path.attr('stroke', ACTIVE_LINK_FILL_COLOR)
-    } else {
-      d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
-      path.attr('stroke', LINK_FILL_COLOR)
-    }
-  })
-  path.on('dblclick', () => {
-    addAndRemoveLink(outputIndex + '-' + sourceId, link.index + '-' + link.id, false)
-  })
-  mooveLinkAndComponents()
 }

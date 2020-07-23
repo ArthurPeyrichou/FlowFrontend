@@ -13,8 +13,8 @@ export class FDElement {
     private x: number;
     private y: number;
     private notes: string;
-    private state: JSON;
-    private options: JSON;
+    private state: any;
+    private options: any;
     private links: Map<number, Array<{index: number; id: string}>>;
 
     /**
@@ -24,11 +24,11 @@ export class FDElement {
      * @param color color visible in ui
      * @param x nummber shoulb be beetween 0 and SVG_GRID_SIZE.
      * @param y nummber shoulb be beetween 0 and SVG_GRID_SIZE.
-     * @param notes JSON Object or string parsable into JSON Object.
-     * @param state JSON Object or string parsable into JSON Object.
-     * @param links JSON Object or string parsable into JSON Object.
+     * @param notes any Object or string parsable into JSON Object.
+     * @param state any Object or string parsable into JSON Object.
+     * @param links any Object or string parsable into JSON Object.
      */
-    constructor (id: string, aFDComponent: FDComponent, tabId: string, name: string, color: string, x: number | string, y: number | string, notes: string, state: JSON, options: JSON, links: Map<number, Array<{index: number; id: string}>>) {
+    constructor (id: string, aFDComponent: FDComponent, tabId: string, name: string, color: string, x: number | string, y: number | string, notes: string, state: any, options: any, links: Map<number, Array<{index: number; id: string}>>) {
       this.id = id
       this.hisFDComponent = aFDComponent
       this.tabId = tabId
@@ -83,11 +83,11 @@ export class FDElement {
       return this.notes
     }
 
-    getOptions (): JSON {
+    getOptions (): any {
       return this.options
     }
 
-    getState (): JSON {
+    getState (): any {
       return this.state
     }
 

@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
-import { lineFunction } from '../gridServices/addLink'
-import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR } from '../../config'
+import * as linkCalculators from './linkCalculators'
+import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR } from '../../../config'
 
 /**
  * Generates an animation for data transfer between two components.
@@ -72,7 +72,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
       xy.push([point.x, point.y])
       if (position < length - 1) {
         d3.select('#' + dataTransfertId).datum(xy)
-          .attr('d', lineFunction)
+          .attr('d', linkCalculators.lineFunction)
       } else {
         d3.select('#' + dataTransfertId).remove()
       }
@@ -83,7 +83,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
     .attr('id', dataTransfertId)
     .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
     .datum([source, source])
-    .attr('d', lineFunction)
+    .attr('d', linkCalculators.lineFunction)
     .attr('stroke', TRANSFER_FILL_COLOR)
     .attr('stroke-width', '3px')
     .attr('fill', 'none')

@@ -50,9 +50,14 @@ import CompSettingModal from '@/components/conception/CompSettingModal.vue'
 import TabSettingModal from '@/components/conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
-import { addComponentIntoGrid, setComponentName, setComponentIO, setComponentLoading } from '../../services/gridServices/addComponent'
-import { addLinkBeetweenTwoComponentsIntoGrid, loadLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
-import { transfertData } from '../../services/gridServices/transfertData'
+import { addComponentIntoGrid } from '../../services/gridServices/component/addComponentIntoGrid'
+import { setComponentName } from '../../services/gridServices/component/setComponentName'
+import { setComponentIO } from '../../services/gridServices/component/setComponentIO'
+import { setComponentBeingProcessed } from '../../services/gridServices/component/setComponentBeingProcessed'
+import { createLinkIntoGrid } from '../../services/gridServices/link/createLinkIntoGrid'
+import { addLinkIntoGrid } from '../../services/gridServices/link/addLinkIntoGrid'
+
+import { transfertData } from '../../services/gridServices/link/transfertData'
 import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE } from '../../config'
 import { FDElement } from '../../models/FDElement'
 import { BaseType, ContainerElement } from 'd3'
@@ -84,7 +89,7 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   * Called by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+   * Called by createLinkIntoGrid() when a link is added into grid.
    * @public
    * @param outputCompId the component source. Ex: '0-4561283'
    * @param inputCompId the component target. Ex: '1-5986157'
@@ -281,13 +286,13 @@ export default class ConceptionGrid extends Vue {
         if (component.getLinks().size !== 0) {
           component.getLinks().forEach((links, index) => {
             if (index !== 99) {
-              links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link, this.addAndRemoveLink))
+              links.forEach(link => addLinkIntoGrid(component.getId(), index, link, this.addAndRemoveLink))
             }
           })
         }
       })
     }
-    addLinkBeetweenTwoComponentsIntoGrid(this.addAndRemoveLink)
+    createLinkIntoGrid(this.addAndRemoveLink)
   }
 
   /**
@@ -331,7 +336,9 @@ export default class ConceptionGrid extends Vue {
   setTabs (tabs: Array<{id: string; index: number; name: string}>) {
     this.tabs = tabs.sort((a, b) => a.index - b.index)
     if (this.tabs.length > 0) {
-      this.currentTab = this.tabs[0].id
+      if (this.currentTab === '') {
+        this.currentTab = this.tabs[0].id
+      }
     }
   }
 
@@ -347,9 +354,9 @@ export default class ConceptionGrid extends Vue {
         if (traffic[el.getId()]) {
           if (el.getFDComponent().getOutput() > 0) {
             if (traffic[el.getId()].output === 0) {
-              setComponentLoading(el.getId(), true)
+              setComponentBeingProcessed(el.getId(), true)
             } else {
-              setComponentLoading(el.getId(), false)
+              setComponentBeingProcessed(el.getId(), false)
             }
           }
           setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
@@ -398,10 +405,17 @@ export default class ConceptionGrid extends Vue {
     if (name !== '') {
       const componentRect = document.getElementById('rect-' + fdElement.getId())
       if (componentRect) {
-        fdElement.setName(name)
-        fdElement.setColor(color)
-        componentRect.setAttribute('fill', color)
-        setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
+        /* fdElement.setName(name)
+          fdElement.setColor(color)
+          componentRect.setAttribute('fill', color)
+          setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
+        */
+        const msg = { target: fdElement.getId(), type: 'options', body: fdElement.getOptions() }
+        msg.body.comname = name
+        msg.body.comcolor = color
+        msg.body.comnotes = ''
+        this.sendMessageToBackend(JSON.stringify(msg))
+        this.sendMessageToBackend(JSON.stringify({ type: 'apply', body: [] }))
       }
     }
   }
