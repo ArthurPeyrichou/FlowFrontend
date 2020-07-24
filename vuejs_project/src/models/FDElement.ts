@@ -2,7 +2,7 @@ import { FDComponent } from './FDComponent'
 import { SVG_GRID_SIZE } from '../config'
 
 /**
- * A Component
+ * A Component of a graph
  */
 export class FDElement {
     private id: string;

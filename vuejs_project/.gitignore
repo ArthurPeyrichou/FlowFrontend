@@ -8,9 +8,7 @@ node_modules
 /tests/e2e/videos
 /tests/e2e/screenshots
 
-/e2e-coverage
-/unit-coverage
-/coverage
+/coverages
 /.nyc_output
 /reports
 

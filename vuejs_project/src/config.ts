@@ -22,3 +22,6 @@ export const TRANSFER_TYPE: 'PATH' | 'CIRCLE' = 'PATH'
 
 /* Console Parameters */
 export const OUTPUT_FONT_SIZE = 12
+
+/* Communication Parameters */
+export const COMMUNICATION_TYPE: 'DIRECT' | 'ON_APPLY' = 'DIRECT'
