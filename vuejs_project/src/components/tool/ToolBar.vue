@@ -147,7 +147,7 @@ export default class ToolBar extends Vue {
    * @param compBrutList the new components list
    * @public
    */
-  setCompList (compBrutList: FDComponent[]): void {
+  public setCompList (compBrutList: FDComponent[]): void {
     this.compBrutList = compBrutList
   }
 }

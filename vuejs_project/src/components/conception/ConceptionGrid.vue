@@ -76,7 +76,7 @@ export default class ConceptionGrid extends Vue {
   fdCompToDrop: FDComponent | undefined = undefined
   graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
   idList: Array<string> = []
-  tabs: Array<{id: string; index: number; name: string}> = []
+  tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
   currentTab = ''
   svgScale = 1
   hideToolBar = false
@@ -123,9 +123,15 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   addNewTab (aName: string) {
-    const newId = this.makeId(10)
-    this.tabs.push({ id: newId, index: this.tabs.length, name: aName })
+    let newId = this.makeId(13)
+    while (this.idList.includes(newId)) {
+      newId = this.makeId(13)
+    }
+    this.tabs.push({ id: newId, index: this.tabs.length, name: aName, linker: aName.toLowerCase(), icon: 'fa-object-ungroup' })
+    this.graphs.set(newId, [])
     this.selectTab(newId)
+    const msg = '{"type": "apply", "body": [{"type": "tabs", "tabs": ' + JSON.stringify(this.tabs) + '}]}'
+    this.sendMessageToBackend(msg)
   }
 
   /**
@@ -134,8 +140,25 @@ export default class ConceptionGrid extends Vue {
    * @param fdComp the component to delete
    */
   deleteTheComp (fdElementId: string): void {
-    const msg = { type: 'apply', body: [{ type: 'rem', id: fdElementId }] }
-    this.sendMessageToBackend(JSON.stringify(msg))
+    if (process.env.NODE_ENV === 'test') {
+      this.graphs.set(this.currentTab, this.graphs.get(this.currentTab).filter(fdEl => {
+        if (fdEl.getId() !== fdElementId) {
+          fdEl.getLinks().forEach((connections, index) => {
+            fdEl.getLinks().set(index, connections.filter(connection => connection.id === fdElementId))
+          })
+          return true
+        }
+        return false
+      }))
+      d3.select('#comp-' + fdElementId).remove()
+      const htmlColl = document.getElementsByClassName('link-' + fdElementId)
+      while (htmlColl.length > 0) {
+        htmlColl[0].parentElement.remove()
+      }
+    } else {
+      const msg = { type: 'apply', body: [{ type: 'rem', id: fdElementId }] }
+      this.sendMessageToBackend(JSON.stringify(msg))
+    }
   }
 
   /**
@@ -171,8 +194,15 @@ export default class ConceptionGrid extends Vue {
         while (this.idList.includes(newId)) {
           newId = this.makeId(13)
         }
-        const msg = { type: 'apply', body: [{ type: 'add', com: { component: this.fdCompToDrop.getId(), state: { text: '', color: '' }, x: mouse[0], y: mouse[1], tab: this.currentTab, connections: {}, id: newId, disabledio: { input: [], output: [] } } }] }
-        this.sendMessageToBackend(JSON.stringify(msg))
+        if (process.env.NODE_ENV === 'test') {
+          const el = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, {}, new Map())
+          this.graphs.get(this.currentTab).push(el)
+          addComponentIntoGrid(mouse, el, this.openComponentSettingModal, this.sendMessageToBackend)
+          createLinkIntoGrid(this.addAndRemoveLink, process.env.NODE_ENV === 'test')
+        } else {
+          const msg = { type: 'apply', body: [{ type: 'add', com: { component: this.fdCompToDrop.getId(), state: { text: '', color: '' }, x: mouse[0], y: mouse[1], tab: this.currentTab, connections: {}, id: newId, disabledio: { input: [], output: [] } } }] }
+          this.sendMessageToBackend(JSON.stringify(msg))
+        }
         this.fdCompToDrop = undefined
       }
     }
@@ -292,7 +322,7 @@ export default class ConceptionGrid extends Vue {
         }
       })
     }
-    createLinkIntoGrid(this.addAndRemoveLink)
+    createLinkIntoGrid(this.addAndRemoveLink, process.env.NODE_ENV === 'test')
   }
 
   /**
@@ -331,9 +361,9 @@ export default class ConceptionGrid extends Vue {
   /**
    * Set the tab list in conception grid header
    * @public
-   * @param tabs the tab list: {id: string; index: number; name: string}
+   * @param tabs the tab list: {id: string; index: number; name: string; linker: string; icon: string}
    */
-  setTabs (tabs: Array<{id: string; index: number; name: string}>) {
+  setTabs (tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}>) {
     this.tabs = tabs.sort((a, b) => a.index - b.index)
     if (this.tabs.length > 0) {
       if (this.currentTab === '') {
@@ -405,17 +435,19 @@ export default class ConceptionGrid extends Vue {
     if (name !== '') {
       const componentRect = document.getElementById('rect-' + fdElement.getId())
       if (componentRect) {
-        /* fdElement.setName(name)
+        if (process.env.NODE_ENV === 'test') {
+          fdElement.setName(name)
           fdElement.setColor(color)
           componentRect.setAttribute('fill', color)
           setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
-        */
-        const msg = { target: fdElement.getId(), type: 'options', body: fdElement.getOptions() }
-        msg.body.comname = name
-        msg.body.comcolor = color
-        msg.body.comnotes = ''
-        this.sendMessageToBackend(JSON.stringify(msg))
-        this.sendMessageToBackend(JSON.stringify({ type: 'apply', body: [] }))
+        } else {
+          const msg = { target: fdElement.getId(), type: 'options', body: fdElement.getOptions() }
+          msg.body.comname = name
+          msg.body.comcolor = color
+          msg.body.comnotes = ''
+          this.sendMessageToBackend(JSON.stringify(msg))
+          this.sendMessageToBackend(JSON.stringify({ type: 'apply', body: [] }))
+        }
       }
     }
   }

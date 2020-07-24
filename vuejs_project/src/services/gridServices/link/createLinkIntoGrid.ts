@@ -1,7 +1,8 @@
 import * as d3 from 'd3'
 import * as linkCalculators from './linkCalculators'
 import { organizeCompAndLinksOverlay } from './organizeCompAndLinksOverlay'
-import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR } from '../../../config'
+import { transfertData } from './transfertData'
+import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE } from '../../../config'
 
 /**
  * Selects all connectors of '#conception-grid-svg' and sets drag&drop listeners for links creation.
@@ -9,8 +10,9 @@ import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR } from '../../../config'
  * Generates a link which start from the component's outlet and follow the user mouse
  * On drag end, creates a link for the graph if find an other component to link on mouse position
  * @param addAndRemoveLink function who register the link in component's links of ConceptionGrid's Vue
+ * @param addTheLinkInTheSvg if true add the link in the svg grid, otherwise remove the g and the path of the animation
  */
-export function createLinkIntoGrid (addAndRemoveLink: Function): void {
+export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheSvg: boolean): void {
   const dragLinkCompHandler = d3.drag()
     .on('drag', function () {
       // The data for our line
@@ -96,21 +98,25 @@ export function createLinkIntoGrid (addAndRemoveLink: Function): void {
               isFounded = true
               const g = document.getElementById('link-' + theSourceCirleCode)?.parentElement
               if (g) {
-                g.remove()
-                // g.setAttribute('class', 'link')
-                // g.setAttribute('id', 'link-tempory')
+                if (addTheLinkInTheSvg) {
+                  g.setAttribute('class', 'link')
+                  g.setAttribute('id', 'link-tempory')
+                } else {
+                  g.remove()
+                }
               }
-              /* d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
-                .attr('class', 'link-path link-' + outputInput.output.compId + ' link-' + outputInput.input.compId)
-                .datum(getLineData(outputInput.output.xy, outputInput.input.xy, false))
-                .attr('d', lineFunction)
-                .attr('data-input', outputInput.input.id)
-                .attr('data-output', outputInput.output.id)
-                .attr('data-input-index', (isSourceInput ? theSourceCirle.attr('data-index') : theTargetCirle.attr('data-index')))
-                .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
+              if (addTheLinkInTheSvg) {
+                d3.select('#link-' + theSourceCirleCode).attr('id', 'link-' + outputInput.output.id + '-to-' + outputInput.input.id)
+                  .attr('class', 'link-path link-' + outputInput.output.compId + ' link-' + outputInput.input.compId)
+                  .datum(linkCalculators.getLineData(outputInput.output.xy, outputInput.input.xy, false))
+                  .attr('d', linkCalculators.lineFunction)
+                  .attr('data-input', outputInput.input.id)
+                  .attr('data-output', outputInput.output.id)
+                  .attr('data-input-index', (isSourceInput ? theSourceCirle.attr('data-index') : theTargetCirle.attr('data-index')))
+                  .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
 
-              transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE)
-              */
+                transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE)
+              }
             }
           }
         })

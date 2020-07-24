@@ -63,7 +63,6 @@ export default class TabSettingModal extends Vue {
    * @public
    */
   handleAddSubmit (): void {
-    console.log('cc')
     // Exit when the form isn't valid
     if (!this.checkFormValidity()) {
       return

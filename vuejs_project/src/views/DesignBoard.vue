@@ -13,7 +13,6 @@ import ConsoleBar from '@/components/console/ConsoleBar.vue'
 import { FDComponent } from '../models/FDComponent'
 import { FDElement } from '../models/FDElement'
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { WEBSOCKET_URL, WEBSOCKET_PORT } from '../config'
 
 @Component({
   components: {
@@ -27,15 +26,17 @@ export default class DesignBoard extends Vue {
   @Prop({ default: 'dark' }) public theme!: string;
 
   private databaseElementList: Array<FDElement> = []
-  private tabList: Array<{id: string; index: number; name: string}> = []
+  private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
   private connection: WebSocket | null = null
 
-  constructor () {
-    super()
-    // This way we execute the code after the redering of the template
-    this.$nextTick(() => {
-      this.sendBlankDesignerData()
-      this.connect(3, WEBSOCKET_URL + WEBSOCKET_PORT)
+  mounted () {
+    this.$nextTick(function () {
+      // If the node environment is test, we populate the toolbar of fake components for tests
+      if (process.env.NODE_ENV === 'test') {
+        this.sendBlankDesignerData()
+      } else {
+        this.connect(3, process.env.VUE_APP_BACKEND_URL)
+      }
     })
   }
 
@@ -67,7 +68,7 @@ export default class DesignBoard extends Vue {
           console.log(data)
           break
         case 'traffic':
-          (this.$refs.myConceptionGrid as ConceptionGrid).setTraffic(data.body)
+          (this.$children[1] as ConceptionGrid).setTraffic(data.body)
           break
         default:
           console.warn('Message type "' + data.type + '" not treated.')
@@ -75,7 +76,7 @@ export default class DesignBoard extends Vue {
       }
     }
     console.log('Starting connection to WebSocket Server...')
-    this.connection = new WebSocket(WEBSOCKET_URL + WEBSOCKET_PORT)
+    this.connection = new WebSocket(url)
     this.connection.addEventListener('error', e => {
       // readyState === 3 is CLOSED
       if ((e.target as WebSocket).readyState === 3) {
@@ -97,10 +98,11 @@ export default class DesignBoard extends Vue {
   }
 
   /**
+   * Sand fake data to toolbar in case of bakcend connection failed
    * @public
    */
   sendBlankDesignerData (): void {
-    (this.$refs.myToolBar as ToolBar).setCompList([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, 'bug', '1.0', 'readme', true, '{}'),
+    (this.$children[0] as ToolBar).setCompList([new FDComponent('id0', 'FakeType1', 'FakeComp(1-1)', '#EFC467', 'autor', true, true, 'bug', '1.0', 'readme', true, '{}'),
       new FDComponent('id1', 'FakeType2', 'FakeComp(1-0)', '#D86571', 'autor', true, false, 'bug', '1.0', 'readme', false, '{}'),
       new FDComponent('id2', 'FakeType1', 'FakeComp(2-2)', '#EFC467', 'autor', 2, 2, 'bug', '1.0', 'readme', false, '{}'),
       new FDComponent('id3', 'FakeType2', 'FakeComp(1-3)', '#D86571', 'autor', true, 3, 'bug', '1.0', 'readme', false, '{}'),
@@ -112,6 +114,7 @@ export default class DesignBoard extends Vue {
    * Send components from database to toolbar
    * Send tabs to conception grid
    * And send all graphs element to conception grid
+   * @param data
    * @public
    */
   sendDesignerData (data: any): void {
@@ -122,9 +125,9 @@ export default class DesignBoard extends Vue {
       databaseCompList.push(comp)
       map.set(el.id, comp)
     });
-    (this.$refs.myToolBar as ToolBar).setCompList(databaseCompList)
+    (this.$children[0] as ToolBar).setCompList(databaseCompList)
     this.tabList = data.tabs;
-    (this.$refs.myConceptionGrid as ConceptionGrid).setTabs(this.tabList)
+    (this.$children[1] as ConceptionGrid).setTabs(this.tabList)
 
     this.databaseElementList = []
 
@@ -134,26 +137,28 @@ export default class DesignBoard extends Vue {
         this.databaseElementList.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
       }
     });
-    (this.$refs.myConceptionGrid as ConceptionGrid).setGraphsElements(this.databaseElementList)
+    (this.$children[1] as ConceptionGrid).setGraphsElements(this.databaseElementList)
   }
 
   /**
    * Send message as a log into console bar
+   * @param data
    * @public
    */
   sendMessage (data: any): void {
     const theElement: FDElement[] = this.databaseElementList.filter(el => el.getId() === data.id)
     if (theElement.length === 1) {
       const tab = this.tabList.filter(el => el.id === theElement[0].getTabId());
-      (this.$refs.myConsoleBar as ConsoleBar).addLog((tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.body, theElement[0].getColor())
+      (this.$children[2] as ConsoleBar).addLog((tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.body, theElement[0].getColor())
     } else {
-      (this.$refs.myConsoleBar as ConsoleBar).addLog('Unknown', data.body, '#CF1D1D')
+      (this.$children[2] as ConsoleBar).addLog('Unknown', data.body, '#CF1D1D')
     }
   }
 
   /**
    * Call by a listener in addComponent.ts
    * Will send a message to backend for trigger clicked component
+   * @param data
    * @public
    */
   sendMessageToBackend (data: string): void {

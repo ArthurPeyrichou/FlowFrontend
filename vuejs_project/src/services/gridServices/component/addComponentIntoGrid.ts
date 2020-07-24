@@ -101,7 +101,6 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
   if (fdElementToDrop.getFDComponent().isClickable()) {
     g.append('polygon')
       .attr('id', 'trigger-' + fdElementToDrop.getId())
-      .attr('class', 'draggable')
       .attr('points', positionCal.getTriggerTrianglePoints(x, compWidth, y, compHeight))
       .attr('data-id', fdElementToDrop.getId())
       .attr('stroke', 'black')
