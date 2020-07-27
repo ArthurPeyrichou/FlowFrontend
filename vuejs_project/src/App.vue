@@ -1,6 +1,6 @@
 <template>
   <div id="app" v-bind:class="theme">
-    <b-nav tabs class="navbar-menu" style="height:50px">
+    <b-nav tabs id="main-menu" class="navbar-menu" style="height:50px">
       <b-nav-item v-bind:to="'/'" :active="currentRoute=='/'">Design Board</b-nav-item>
       <b-nav-item v-bind:to="'/blank-board'" :active="currentRoute=='/blank-board'">Blank Board</b-nav-item>
       <b-nav-item disabled>Disabled</b-nav-item>
@@ -23,6 +23,7 @@ export default class App extends Vue {
 </script>
 
 <style>
+  @import './assets/style.css';
   #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;

@@ -1,5 +1,5 @@
 /* Theme */
-export const THEME: 'dark' | 'light' = 'dark'
+export const THEME: 'dark' | 'light' | 'custom' = 'dark'
 
 /* Grid Parameters */
 // The invisible border width which limit components to touch svg's borders.
