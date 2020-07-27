@@ -30,14 +30,15 @@ export default class DesignBoard extends Vue {
   private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
   private connection: WebSocket | null = null
   private isLoadedOnce = false
+  private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
 
   mounted () {
     this.$nextTick(function () {
       // If the node environment is test, we populate the toolbar of fake components for tests
-      if (process.env.NODE_ENV === 'test') {
+      if (process.env.NODE_ENV === 'test' || !this.backendUrl) {
         this.sendBlankDesignerData()
       } else {
-        this.connect(3, process.env.VUE_APP_BACKEND_URL)
+        this.connect(3, this.backendUrl)
       }
     })
   }
@@ -168,7 +169,11 @@ export default class DesignBoard extends Vue {
    */
   sendMessageToBackend (data: Array<string>): void {
     if (this.connection !== null) {
-      data.forEach(el => this.connection.send(el))
+      data.forEach(el => {
+        if (this.connection !== null) {
+          this.connection.send(el)
+        }
+      })
     } else {
       console.log('Data received but no connection to send the message found.')
     }
