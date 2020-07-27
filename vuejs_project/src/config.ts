@@ -1,10 +1,6 @@
 /* Theme */
 export const THEME: 'dark' | 'light' = 'dark'
 
-/* Websocket Parameters */
-export const WEBSOCKET_URL = 'ws://localhost:'
-export const WEBSOCKET_PORT = 5001
-
 /* Grid Parameters */
 // The invisible border width which limit components to touch svg's borders.
 export const SVG_GRID_SIZE = 5000
@@ -23,3 +19,9 @@ export const TRANSFER_RADIUS = 4
 export const TRANSFER_FILL_COLOR = 'gold'
 export const TRANSFER_STROKE_COLOR = 'black'
 export const TRANSFER_TYPE: 'PATH' | 'CIRCLE' = 'PATH'
+
+/* Console Parameters */
+export const OUTPUT_FONT_SIZE = 12
+
+/* Communication Parameters */
+export const COMMUNICATION_TYPE: 'DIRECT' | 'ON_APPLY' = 'ON_APPLY'

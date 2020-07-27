@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
-import { lineFunction } from '../gridServices/addLink'
-import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR } from '../../config'
+import * as linkCalculators from './linkCalculators'
+import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR } from '../../../config'
 
 /**
  * Generates an animation for data transfer between two components.
@@ -17,8 +17,7 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
   const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
 
   // Make the circle follow the path line from the output to the input
-  // eslint-disable-next-line
-    function pathTween(path: any) {
+  function pathTween (path: any) {
     const length = path.node().getTotalLength()
     const r = d3.interpolate(0, length)
     return function (t: number) {
@@ -28,8 +27,7 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
         d3.select('#' + dataTransfertId).attr('cx', point.x)
           .attr('cy', point.y)
       } else {
-                // eslint-disable-next-line no-unused-expressions
-                document.getElementById(dataTransfertId)?.remove()
+        d3.select('#' + dataTransfertId).remove()
       }
     }
   }
@@ -63,8 +61,8 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
   const source: [number, number] = [Number.parseInt(theOuputCircle.attr('cx')), Number.parseInt(theOuputCircle.attr('cy'))]
 
   // Make the circle follow the path line from the output to the input
-  // eslint-disable-next-line
-    function pathTween (path: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function pathTween (path: any) {
     const length = path.node().getTotalLength()
     const r = d3.interpolate(0, length)
     const xy: Array<[number, number]> = []
@@ -74,10 +72,9 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
       xy.push([point.x, point.y])
       if (position < length - 1) {
         d3.select('#' + dataTransfertId).datum(xy)
-          .attr('d', lineFunction)
+          .attr('d', linkCalculators.lineFunction)
       } else {
-                // eslint-disable-next-line no-unused-expressions
-                document.getElementById(dataTransfertId)?.remove()
+        d3.select('#' + dataTransfertId).remove()
       }
     }
   }
@@ -86,7 +83,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
     .attr('id', dataTransfertId)
     .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
     .datum([source, source])
-    .attr('d', lineFunction)
+    .attr('d', linkCalculators.lineFunction)
     .attr('stroke', TRANSFER_FILL_COLOR)
     .attr('stroke-width', '3px')
     .attr('fill', 'none')

@@ -46,14 +46,22 @@
 
 <script lang="ts">
 import * as d3 from 'd3'
-import CompSettingModal from '@/components/conception/CompSettingModal.vue'
-import TabSettingModal from '@/components/conception/TabSettingModal.vue'
+import CompSettingModal from '../conception/CompSettingModal.vue'
+import TabSettingModal from '../conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
-import { addComponentIntoGrid, setComponentName } from '../../services/gridServices/addComponent'
-import { addLinkBeetweenTwoComponentsIntoGrid, loadLinkBeetweenTwoComponentsIntoGrid } from '../../services/gridServices/addLink'
-import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP } from '../../config'
+import { BackendRequestFactory } from '../../models/BackendRequestFactory'
+import { addComponentIntoGrid } from '../../services/gridServices/component/addComponentIntoGrid'
+import { setComponentName } from '../../services/gridServices/component/setComponentName'
+import { setComponentIO } from '../../services/gridServices/component/setComponentIO'
+import { setComponentBeingProcessed } from '../../services/gridServices/component/setComponentBeingProcessed'
+import { createLinkIntoGrid } from '../../services/gridServices/link/createLinkIntoGrid'
+import { addLinkIntoGrid } from '../../services/gridServices/link/addLinkIntoGrid'
+
+import { transfertData } from '../../services/gridServices/link/transfertData'
+import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE, COMMUNICATION_TYPE } from '../../config'
 import { FDElement } from '../../models/FDElement'
+import { BaseType, ContainerElement } from 'd3'
 
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
@@ -64,15 +72,18 @@ import { FDElement } from '../../models/FDElement'
 })
 export default class ConceptionGrid extends Vue {
   @Prop({ default: 'dark' }) theme!: string
+  @Prop({ default: (data: string) => { console.log('Data:' + data) } }) sendMessageToBackend!: Function
 
   fdCompToDrop: FDComponent | undefined = undefined
   graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
   idList: Array<string> = []
-  tabs: Array<{id: string; index: number; name: string}> = []
+  tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
   currentTab = ''
   svgScale = 1
   hideToolBar = false
   hideConsoleBar = false
+  backendRequestFactory = new BackendRequestFactory()
+  isConnectedToBackEnd = process.env.NODE_ENV !== 'test'
 
   constructor () {
     super()
@@ -81,12 +92,71 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Called by createLinkIntoGrid() when a link is added into grid.
+   * @public
+   * @param outputCompId the component source. Ex: '0-4561283'
+   * @param inputCompId the component target. Ex: '1-5986157'
+   */
+  addAndRemoveLink (outputId: string, inputId: string, shouldAdd: boolean): void {
+    const output = outputId.split('-')
+    const input = inputId.split('-')
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      const fdElement = graph.filter(el => el.getId() === output[1])[0]
+      if (fdElement) {
+        if (shouldAdd) {
+          fdElement.addLink(Number.parseInt(output[0]), { index: Number.parseInt(input[0]), id: input[1] })
+        } else {
+          fdElement.removeLink(Number.parseInt(output[0]), { index: Number.parseInt(input[0]), id: input[1] })
+        }
+        this.backendRequestFactory.setALink(fdElement)
+        if (COMMUNICATION_TYPE === 'DIRECT') {
+          this.sendMessageToBackend(this.backendRequestFactory.apply())
+        }
+      }
+    }
+  }
+
+  /**
    * Create a new tab and go into it
+   * @public
    */
   addNewTab (aName: string) {
-    const newId = this.makeId(10)
-    this.tabs.push({ id: newId, index: this.tabs.length, name: aName })
+    let newId = this.makeId(13)
+    while (this.idList.includes(newId)) {
+      newId = this.makeId(13)
+    }
+    this.tabs.push({ id: newId, index: this.tabs.length, name: aName, linker: aName.toLowerCase(), icon: 'fa-object-ungroup' })
+    this.graphs.set(newId, [])
     this.selectTab(newId)
+    this.backendRequestFactory.setTabs(this.tabs, [])
+    if (COMMUNICATION_TYPE === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
+  }
+
+  /**
+   * Remove a new tab
+   * On tab removing, remove all elements inside
+   * If the tab list is empty create a new tab with name 'Main' and go into it
+   * @public
+   */
+  removeTab (tabId: string) {
+    this.tabs = this.tabs.filter(el => el.id !== tabId)
+    const elements = this.graphs.get(tabId)
+    this.backendRequestFactory.setTabs(this.tabs, (elements || []))
+    if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+      this.graphs.delete(tabId)
+      if (this.tabs.length > 0) {
+        if (this.currentTab === tabId) {
+          this.selectTab(this.tabs[0].id)
+        }
+      } else {
+        this.addNewTab('Main')
+      }
+    } else if (COMMUNICATION_TYPE === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
   }
 
   /**
@@ -94,27 +164,30 @@ export default class ConceptionGrid extends Vue {
    * @public
    * @param fdComp the component to delete
    */
-  deleteTheComp (fdCompId: string): void {
-    console.log(fdCompId)
-    /* this.componentList = this.componentList.filter(el => {
-      el.links = el.links.filter(el => {
-        if (el.compId !== fdCompId) {
+  deleteTheComp (fdElementId: string): void {
+    this.backendRequestFactory.removeElementFromGrid(fdElementId)
+    if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+      const elements = this.graphs.get(this.currentTab)
+      this.graphs.set(this.currentTab, elements ? elements.filter(fdEl => {
+        if (fdEl.getId() !== fdElementId) {
+          fdEl.getLinks().forEach((connections, index) => {
+            fdEl.getLinks().set(index, connections.filter(connection => connection.id === fdElementId))
+          })
           return true
-        } else {
-          // eslint-disable-next-line no-unused-expressions
-          document.getElementById('link-' + el.linkId)?.remove()
-          return false
         }
-      })
-      if (el.compId !== fdCompId) {
-        return true
-      } else {
-        el.links.forEach(el => document.getElementById('link-' + el.linkId)?.remove())
-        // eslint-disable-next-line no-unused-expressions
-        document.getElementById('comp-' + fdCompId)?.remove()
         return false
+      }) : [])
+      d3.select('#comp-' + fdElementId).remove()
+      const htmlColl = document.getElementsByClassName('link-' + fdElementId)
+      while (htmlColl.length > 0) {
+        const el = htmlColl[0].parentElement
+        if (el) {
+          el.remove()
+        }
       }
-    }) */
+    } else if (COMMUNICATION_TYPE === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
   }
 
   /**
@@ -146,27 +219,33 @@ export default class ConceptionGrid extends Vue {
   initSvg (): void {
     const actualize = (mouse: [number, number]) => {
       if (this.fdCompToDrop !== undefined) {
-        // Should call Backend for add new component here
-        const fdElement = new FDElement(this.makeId(10), this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
-        addComponentIntoGrid(mouse, fdElement, this.openComponentSettingModal)
-        if (this.graphs.has(this.currentTab)) {
-          // eslint-disable-next-line
-          this.graphs.get(this.currentTab)?.push(fdElement)
-        } else {
-          this.graphs.set(this.currentTab, [fdElement])
+        let newId = this.makeId(13)
+        while (this.idList.includes(newId)) {
+          newId = this.makeId(13)
         }
-        addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
+        this.idList.push(newId)
+
+        this.backendRequestFactory.addElementIntoGrid(this.fdCompToDrop, mouse, this.currentTab, newId)
+        if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+          const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, {}, new Map())
+          const elements = this.graphs.get(this.currentTab)
+          if (elements) {
+            elements.push(newElement)
+          }
+          addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
+          createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY')
+        } else if (COMMUNICATION_TYPE === 'DIRECT') {
+          this.sendMessageToBackend(this.backendRequestFactory.apply())
+        }
         this.fdCompToDrop = undefined
       }
     }
 
-    d3.select('#svg-grid-bg').on('mousemove', function () {
-      // eslint-disable-next-line
-      actualize(d3.mouse(this as any));
+    d3.select('#svg-grid-bg').on('mousemove', function (this: BaseType) {
+      actualize(d3.mouse(this as ContainerElement))
     })
 
     // This part allows the conception grid positioning by drag and drop
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const svgBoard = document.getElementById('conception-board')
     if (svgBoard !== null) {
       let isDown = false
@@ -222,24 +301,6 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   * Load graphs elements list into the conception grid
-   * @public
-   * @param elementList a list of elements
-   */
-  setGraphsElements (elementList: FDElement[]) {
-    this.graphs = new Map<string, Array<FDElement>>()
-    elementList.forEach(el => {
-      if (this.graphs.has(el.getTabId())) {
-        // eslint-disable-next-line
-        this.graphs.get(el.getTabId())?.push(el)
-      } else {
-        this.graphs.set(el.getTabId(), [el])
-      }
-    })
-    this.populateSvg()
-  }
-
-  /**
    * Make a random string.
    * @public
    * @param length the length wish
@@ -247,11 +308,33 @@ export default class ConceptionGrid extends Vue {
    */
   makeId (length: number): string {
     let result = ''
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    const characters = '0123456789'
     for (let i = 0; i < length; ++i) {
       result += characters.charAt(Math.floor(Math.random() * characters.length))
     }
     return result
+  }
+
+  /**
+   * Called by addComponentIntoGrid() when a comp triggerable is activated.
+   * @param fdElementId
+   */
+  onComponentClick (fdElementId: string): void {
+    this.sendMessageToBackend(this.backendRequestFactory.apply())
+    this.sendMessageToBackend([JSON.stringify({ target: fdElementId, event: 'click' })])
+  }
+
+  /**
+   * Called by addComponentIntoGrid() when a comp is mooved at the end of the drag and drop
+   * @param fdElementId
+   * @param x the new x position
+   * @param y the new y position
+   */
+  onComponentMoove (fdElementId: string, x: number, y: number): void {
+    this.backendRequestFactory.mooveElementFromGrid(fdElementId, [x, y])
+    if (COMMUNICATION_TYPE === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
   }
 
   /**
@@ -260,8 +343,7 @@ export default class ConceptionGrid extends Vue {
    * @param compId the id of the component
    */
   openComponentSettingModal (element: FDElement): void {
-    // eslint-disable-next-line
-    (this.$refs.myCompSettingModal as any).showModal(element)
+    (this.$refs.myCompSettingModal as CompSettingModal).showModal(element)
   }
 
   /**
@@ -269,44 +351,34 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   openTabSettingModal (): void {
-    // eslint-disable-next-line
-    (this.$refs.myTabSettingModal as any).showModal()
-  }
-
-  populateSvg (): void {
-    d3.selectAll('.component').remove()
-    d3.selectAll('.link').remove()
-    // eslint-disable-next-line
-    this.graphs.get(this.currentTab)?.forEach(el => {
-      addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal)
-    })
-    // eslint-disable-next-line
-    this.graphs.get(this.currentTab)?.forEach(component => {
-      if (component.getLinks().size !== 0) {
-        component.getLinks().forEach((links, index) => {
-          if (index !== 99) {
-            links.forEach(link => loadLinkBeetweenTwoComponentsIntoGrid(component.getId(), index, link))
-          }
-        })
-      }
-    })
-    addLinkBeetweenTwoComponentsIntoGrid(this.registerLink)
+    (this.$refs.myTabSettingModal as TabSettingModal).showModal()
   }
 
   /**
-   * Called by addLinkBeetweenTwoComponentsIntoGrid() when a link is added into grid.
+   * Remove all components and links from the svg conception grid
+   * Then for each elements in the targeted graph
+   * Add the componenent and all his links into the svg
    * @public
-   * @param outputCompId the component source
-   * @param inputCompId the component target
-   * @returns a new string identifiant generate with makeId()
    */
-  registerLink (outputCompId: string, inputCompId: string): string {
-    console.log(outputCompId, inputCompId)
-    let newId = this.makeId(10)
-    while (this.idList.includes(newId)) {
-      newId = this.makeId(10)
+  populateSvg (): void {
+    d3.selectAll('.component').remove()
+    d3.selectAll('.link').remove()
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      graph.forEach(el => {
+        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
+      })
+      graph.forEach(component => {
+        if (component.getLinks().size !== 0) {
+          component.getLinks().forEach((links, index) => {
+            if (index !== 99) {
+              links.forEach(link => addLinkIntoGrid(component.getId(), index, link, this.addAndRemoveLink))
+            }
+          })
+        }
+      })
     }
-    return newId
+    createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY')
   }
 
   /**
@@ -322,14 +394,71 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Load graphs elements list into the conception grid
+   * @public
+   * @param elementList a list of elements
+   */
+  setGraphsElements (elementList: FDElement[]) {
+    this.graphs = new Map<string, Array<FDElement>>()
+    elementList.forEach(el => {
+      this.idList.push(el.getId())
+      if (this.graphs.has(el.getTabId())) {
+        const graph = this.graphs.get(el.getTabId())
+        if (graph) {
+          graph.push(el)
+        }
+      } else {
+        this.graphs.set(el.getTabId(), [el])
+      }
+    })
+    this.populateSvg()
+  }
+
+  /**
    * Set the tab list in conception grid header
    * @public
-   * @param tabs the tab list: {id: string; index: number; name: string}
+   * @param tabs the tab list: {id: string; index: number; name: string; linker: string; icon: string}
    */
-  setTabs (tabs: Array<{id: string; index: number; name: string}>) {
+  setTabs (tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}>) {
     this.tabs = tabs.sort((a, b) => a.index - b.index)
+    this.backendRequestFactory.setTabs(this.tabs, [])
     if (this.tabs.length > 0) {
-      this.currentTab = this.tabs[0].id
+      if (this.currentTab === '') {
+        this.currentTab = this.tabs[0].id
+      }
+    } else {
+      this.addNewTab('Main')
+    }
+  }
+
+  /**
+   * Set all input and output debit in elements into the svg conception grid
+   * @param traffic { elementId: {ci: number, co: number, duration: number, input: number, ni: number, no: number, no0: number, output: number, pending: number}, etc}
+   * @public
+   */
+  setTraffic (traffic: any): void {
+    const graph = this.graphs.get(this.currentTab)
+    if (graph) {
+      graph.forEach(el => {
+        if (traffic[el.getId()]) {
+          if (el.getFDComponent().getOutput() > 0) {
+            if (traffic[el.getId()].output === 0) {
+              setComponentBeingProcessed(el.getId(), true)
+            } else {
+              setComponentBeingProcessed(el.getId(), false)
+            }
+          }
+          setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
+          el.getLinks().forEach((links, index) => {
+            links.forEach(link => {
+              // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
+              if (index !== 99) {
+                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE)
+              }
+            })
+          })
+        }
+      })
     }
   }
 
@@ -339,21 +468,22 @@ export default class ConceptionGrid extends Vue {
    * @param barName the id's prefix of the bar's div
    */
   toggleBar (barName: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const element: HTMLElement = document.getElementById(barName + '-bar')!
-    const isHide = element.className.includes(' hide')
-    if (isHide) {
-      element.className = element.className.replace(' hide', '')
-    } else {
-      element.className += ' hide'
-    }
-    switch (barName) {
-      case 'tool':
-        this.hideToolBar = isHide
-        break
-      case 'console':
-        this.hideConsoleBar = isHide
-        break
+    const element: HTMLElement | null = document.getElementById(barName + '-bar')
+    if (element) {
+      const isHide = element.className.includes(' hide')
+      if (isHide) {
+        element.className = element.className.replace(' hide', '')
+      } else {
+        element.className += ' hide'
+      }
+      switch (barName) {
+        case 'tool':
+          this.hideToolBar = isHide
+          break
+        case 'console':
+          this.hideConsoleBar = isHide
+          break
+      }
     }
   }
 
@@ -364,10 +494,23 @@ export default class ConceptionGrid extends Vue {
     if (name !== '') {
       fdElement.setName(name)
       fdElement.setColor(color)
-      // eslint-disable-next-line no-unused-expressions
-      document.getElementById('rect-' + fdElement.getId())?.setAttribute('fill', color)
-      setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
+      this.backendRequestFactory.updateElementFromGrid(fdElement)
+      if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+        d3.select('#rect-' + fdElement.getId()).attr('fill', color)
+        setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
+      } else if (COMMUNICATION_TYPE === 'DIRECT') {
+        this.sendMessageToBackend(this.backendRequestFactory.apply())
+      }
     }
+  }
+
+  /**
+   * Send all the modification made to the backend
+   */
+  updateDataToBackend (): void {
+    const response = this.backendRequestFactory.apply()
+    console.log(response)
+    this.sendMessageToBackend(response)
   }
 
   /**

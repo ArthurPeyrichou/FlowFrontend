@@ -76,6 +76,11 @@ describe('FDComponent Model', () => {
     expect(JSON.stringify(fdComp.getOptions())).toEqual('{}')
   })
 
+  it('Default group check', () => {
+    const fdComp = new FDComponent('id0', '', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    expect(fdComp.getGroup()).toEqual('Common')
+  })
+
   it('Getters check', () => {
     const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
     expect(fdComp.getId()).toEqual('id0')

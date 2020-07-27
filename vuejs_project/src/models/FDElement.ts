@@ -2,7 +2,7 @@ import { FDComponent } from './FDComponent'
 import { SVG_GRID_SIZE } from '../config'
 
 /**
- * A Component
+ * A Component of a graph
  */
 export class FDElement {
     private id: string;
@@ -13,8 +13,8 @@ export class FDElement {
     private x: number;
     private y: number;
     private notes: string;
-    private state: JSON;
-    private options: JSON;
+    private state: any;
+    private options: any;
     private links: Map<number, Array<{index: number; id: string}>>;
 
     /**
@@ -24,11 +24,11 @@ export class FDElement {
      * @param color color visible in ui
      * @param x nummber shoulb be beetween 0 and SVG_GRID_SIZE.
      * @param y nummber shoulb be beetween 0 and SVG_GRID_SIZE.
-     * @param notes JSON Object or string parsable into JSON Object.
-     * @param state JSON Object or string parsable into JSON Object.
-     * @param links JSON Object or string parsable into JSON Object.
+     * @param notes any Object or string parsable into JSON Object.
+     * @param state any Object or string parsable into JSON Object.
+     * @param links any Object or string parsable into JSON Object.
      */
-    constructor (id: string, aFDComponent: FDComponent, tabId: string, name: string, color: string, x: number | string, y: number | string, notes: string, state: JSON, options: JSON, links: Map<number, Array<{index: number; id: string}>>) {
+    constructor (id: string, aFDComponent: FDComponent, tabId: string, name: string, color: string, x: number | string, y: number | string, notes: string, state: any, options: any, links: Map<number, Array<{index: number; id: string}>>) {
       this.id = id
       this.hisFDComponent = aFDComponent
       this.tabId = tabId
@@ -83,11 +83,11 @@ export class FDElement {
       return this.notes
     }
 
-    getOptions (): JSON {
+    getOptions (): any {
       return this.options
     }
 
-    getState (): JSON {
+    getState (): any {
       return this.state
     }
 
@@ -132,12 +132,13 @@ export class FDElement {
     addLink (index: number, link: {index: number; id: string}): void {
       let alreadyExist = false
       if (this.links.has(index)) {
-            // eslint-disable-next-line
-            this.links.get(index)?.forEach(el => alreadyExist = alreadyExist || (el.id === link.id && el.index === el.index))
-            if (!alreadyExist) {
-                // eslint-disable-next-line
-                this.links.get(index)?.push(link)
-            }
+        const links = this.links.get(index)
+        if (links) {
+          links.forEach(el => { alreadyExist = alreadyExist || (el.id === link.id && el.index === link.index) })
+          if (!alreadyExist) {
+            links.push(link)
+          }
+        }
       } else {
         this.links.set(index, [link])
       }
@@ -145,12 +146,14 @@ export class FDElement {
 
     removeLink (index: number, link: {index: number; id: string}): void {
       if (this.links.has(index)) {
-        // eslint-disable-next-line
-        const list: Array<{index: number; id: string}> | undefined = this.links.get(index)?.filter(el => !(el.id === link.id && el.index === el.index))
-        if (list === undefined || list.length === 0) {
-          this.links.delete(index)
-        } else {
-          this.links.set(index, list)
+        const links = this.links.get(index)
+        if (links) {
+          const list: Array<{index: number; id: string}> | undefined = links.filter(el => !(el.id === link.id && el.index === link.index))
+          if (list === undefined || list.length === 0) {
+            this.links.delete(index)
+          } else {
+            this.links.set(index, list)
+          }
         }
       }
     }

@@ -13,7 +13,7 @@ export class FDComponent {
     private version: string;
     private readme: string;
     private click: boolean;
-    private options: JSON;
+    private options: any;
 
     /**
      * @param input Can be a positive or null integer (True = 1 and False = 0). Negative value = 0.
@@ -22,7 +22,7 @@ export class FDComponent {
      * @param options JSON Object or string parsable into JSON Object.
      */
     constructor (id: string, group: string, title: string, color: string, author: string, input: boolean | number | string, output: boolean | number | string,
-      icon: string, version: string, readme: string, click: boolean, options: string | JSON | null) {
+      icon: string, version: string, readme: string, click: boolean, options: string | any | null) {
       if (input === true) {
         this.input = 1
       } else if (input === false) {
@@ -80,7 +80,7 @@ export class FDComponent {
         this.options = JSON.parse('{}')
       }
 
-      if (group === '' || group === undefined) {
+      if (group === '') {
         this.group = 'Common'
       } else {
         this.group = group
@@ -140,7 +140,7 @@ export class FDComponent {
       return this.click
     }
 
-    getOptions (): JSON {
+    getOptions (): any {
       return this.options
     }
 

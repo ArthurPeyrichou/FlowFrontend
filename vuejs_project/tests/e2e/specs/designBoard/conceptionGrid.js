@@ -526,8 +526,7 @@ describe('Grid conception tests', () => {
       cy.wait(TIMELAPS)
     })
   })
-  // Need to link deletion with backend for worck
-  /*
+
   it('Delete component in settting modal', function () {
     cy.visit('/')
     prepareScreen()
@@ -593,7 +592,7 @@ describe('Grid conception tests', () => {
     cy.get('.fdcomp').should('have.length', 2)
     cy.get('.link-path').should('have.length', 0)
   })
-  */
+
   it('Zoom in test', function () {
     cy.visit('/')
     prepareScreen()
