@@ -24,4 +24,4 @@ export const TRANSFER_TYPE: 'PATH' | 'CIRCLE' = 'PATH'
 export const OUTPUT_FONT_SIZE = 12
 
 /* Communication Parameters */
-export const COMMUNICATION_TYPE: 'DIRECT' | 'ON_APPLY' = 'DIRECT'
+export const COMMUNICATION_TYPE: 'DIRECT' | 'ON_APPLY' = 'ON_APPLY'

@@ -10,8 +10,10 @@ import { FDElement } from '@/models/FDElement'
  * @param fdElementToDrop the FDComponent to drop
  * @param registerComponent function who register the component in componentList of ConceptionGrid's Vue and return his unique id
  * @param openModal function call by clicking on the component
+ * @param onComponentClick will apply change to the backend, then activate the component
+ * @param onComponentMoove will notice changes to the BackendRequestFactory
  */
-export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, sendMessageToBackend: Function): void {
+export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, onComponentClick: Function, onComponentMoove: Function): void {
   const x = mouse[0]
   const y = mouse[1]
   const inputCount = fdElementToDrop.getFDComponent().getInput()
@@ -106,7 +108,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
       .attr('stroke', 'black')
       .attr('fill', 'white')
       .on('click', () => {
-        sendMessageToBackend(JSON.stringify({ target: fdElementToDrop.getId(), event: 'click' }))
+        onComponentClick(fdElementToDrop.getId())
       })
   }
 
@@ -142,8 +144,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     })
     .on('end', function () {
       d3.selectAll('rect').style('opacity', 1)
-      const msg = { type: 'apply', body: [{ type: 'mov', com: { id: d3.select(this).attr('data-id'), x: Number.parseInt(d3.event.x), y: Number.parseInt(d3.event.y) } }] }
-      sendMessageToBackend(JSON.stringify(msg))
+      onComponentMoove(d3.select(this).attr('data-id'), Number.parseInt(d3.event.x), Number.parseInt(d3.event.y))
     })
 
   dragCompHandler(d3.select('#conception-grid-svg').selectAll('.draggable'))

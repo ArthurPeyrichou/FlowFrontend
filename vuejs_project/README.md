@@ -15,14 +15,39 @@ npm run serve
 npm run build
 ```
 
-### Run your unit tests
+### Run your unit tests and generate a coverage
 ```
 npm run test:unit
 ```
 
-### Run your end-to-end tests
+### Run your end-to-end tests and generate a coverage
 ```
 npm run test:e2e
+```
+
+### Run your end-to-end tests with user interface
+```
+npm run test:e2e-debug
+```
+
+### Run your unit tests + end-to-end tests and generate a full coverage in ouput terminal
+```
+npm run test:e2e
+```
+
+### Compiles and hot-reloads all docs from the project
+```
+npm run styleguide
+```
+
+### Compiles and minifies all docs from the project in folder styleguide/
+```
+npm run styleguide:build
+```
+
+### Compiles and generate a doc in folder docs/
+```
+npm run vue-docgen
 ```
 
 ### Lints and fixes files

@@ -7,12 +7,13 @@
 </template>
 
 <script lang="ts">
-import ToolBar from '@/components/tool/ToolBar.vue'
-import ConceptionGrid from '@/components/conception/ConceptionGrid.vue'
-import ConsoleBar from '@/components/console/ConsoleBar.vue'
+import ToolBar from '../components/tool/ToolBar.vue'
+import ConceptionGrid from '../components/conception/ConceptionGrid.vue'
+import ConsoleBar from '../components/console/ConsoleBar.vue'
 import { FDComponent } from '../models/FDComponent'
 import { FDElement } from '../models/FDElement'
 import { Component, Vue, Prop } from 'vue-property-decorator'
+import { COMMUNICATION_TYPE } from '../config'
 
 @Component({
   components: {
@@ -28,6 +29,7 @@ export default class DesignBoard extends Vue {
   private databaseElementList: Array<FDElement> = []
   private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
   private connection: WebSocket | null = null
+  private isLoadedOnce = false
 
   mounted () {
     this.$nextTick(function () {
@@ -54,7 +56,10 @@ export default class DesignBoard extends Vue {
           this.sendMessage(data)
           break
         case 'designer':
-          this.sendDesignerData(data)
+          if (!this.isLoadedOnce || COMMUNICATION_TYPE === 'DIRECT') {
+            this.sendDesignerData(data)
+            this.isLoadedOnce = true
+          }
           break
         case 'error':
         case 'errors':
@@ -161,9 +166,9 @@ export default class DesignBoard extends Vue {
    * @param data
    * @public
    */
-  sendMessageToBackend (data: string): void {
+  sendMessageToBackend (data: Array<string>): void {
     if (this.connection !== null) {
-      this.connection.send(data)
+      data.forEach(el => this.connection.send(el))
     } else {
       console.log('Data received but no connection to send the message found.')
     }

@@ -80,7 +80,7 @@ export class FDComponent {
         this.options = JSON.parse('{}')
       }
 
-      if (group === '' || group === undefined) {
+      if (group === '') {
         this.group = 'Common'
       } else {
         this.group = group

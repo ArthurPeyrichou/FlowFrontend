@@ -46,8 +46,8 @@
 
 <script lang="ts">
 import * as d3 from 'd3'
-import CompSettingModal from '@/components/conception/CompSettingModal.vue'
-import TabSettingModal from '@/components/conception/TabSettingModal.vue'
+import CompSettingModal from '../conception/CompSettingModal.vue'
+import TabSettingModal from '../conception/TabSettingModal.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FDComponent } from '../../models/FDComponent'
 import { BackendRequestFactory } from '../../models/BackendRequestFactory'
@@ -232,7 +232,7 @@ export default class ConceptionGrid extends Vue {
           if (elements) {
             elements.push(newElement)
           }
-          addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.sendMessageToBackend)
+          addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
           createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY')
         } else if (COMMUNICATION_TYPE === 'DIRECT') {
           this.sendMessageToBackend(this.backendRequestFactory.apply())
@@ -316,6 +316,28 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
+   * Called by addComponentIntoGrid() when a comp triggerable is activated.
+   * @param fdElementId
+   */
+  onComponentClick (fdElementId: string): void {
+    this.sendMessageToBackend(this.backendRequestFactory.apply())
+    this.sendMessageToBackend([JSON.stringify({ target: fdElementId, event: 'click' })])
+  }
+
+  /**
+   * Called by addComponentIntoGrid() when a comp is mooved at the end of the drag and drop
+   * @param fdElementId
+   * @param x the new x position
+   * @param y the new y position
+   */
+  onComponentMoove (fdElementId: string, x: number, y: number): void {
+    this.backendRequestFactory.mooveElementFromGrid(fdElementId, [x, y])
+    if (COMMUNICATION_TYPE === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
+  }
+
+  /**
    * Called by addComponentIntoGrid() when a comp is clicked.
    * @public
    * @param compId the id of the component
@@ -344,7 +366,7 @@ export default class ConceptionGrid extends Vue {
     const graph = this.graphs.get(this.currentTab)
     if (graph) {
       graph.forEach(el => {
-        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.sendMessageToBackend)
+        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
       })
       graph.forEach(component => {
         if (component.getLinks().size !== 0) {
@@ -399,6 +421,7 @@ export default class ConceptionGrid extends Vue {
    */
   setTabs (tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}>) {
     this.tabs = tabs.sort((a, b) => a.index - b.index)
+    this.backendRequestFactory.setTabs(this.tabs, [])
     if (this.tabs.length > 0) {
       if (this.currentTab === '') {
         this.currentTab = this.tabs[0].id
@@ -479,6 +502,15 @@ export default class ConceptionGrid extends Vue {
         this.sendMessageToBackend(this.backendRequestFactory.apply())
       }
     }
+  }
+
+  /**
+   * Send all the modification made to the backend
+   */
+  updateDataToBackend (): void {
+    const response = this.backendRequestFactory.apply()
+    console.log(response)
+    this.sendMessageToBackend(response)
   }
 
   /**

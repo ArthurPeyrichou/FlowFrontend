@@ -10,6 +10,7 @@
         </b-navbar-toggle>
 
         <div id="tool-options">
+          <button v-if="shouldShowApplyButton" v-on:click="updateDataToBackend" id="send-update-button" type="button" class="btn btn-outline-success float-right">Update</button>
         </div>
 
         <b-collapse id="navbar-toggle-collapse" is-nav>
@@ -52,6 +53,8 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import AddCompModal from '@/components/tool/AddCompModal.vue'
 import { FDComponent } from '../../models/FDComponent'
+import { COMMUNICATION_TYPE } from '../../config'
+import ConceptionGrid from '../conception/ConceptionGrid.vue'
 
 /** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
 @Component({
@@ -67,6 +70,7 @@ export default class ToolBar extends Vue {
   compSearchPattern = '';
   /** FlowData components list got from DesignBoard vue, got itself by the api.  */
   compBrutList: FDComponent[] = []
+  shouldShowApplyButton = COMMUNICATION_TYPE === 'ON_APPLY' && process.env.NODE_ENV !== 'test'
 
   constructor () {
     super()
@@ -149,6 +153,10 @@ export default class ToolBar extends Vue {
    */
   public setCompList (compBrutList: FDComponent[]): void {
     this.compBrutList = compBrutList
+  }
+
+  updateDataToBackend (): void {
+    (this.$parent.$children[1] as ConceptionGrid).updateDataToBackend()
   }
 }
 </script>
@@ -267,6 +275,10 @@ export default class ToolBar extends Vue {
   .search-component-box-control .fa-times {
     color: red;
     cursor: pointer;
+  }
+  #send-update-button {
+    height: 100%;
+    border-radius: 0px;
   }
 
   /* Dark side */

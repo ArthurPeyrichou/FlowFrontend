@@ -6,24 +6,29 @@ import { FDElement } from './FDElement'
  */
 export class BackendRequestFactory {
     private removeElements: Array<{ type: 'rem'; id: string }> = []
-    private addElements: Array<{ type: 'add'; com: { component: string; state: { text: ''; color: '' }; x: number; y: number; tab: string; connections: {}; id: string; disabledio: { input: []; output: [] } } }> = []
+    private addElements: Array<{ type: 'add'; com: { component: string; state: { text: ''; color: '' }; x: number; y: number; tab: string; connections: any; id: string; disabledio: { input: []; output: [] } } }> = []
     private updateElements: Array<{ target: string; type: 'options'; body: {comname: string; comcolor: string; comnotes: string} }> = []
     private mooveElements: Array<{ type: 'mov'; com: { id: string; x: number; y: number } }> = []
 
-    private links: Array<{ type: 'conn'; id: string; conn: Map<number, Array<{ index: number; id: string }>>}> = []
+    private links: Array<{ type: 'conn'; id: string; conn: any}> = []
 
     private tabs: {type: 'tabs'; tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}>} = { type: 'tabs', tabs: [] }
 
-    apply (): string {
+    apply (): Array<string> {
       const msg = { type: 'apply', body: new Array<any>() }
       this.addElements.forEach(el => msg.body.push(el))
-      this.updateElements.forEach(el => msg.body.push(el))
       this.mooveElements.forEach(el => msg.body.push(el))
       this.removeElements.forEach(el => msg.body.push(el))
       this.links.forEach(el => msg.body.push(el))
       msg.body.push(this.tabs)
+
+      const requests: Array<string> = [JSON.stringify(msg)]
+      this.updateElements.forEach(el => requests.push(JSON.stringify(el)))
+      if (this.updateElements.length > 0) {
+        requests.push(JSON.stringify({ type: 'apply', body: [] }))
+      }
       this.reset()
-      return JSON.stringify(msg)
+      return requests
     }
 
     reset (): void {
@@ -32,7 +37,6 @@ export class BackendRequestFactory {
       this.mooveElements = []
       this.removeElements = []
       this.links = []
-      this.tabs = { type: 'tabs', tabs: [] }
     }
 
     /**
@@ -53,7 +57,10 @@ export class BackendRequestFactory {
         if (el.id === elementId) {
           return false
         }
-        el.conn.forEach((links) => { links = links.filter(link => link.id !== elementId) })
+        // el.conn.forEach((links, index) => el.conn.set(index, links.filter(link => link.id !== elementId)))
+        for (const [key, value] of Object.entries(el.conn)) {
+          el.conn[key] = (value as Array<{ index: number; id: string }>).filter(link => link.id !== elementId)
+        }
         return true
       })
     }
@@ -98,15 +105,19 @@ export class BackendRequestFactory {
         connections += '"' + index + '": ' + JSON.stringify(links) + ', '
       })
       connections += '}'
-      const connectionsObject: Map<number, Array<{ index: number; id: string }>> = JSON.parse(connections.replace(', }', ' }'))
-      if (this.links.filter(el => el.id === fdElement.getId()).length === 1) {
-        this.links.forEach(el => {
-          if (el.id === fdElement.getId()) {
-            el.conn = connectionsObject
-          }
-        })
+      const connectionsObject = JSON.parse(connections.replace(', }', ' }'))
+      if (this.addElements.filter(el => el.com.id === fdElement.getId()).length === 1) {
+        this.addElements.filter(el => el.com.id === fdElement.getId())[0].com.connections = connectionsObject
       } else {
-        this.links.push({ type: 'conn', id: fdElement.getId(), conn: connectionsObject })
+        if (this.links.filter(el => el.id === fdElement.getId()).length === 1) {
+          this.links.forEach(el => {
+            if (el.id === fdElement.getId()) {
+              el.conn = connectionsObject
+            }
+          })
+        } else {
+          this.links.push({ type: 'conn', id: fdElement.getId(), conn: connectionsObject })
+        }
       }
     }
 
