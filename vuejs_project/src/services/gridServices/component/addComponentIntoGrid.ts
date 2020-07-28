@@ -3,7 +3,7 @@ import { getComponentWidth } from './getComponentWidth'
 import { updateComponentPosition } from './updateComponentPosition'
 import * as positionCal from './componentPositionCalculators'
 import { FDElement } from '@/models/FDElement'
-import { DATA_LOADING_TYPE } from '../../../config'
+import { DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../../config'
 
 /**
  * Adds a new component into '#conception-grid-svg' and set his listeners.
@@ -19,7 +19,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
   const y = mouse[1]
   const inputCount = fdElementToDrop.getFDComponent().getInput()
   const outputCount = fdElementToDrop.getFDComponent().getOutput()
-  const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, 65)
+  const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, TRANSFER_SHOW_IO ? 65 : 45)
   const compWidth = getComponentWidth(fdElementToDrop.getName(), '', undefined)
   const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + fdElementToDrop.getTabId())
   const g = d3.select(theSvg)
@@ -90,18 +90,20 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     .style('background-color', 'transparent')
     .html('<i class="icon-fixed-width fa fa-' + fdElementToDrop.getFDComponent().getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 
-  g.append('text')
-    .attr('id', 'io-' + fdElementToDrop.getId())
-    .attr('class', 'draggable unselectable-text')
-    .attr('data-id', fdElementToDrop.getId())
-    .attr('fill', 'black')
-    .style('font', '900 normal normal 12px \'Font Awesome 5 Free\'')
-    .text('IO: 0B \uf061 0B')
-    .attr('x', positionCal.ioPlaceX(x, compWidth))
-    .attr('y', positionCal.ioPlaceY(y, compHeight))
-    .on('click', () => {
-      openModal(fdElementToDrop)
-    })
+  if (TRANSFER_SHOW_IO) {
+    g.append('text')
+      .attr('id', 'io-' + fdElementToDrop.getId())
+      .attr('class', 'draggable unselectable-text')
+      .attr('data-id', fdElementToDrop.getId())
+      .attr('fill', 'black')
+      .style('font', '900 normal normal 12px \'Font Awesome 5 Free\'')
+      .text('IO: 0B \uf061 0B')
+      .attr('x', positionCal.ioPlaceX(x, compWidth))
+      .attr('y', positionCal.ioPlaceY(y, compHeight))
+      .on('click', () => {
+        openModal(fdElementToDrop)
+      })
+  }
 
   if (fdElementToDrop.getFDComponent().isClickable()) {
     g.append('polygon')

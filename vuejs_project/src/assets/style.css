@@ -1,14 +1,14 @@
 /* MENU */
 body {
-    --MENU-BACKGROUND: #404040;
-    --MENU-TEXT: #c8c8c8;
-    --MENU-BORDER: #FFFFFF4D;
+    --MENU-BACKGROUND: #E27300;
+    --MENU-TEXT: #000000;
+    --MENU-BORDER: #C45100;
 
     --MENU-BACKGROUND-ACTIVE: #101010;
     --MENU-TEXT-ACTIVE: #FFFFFF;
-    --MENU-BORDER-ACTIVE: #FFFFFF4D;
+    --MENU-BORDER-ACTIVE: #C45100;
 
-    --MENU-BORDER-HOVER: #FFFFFF4D;
+    --MENU-BORDER-HOVER: #FFFFFF1A;
 
     /* Global */
     --BAR-HEADER-BACKGROUND: #101010;
@@ -22,11 +22,14 @@ body {
     /* Conception grid */
     --CONCEPTION-GRID-MENU-BACKGROUND: #101010;
     --CONCEPTION-GRID-MENU-TEXT: #c8c8c8;
-    --CONCEPTION-GRID-MENU-BORDER: #FFFFFF4D;
+    --CONCEPTION-GRID-MENU-BORDER: #C45100;
 
     --CONCEPTION-GRID-MENU-TEXT-ACTIVE: #FFFFFF;
 
     --CONCEPTION-GRID-REDUCE-BUTTON-BACKGROUND: #303030;
+
+    
+    --CONCEPTION-GRID-BODY-BACKGROUND: #f89a59;
 
     /* Console bar */
     --CONSOLE-BAR-OUTPUT-TEXT: #c8c8c8;
@@ -34,13 +37,13 @@ body {
     /* Tool bar */
     --TOOL-BAR-COMPONENT-GROUP-TEXT: #e8e8e8;
 
-    --TOOL-BAR-COMPONENT-BACKGROUND: #404040;
-    --TOOL-BAR-COMPONENT-TEXT: #c8c8c8;
-    --TOOL-BAR-COMPONENT-BORDER: #000000;
+    --TOOL-BAR-COMPONENT-BACKGROUND: #E27300;
+    --TOOL-BAR-COMPONENT-TEXT: #000000;
+    --TOOL-BAR-COMPONENT-BORDER: #C45100;
 
     --TOOL-BAR-SEARCH-BOX-BACKGROUND: #303030;
     --TOOL-BAR-SEARCH-BOX-TEXT: #808080;
-    --TOOL-BAR-SEARCH-BOX-BORDER: #404040;
+    --TOOL-BAR-SEARCH-BOX-BORDER: #E27300;
 
 }
 /* MENU */
@@ -50,7 +53,9 @@ body {
     border-color: var(--MENU-BORDER) !important;
 }
 .custom #main-menu .nav-item a {
+    background-color: var(--MENU-BACKGROUND) !important;
     color: var(--MENU-TEXT) !important;
+    border-color: var(--MENU-BORDER) !important;
 }
 .custom #main-menu .nav-item .active {
     background-color: var(--MENU-BACKGROUND-ACTIVE) !important;
@@ -63,9 +68,11 @@ body {
 
 /* Conception grid */
 .custom #conception-grid {
-    background-color: var(--BAR-BODY-BACKGROUND) !important;
     border-left: 1px solid var(--BAR-BODY-BORDER) !important;
     border-right: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #conception-board {
+    background-color: var(--CONCEPTION-GRID-BODY-BACKGROUND) !important;
 }
 .custom #conception-grid .header {
     background-color: var(--BAR-HEADER-BACKGROUND) !important;
@@ -84,7 +91,7 @@ body {
     border-color: var(--CONCEPTION-GRID-MENU-BORDER) !important;
 }
 .custom #conception-grid .navbar-menu .nav-item .active {
-    background-color: var(--BAR-BODY-BACKGROUND) !important;
+    background-color: var(--CONCEPTION-GRID-BODY-BACKGROUND) !important;
     color: var(--CONCEPTION-GRID-MENU-TEXT-ACTIVE) !important;
     border-color: var(--CONCEPTION-GRID-MENU-BORDER) !important;
 }

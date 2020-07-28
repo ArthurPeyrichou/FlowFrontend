@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import * as linkCalculators from '../link/linkCalculators'
 import * as positionCal from './componentPositionCalculators'
-import { DATA_LOADING_TYPE } from '../../../config'
+import { DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../../config'
 
 /**
  * Change the position of the component
@@ -44,9 +44,11 @@ export function updateComponentPosition (theCompId: string, x: null | number = n
     .attr('y', positionCal.iconPlaceY(y, theCompHeight))
     .style('transform-origin', (positionCal.iconPlaceX(x, theCompWidth) + 12) + 'px ' + (positionCal.iconPlaceY(y, theCompHeight) - 9) + 'px')
 
-  d3.select('#io-' + theCompId)
-    .attr('x', positionCal.ioPlaceX(x, theCompWidth))
-    .attr('y', positionCal.ioPlaceY(y, theCompHeight))
+  if (TRANSFER_SHOW_IO) {
+    d3.select('#io-' + theCompId)
+      .attr('x', positionCal.ioPlaceX(x, theCompWidth))
+      .attr('y', positionCal.ioPlaceY(y, theCompHeight))
+  }
 
   d3.select('#trigger-' + theCompId)
     .attr('points', positionCal.getTriggerTrianglePoints(x, theCompWidth, y, theCompHeight))

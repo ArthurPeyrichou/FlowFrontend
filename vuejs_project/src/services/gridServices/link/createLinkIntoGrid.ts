@@ -117,6 +117,10 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
                   .attr('data-output', outputInput.output.id)
                   .attr('data-input-index', (isSourceInput ? theSourceCirle.attr('data-index') : theTargetCirle.attr('data-index')))
                   .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
+                  .on('dblclick', function () {
+                    d3.select(this).remove()
+                    addAndRemoveLink(outputInput.output.id, outputInput.input.id, false)
+                  })
 
                 transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE, tabId)
               }

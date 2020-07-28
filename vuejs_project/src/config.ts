@@ -21,6 +21,7 @@ export const TRANSFER_FILL_COLOR = 'gold'
 export const TRANSFER_STROKE_COLOR = 'black'
 export const TRANSFER_TYPE: 'PATH' | 'CIRCLE' = 'PATH'
 export const TRANSFER_BYTES_PRECISION = 2
+export const TRANSFER_SHOW_IO: true | false = true
 
 /* Console Parameters */
 export const OUTPUT_FONT_SIZE = 12

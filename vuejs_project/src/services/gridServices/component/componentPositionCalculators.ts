@@ -1,4 +1,4 @@
-import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH } from '../../../config'
+import { SVG_GRID_SIZE, SVG_GRID_BORDER_WIDTH, TRANSFER_SHOW_IO } from '../../../config'
 
 /*
  * In this file you will find all the function that calculate the component placement
@@ -33,11 +33,11 @@ export function namePlaceX (x: number, theCompWidth: number): number {
 
 export function namePlaceY (y: number, theCompHeight: number): number {
   if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
-    return SVG_GRID_BORDER_WIDTH - 8 + (theCompHeight / 2)
+    return SVG_GRID_BORDER_WIDTH - (TRANSFER_SHOW_IO ? 8 : 2) + (theCompHeight / 2)
   } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
-    return SVG_GRID_SIZE - 8 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
+    return SVG_GRID_SIZE - (TRANSFER_SHOW_IO ? 8 : 2) - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
   }
-  return y - 8
+  return y - (TRANSFER_SHOW_IO ? 8 : 2)
 }
 
 export function titlePlaceX (x: number, theCompWidth: number): number {
@@ -51,11 +51,11 @@ export function titlePlaceX (x: number, theCompWidth: number): number {
 
 export function titlePlaceY (y: number, theCompHeight: number): number {
   if (y < (SVG_GRID_BORDER_WIDTH + (theCompHeight / 2))) {
-    return SVG_GRID_BORDER_WIDTH + 7 + (theCompHeight / 2)
+    return SVG_GRID_BORDER_WIDTH + (TRANSFER_SHOW_IO ? 8 : 14) + (theCompHeight / 2)
   } else if (y > (SVG_GRID_SIZE - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2))) {
-    return SVG_GRID_SIZE + 7 - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
+    return SVG_GRID_SIZE + (TRANSFER_SHOW_IO ? 8 : 14) - SVG_GRID_BORDER_WIDTH - (theCompHeight / 2)
   }
-  return y + 7
+  return y + (TRANSFER_SHOW_IO ? 8 : 14)
 }
 
 // io for input/output

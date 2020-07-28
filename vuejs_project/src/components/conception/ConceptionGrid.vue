@@ -75,7 +75,7 @@ import { createLinkIntoGrid } from '../../services/gridServices/link/createLinkI
 import { addLinkIntoGrid } from '../../services/gridServices/link/addLinkIntoGrid'
 
 import { transfertData } from '../../services/gridServices/link/transfertData'
-import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE, COMMUNICATION_TYPE, DATA_LOADING_TYPE } from '../../config'
+import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE, COMMUNICATION_TYPE, DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../config'
 import { FDElement } from '../../models/FDElement'
 import { BaseType, ContainerElement } from 'd3'
 
@@ -522,7 +522,9 @@ export default class ConceptionGrid extends Vue {
               setComponentBeingProcessed(el.getId(), false)
             }
           }
-          setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
+          if (TRANSFER_SHOW_IO) {
+            setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
+          }
           el.getLinks().forEach((links, index) => {
             links.forEach(link => {
               // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)

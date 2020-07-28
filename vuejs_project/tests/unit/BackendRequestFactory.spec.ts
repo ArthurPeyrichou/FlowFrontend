@@ -254,6 +254,5 @@ describe('BackendRequestFactory Model', () => {
 
   it('Add new element, moove and update request, after the factory reset all changes', () => {
     expect(BackendRequestFactory.installComponent('fakeComp.py', 'print \'coucou\'')).toEqual('{"type":"install","filename":"fakeComp.py","body":"print \'coucou\'"}')
-
   })
 })
