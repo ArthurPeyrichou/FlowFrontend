@@ -126,6 +126,14 @@ body {
     color: var(--BAR-HEADER-TEXT);
     border-right: 1px solid var(--BAR-BODY-BORDER) !important;
 }
+.custom #tool-bar #toolbar-option-navbar-toggle-collapse {
+    color: var(--BAR-HEADER-TEXT);
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+}
+.custom #tool-bar #toolbar-option-navbar-toggle-collapse a {
+    color: var(--BAR-HEADER-TEXT);
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+}
 .custom #console-bar #tool-options {
     border-bottom: 1px solid var(--BAR-BODY-BORDER) !important;
 }

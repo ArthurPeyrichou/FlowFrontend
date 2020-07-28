@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import * as linkCalculators from './linkCalculators'
 import { organizeCompAndLinksOverlay } from './organizeCompAndLinksOverlay'
 import { transfertData } from './transfertData'
-import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE } from '../../../config'
+import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE, DATA_LOADING_TYPE } from '../../../config'
 
 /**
  * Selects all connectors of '#conception-grid-svg' and sets drag&drop listeners for links creation.
@@ -11,8 +11,11 @@ import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE } from '../../..
  * On drag end, creates a link for the graph if find an other component to link on mouse position
  * @param addAndRemoveLink function who register the link in component's links of ConceptionGrid's Vue
  * @param addTheLinkInTheSvg if true add the link in the svg grid, otherwise remove the g and the path of the animation
+ * @param tabId the tab id
  */
-export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheSvg: boolean): void {
+export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheSvg: boolean, tabId: string): void {
+  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+
   const dragLinkCompHandler = d3.drag()
     .on('drag', function () {
       // The data for our line
@@ -25,9 +28,9 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
       // Look if a temp <g><path/></g> already exist
       if (document.getElementById('link-' + theSourceCompId) === null) {
         // The line SVG Path we draw
-        const path = d3.select('#conception-grid-svg').append('g')
+        const path = d3.select(theSvg).append('g')
           .attr('class', 'link ' + (isSourceInput ? 'input-' : 'output-') + theSourceCompId)
-          .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
+          .attr('transform', d3.select(theSvg).select('g').attr('transform'))
           .append('path')
           .attr('id', 'link-' + theSourceCompId)
           .datum(linkCalculators.getLineData(source, target, isSourceInput))
@@ -74,7 +77,7 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
       }
 
       let isFounded = false
-      d3.select('#conception-grid-svg').selectAll('.connector')
+      d3.select(theSvg).selectAll('.connector')
         .each(function () {
           const theTargetCirle = d3.select(this)
           const targetXY: [number, number] = [Number.parseInt(theTargetCirle.attr('cx')), Number.parseInt(theTargetCirle.attr('cy'))]
@@ -115,7 +118,7 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
                   .attr('data-input-index', (isSourceInput ? theSourceCirle.attr('data-index') : theTargetCirle.attr('data-index')))
                   .attr('data-output-index', (isSourceInput ? theTargetCirle.attr('data-index') : theSourceCirle.attr('data-index')))
 
-                transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE)
+                transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE, tabId)
               }
             }
           }
@@ -128,5 +131,5 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
       }
     })
 
-  dragLinkCompHandler(d3.select('#conception-grid-svg').selectAll('.connector'))
+  dragLinkCompHandler(d3.select(theSvg).selectAll('.connector'))
 }

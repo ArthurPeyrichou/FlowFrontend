@@ -8,6 +8,7 @@ export const SVG_GRID_BORDER_WIDTH = 10
 export const SVG_MIN_SCALE = 0.1
 export const SVG_MAX_SCALE = 2
 export const SVG_SCALE_STEP = 0.1
+export const DATA_LOADING_TYPE: 'ALL_AT_ONCE' | 'ON_CHANGE_TAB' = 'ALL_AT_ONCE'
 
 /* Link Rendering */
 export const LINK_FILL_COLOR = 'grey'

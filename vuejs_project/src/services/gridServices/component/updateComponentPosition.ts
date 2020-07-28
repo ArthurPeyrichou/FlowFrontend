@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 import * as linkCalculators from '../link/linkCalculators'
 import * as positionCal from './componentPositionCalculators'
+import { DATA_LOADING_TYPE } from '../../../config'
 
 /**
  * Change the position of the component
@@ -10,24 +11,24 @@ import * as positionCal from './componentPositionCalculators'
  * @param y position of the component
  */
 export function updateComponentPosition (theCompId: string, x: null | number = null, y: null | number = null): void {
-  const theCompWidth = Number.parseInt(d3.select('#rect-' + theCompId).attr('width'))
-  const theCompHeight = Number.parseInt(d3.select('#rect-' + theCompId).attr('height'))
-  const theCompInputCount = Number.parseInt(d3.select('#rect-' + theCompId).attr('data-input'))
-  const theCompOutputCount = Number.parseInt(d3.select('#rect-' + theCompId).attr('data-output'))
+  const rect = d3.select('#rect-' + theCompId)
+  const theCompWidth = Number.parseInt(rect.attr('width'))
+  const theCompHeight = Number.parseInt(rect.attr('height'))
+  const theCompInputCount = Number.parseInt(rect.attr('data-input'))
+  const theCompOutputCount = Number.parseInt(rect.attr('data-output'))
   if (x === null) {
-    x = Number.parseInt(d3.select('#rect-' + theCompId).attr('x')) + (theCompWidth / 2)
+    x = Number.parseInt(rect.attr('x')) + (theCompWidth / 2)
   }
   if (y === null) {
-    y = Number.parseInt(d3.select('#rect-' + theCompId).attr('y')) + (theCompHeight / 2)
+    y = Number.parseInt(rect.attr('y')) + (theCompHeight / 2)
   }
 
-  const svg: HTMLElement | null = document.getElementById('conception-grid-svg')
+  const svg: HTMLElement | null = document.getElementById('conception-grid-svg' + ((DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + rect.attr('data-tab-id'))))
   if (svg?.lastElementChild?.getAttribute('id') !== 'comp-' + theCompId) {
     d3.select('#comp-' + theCompId).raise()
   }
 
-  d3.select('#rect-' + theCompId)
-    .attr('x', positionCal.rectPlaceX(x, theCompWidth))
+  rect.attr('x', positionCal.rectPlaceX(x, theCompWidth))
     .attr('y', positionCal.rectPlaceY(y, theCompHeight))
 
   d3.select('#name-text-' + theCompId)
@@ -63,14 +64,14 @@ export function updateComponentPosition (theCompId: string, x: null | number = n
   }
 
   d3.selectAll('.link-' + theCompId).each(function () {
-    const input = d3.select(this).attr('data-input')
-    const output = d3.select(this).attr('data-output')
+    const input = d3.select('#input-' + d3.select(this).attr('data-input'))
+    const output = d3.select('#output-' + d3.select(this).attr('data-output'))
     const source: [number, number] =
-                  [Number.parseInt(d3.select('#output-' + output).attr('cx')),
-                    Number.parseInt(d3.select('#output-' + output).attr('cy'))]
+                  [Number.parseInt(output.attr('cx')),
+                    Number.parseInt(output.attr('cy'))]
     const target: [number, number] =
-                  [Number.parseInt(d3.select('#input-' + input).attr('cx')),
-                    Number.parseInt(d3.select('#input-' + input).attr('cy'))]
+                  [Number.parseInt(input.attr('cx')),
+                    Number.parseInt(input.attr('cy'))]
 
     d3.select(this)
       .datum(linkCalculators.getLineData(source, target, false))

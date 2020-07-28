@@ -18,16 +18,32 @@
       </div>
     </div>
     <div id="conception-board" class="board">
-      <svg id="conception-grid-svg" class="grid" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
+      <template v-if="isDataLoadingAtOnce">
+      <svg id="conception-grid-svg" class="conception-grid-svg" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
         <defs>
           <pattern patternUnits="userSpaceOnUse" id="svg-grid" x="0" y="0" width="150" height="150">
             <image width="150" height="150" v-bind="{'xlink:href' : require('@/assets/conception-grid-' + theme + '.png')}"/>
           </pattern>
         </defs>
         <g class="svg-grid">
-          <rect id="svg-grid-bg" x="0" y="0" width="5000" height="5000" fill="url(#svg-grid)"></rect>
+          <rect class="svg-grid-bg" x="0" y="0" width="5000" height="5000" fill="url(#svg-grid)"></rect>
         </g>
       </svg>
+      </template>
+      <template v-else-if="!isDataLoadingAtOnce">
+        <div id="svg-list">
+          <svg v-for="tab in tabs" :key="'svg-' + tab.id" :id="'conception-grid-svg-' + tab.id" class="conception-grid-svg" viewBox="0,0,5000,5000" @dragover.prevent v-on:drop="drop($event)">
+            <defs>
+              <pattern patternUnits="userSpaceOnUse" :id="'svg-grid-' + tab.id" x="0" y="0" width="150" height="150">
+                <image width="150" height="150" v-bind="{'xlink:href' : require('@/assets/conception-grid-' + theme + '.png')}"/>
+              </pattern>
+            </defs>
+            <g class="svg-grid">
+              <rect class="svg-grid-bg" x="0" y="0" width="5000" height="5000" :fill="'url(#svg-grid-' + tab.id + ')'"></rect>
+            </g>
+          </svg>
+        </div>
+      </template>
       <div id="zoom-tools">
         <button id="zoom-in-btn" title="Zoom in" data-exec="#designer.zoomin" v-on:click="zoomInSvg" class="btn btn-light btn-outline-dark">
           <i class="fa fa-search-plus"></i>
@@ -59,7 +75,7 @@ import { createLinkIntoGrid } from '../../services/gridServices/link/createLinkI
 import { addLinkIntoGrid } from '../../services/gridServices/link/addLinkIntoGrid'
 
 import { transfertData } from '../../services/gridServices/link/transfertData'
-import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE, COMMUNICATION_TYPE } from '../../config'
+import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE, COMMUNICATION_TYPE, DATA_LOADING_TYPE } from '../../config'
 import { FDElement } from '../../models/FDElement'
 import { BaseType, ContainerElement } from 'd3'
 
@@ -84,6 +100,7 @@ export default class ConceptionGrid extends Vue {
   hideConsoleBar = false
   backendRequestFactory = new BackendRequestFactory()
   isConnectedToBackEnd = process.env.NODE_ENV !== 'test'
+  isDataLoadingAtOnce = DATA_LOADING_TYPE === 'ALL_AT_ONCE'
 
   constructor () {
     super()
@@ -132,6 +149,9 @@ export default class ConceptionGrid extends Vue {
     this.backendRequestFactory.setTabs(this.tabs, [])
     if (COMMUNICATION_TYPE === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
+    if (!this.isDataLoadingAtOnce) {
+      this.$nextTick(() => { this.initSvg() })
     }
   }
 
@@ -233,7 +253,7 @@ export default class ConceptionGrid extends Vue {
             elements.push(newElement)
           }
           addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
-          createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY')
+          createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY', this.currentTab)
         } else if (COMMUNICATION_TYPE === 'DIRECT') {
           this.sendMessageToBackend(this.backendRequestFactory.apply())
         }
@@ -241,7 +261,7 @@ export default class ConceptionGrid extends Vue {
       }
     }
 
-    d3.select('#svg-grid-bg').on('mousemove', function (this: BaseType) {
+    d3.selectAll('.svg-grid-bg').on('mousemove', function (this: BaseType) {
       actualize(d3.mouse(this as ContainerElement))
     })
 
@@ -363,22 +383,46 @@ export default class ConceptionGrid extends Vue {
   populateSvg (): void {
     d3.selectAll('.component').remove()
     d3.selectAll('.link').remove()
-    const graph = this.graphs.get(this.currentTab)
-    if (graph) {
-      graph.forEach(el => {
-        addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
-      })
-      graph.forEach(component => {
-        if (component.getLinks().size !== 0) {
-          component.getLinks().forEach((links, index) => {
-            if (index !== 99) {
-              links.forEach(link => addLinkIntoGrid(component.getId(), index, link, this.addAndRemoveLink))
-            }
-          })
-        }
-      })
+    const selectedGraph: FDElement[] = this.graphs.get(this.currentTab) || []
+    const graphs: Map<string, FDElement[]> = this.isDataLoadingAtOnce ? new Map<string, FDElement[]>().set(this.currentTab, selectedGraph) : this.graphs
+    graphs.forEach(graph => {
+      if (graph) {
+        graph.forEach(el => {
+          addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
+        })
+      }
+    })
+    graphs.forEach(graph => {
+      if (graph) {
+        graph.forEach(component => {
+          if (component.getLinks().size !== 0) {
+            component.getLinks().forEach((links, index) => {
+              if (index !== 99) {
+                links.forEach(link => this.waitRenderingBeforeAddLink(component.getId(), index, link, component.getTabId()))
+              }
+            })
+          }
+        })
+      }
+    })
+    createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY', this.currentTab)
+  }
+
+  /**
+   * Will add a link beetween two component, but before will wait that the componnents are both rendered in the svg
+   * @public
+   * @param outputId
+   * @param outputIndex
+   * @param link
+   * @param tabId
+   * @param tries by default to 10, will decrease on each tries, represente the number of tentative
+   */
+  waitRenderingBeforeAddLink (outputId: string, outputIndex: number, link: {id: string; index: number}, tabId: string, tries = 10): void {
+    if (document.getElementById('output-' + outputIndex + '-' + outputId) !== null && document.getElementById('input-' + link.index + '-' + link.id) !== null) {
+      addLinkIntoGrid(outputId, outputIndex, link, tabId, this.addAndRemoveLink)
+    } else if (tries > 0) {
+      this.$nextTick(() => { this.waitRenderingBeforeAddLink(outputId, outputIndex, link, tabId, --tries) })
     }
-    createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY')
   }
 
   /**
@@ -389,7 +433,22 @@ export default class ConceptionGrid extends Vue {
   selectTab (tabId: string) {
     if (this.currentTab !== tabId) {
       this.currentTab = tabId
-      this.populateSvg()
+      if (this.isDataLoadingAtOnce) {
+        this.populateSvg()
+      } else {
+        const svgs = document.getElementsByClassName('conception-grid-svg')
+        for (let j = 0; j < svgs.length; ++j) {
+          const svg = svgs[j]
+          if (svg) {
+            const id = svg.getAttribute('id') || ''
+            if (id.includes(tabId)) {
+              svg.setAttribute('style', 'display:initial;')
+            } else {
+              svg.setAttribute('style', 'display:none;')
+            }
+          }
+        }
+      }
     }
   }
 
@@ -411,7 +470,22 @@ export default class ConceptionGrid extends Vue {
         this.graphs.set(el.getTabId(), [el])
       }
     })
-    this.populateSvg()
+    this.afterRenderingPopulateSvg()
+  }
+
+  /**
+   * If DATA_LOADING_TYPE === 'ON_CHANGE_TAB', there is one svg per tabs
+   * Svg are display with this.tabs, we need to wait template rendering before populate svg
+   * @public
+   * @param tries by default to 10, will decrease on each tries, represente the number of tentative
+   */
+  afterRenderingPopulateSvg (tries = 10): void {
+    if (this.isDataLoadingAtOnce || document.getElementsByClassName('conception-grid-svg').length === this.tabs.length) {
+      this.initSvg()
+      this.populateSvg()
+    } else {
+      this.$nextTick(() => { this.afterRenderingPopulateSvg(--tries) })
+    }
   }
 
   /**
@@ -453,7 +527,7 @@ export default class ConceptionGrid extends Vue {
             links.forEach(link => {
               // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
               if (index !== 99) {
-                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE)
+                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE, this.currentTab)
               }
             })
           })
@@ -520,7 +594,7 @@ export default class ConceptionGrid extends Vue {
   public zoomInSvg (): void {
     if (this.svgScale < SVG_MAX_SCALE) {
       this.svgScale += SVG_SCALE_STEP
-      d3.select('#conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
+      d3.selectAll('.conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
 
@@ -531,7 +605,7 @@ export default class ConceptionGrid extends Vue {
   zoomOutSvg (): void {
     if (this.svgScale > SVG_MIN_SCALE + SVG_SCALE_STEP) {
       this.svgScale -= SVG_SCALE_STEP
-      d3.select('#conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
+      d3.selectAll('.conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
 
@@ -542,7 +616,7 @@ export default class ConceptionGrid extends Vue {
   zoomResetSvg (): void {
     if (this.svgScale !== 1) {
       this.svgScale = 1
-      d3.select('#conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
+      d3.selectAll('.conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
 }
@@ -599,7 +673,7 @@ export default class ConceptionGrid extends Vue {
   .board.active {
     cursor: grabbing;
   }
-  .grid {
+  .conception-grid-svg {
     min-height: 5000px;
     height: 100%;
     min-width: 5000px;

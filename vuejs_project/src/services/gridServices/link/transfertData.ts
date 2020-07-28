@@ -1,16 +1,19 @@
 import * as d3 from 'd3'
 import * as linkCalculators from './linkCalculators'
-import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR } from '../../../config'
+import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR, DATA_LOADING_TYPE } from '../../../config'
 
 /**
  * Generates an animation for data transfer between two components.
  * The animation make a circle on the existing link's path which start from the start (output) to the end (input) like a pearl on a string.
  * @param theOuputId
  * @param theInputId
+ * @param tabId
  */
-export function transfertDataWithCircle (theOuputId: string, theInputId: string): void {
+export function transfertDataWithCircle (theOuputId: string, theInputId: string, tabId: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
+
+  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
   // Gets the link path and initialize the circle which represent the data transfer
   const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
@@ -32,9 +35,9 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
     }
   }
 
-  d3.select('#conception-grid-svg').append('circle')
+  d3.select(theSvg).append('circle')
     .attr('id', dataTransfertId)
-    .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
+    .attr('transform', d3.select(theSvg).select('g').attr('transform'))
     .attr('cx', theOuputCircle.attr('cx'))
     .attr('cy', theOuputCircle.attr('cy'))
     .attr('r', TRANSFER_RADIUS)
@@ -50,10 +53,13 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string)
  * The animation make a path on the existing link's path which start from the start (output) to the end (input) like a loading bar.
  * @param theOuputId
  * @param theInputId
+ * @param tabId
  */
-export function transfertDataWithPath (theOuputId: string, theInputId: string): void {
+export function transfertDataWithPath (theOuputId: string, theInputId: string, tabId: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
+
+  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
   // Gets the link path and initialize the circle which represent the data transfer
   const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
@@ -79,9 +85,9 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
     }
   }
 
-  d3.select('#conception-grid-svg').append('path')
+  d3.select(theSvg).append('path')
     .attr('id', dataTransfertId)
-    .attr('transform', d3.select('#conception-grid-svg').select('g').attr('transform'))
+    .attr('transform', d3.select(theSvg).select('g').attr('transform'))
     .datum([source, source])
     .attr('d', linkCalculators.lineFunction)
     .attr('stroke', TRANSFER_FILL_COLOR)
@@ -97,17 +103,18 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string): 
  * @param theOuputId
  * @param theInputId
  * @param typeOfTransfer
+ * @param tabId
  */
-export function transfertData (theOuputId: string, theInputId: string, typeOfTransfer: string): void {
+export function transfertData (theOuputId: string, theInputId: string, typeOfTransfer: string, tabId: string): void {
   switch (typeOfTransfer.toUpperCase()) {
     case 'CIRCLE':
-      transfertDataWithCircle(theOuputId, theInputId)
+      transfertDataWithCircle(theOuputId, theInputId, tabId)
       break
     case 'PATH':
-      transfertDataWithPath(theOuputId, theInputId)
+      transfertDataWithPath(theOuputId, theInputId, tabId)
       break
     default:
-      transfertDataWithPath(theOuputId, theInputId)
+      transfertDataWithPath(theOuputId, theInputId, tabId)
       break
   }
 }
