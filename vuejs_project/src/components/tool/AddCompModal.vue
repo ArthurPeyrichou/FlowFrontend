@@ -39,6 +39,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { BackendRequestFactory } from '../../models/BackendRequestFactory'
+import ConceptionGrid from '../conception/ConceptionGrid.vue'
 
 /** Modal that allow users to upload Flowdata components files into the toolbar. */
 @Component
@@ -69,13 +71,30 @@ export default class AddCompModal extends Vue {
       return
     }
 
-    // DO SOMETHING HERE
-    console.log('upload validated.')
+    if (this.file) {
+      // DO SOMETHING HERE
+      const fr = new FileReader()
+      const fileName = this.file.name
 
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-add-component')
-    })
+      fr.readAsText(this.file)
+      const sendFile = (fileBody: string) => {
+        (this.$parent.$parent.$children[1] as ConceptionGrid).sendMessageToBackend([BackendRequestFactory.installComponent(fileName || '', fileBody)])
+      }
+
+      fr.onload = function () {
+        const res = fr.result
+        if (res) {
+          sendFile(res.toString())
+        }
+      }
+
+      console.log('upload validated.')
+
+      // Hide the modal manually
+      this.$nextTick(() => {
+        this.$bvModal.hide('modal-add-component')
+      })
+    }
   }
 
   /**

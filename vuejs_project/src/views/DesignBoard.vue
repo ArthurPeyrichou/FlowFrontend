@@ -61,7 +61,7 @@ export default class DesignBoard extends Vue {
             this.sendDesignerData(data)
             --this.shouldReload
             // if too many time is spend (1.5s) before the next designer data, close the opportunnity to reload
-            setTimeout( () => { this.shouldReload = 0 }, 1500)
+            setTimeout(() => { this.shouldReload = 0 }, 1500)
           }
           break
         case 'error':

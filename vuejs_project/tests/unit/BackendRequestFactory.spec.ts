@@ -251,4 +251,9 @@ describe('BackendRequestFactory Model', () => {
     expect(res.length).toEqual(1)
     expect(res[0]).toEqual(JSON.stringify({ type: 'apply', body: [{ type: 'tabs', tabs: [newTab] }] }))
   })
+
+  it('Add new element, moove and update request, after the factory reset all changes', () => {
+    expect(BackendRequestFactory.installComponent('fakeComp.py', 'print \'coucou\'')).toEqual('{"type":"install","filename":"fakeComp.py","body":"print \'coucou\'"}')
+
+  })
 })
