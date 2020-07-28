@@ -20,6 +20,7 @@ export const TRANSFER_RADIUS = 4
 export const TRANSFER_FILL_COLOR = 'gold'
 export const TRANSFER_STROKE_COLOR = 'black'
 export const TRANSFER_TYPE: 'PATH' | 'CIRCLE' = 'PATH'
+export const TRANSFER_BYTES_PRECISION = 2
 
 /* Console Parameters */
 export const OUTPUT_FONT_SIZE = 12

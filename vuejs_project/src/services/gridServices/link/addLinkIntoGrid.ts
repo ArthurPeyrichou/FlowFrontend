@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import * as linkCalculators from './linkCalculators'
 import { organizeCompAndLinksOverlay } from './organizeCompAndLinksOverlay'
 import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, DATA_LOADING_TYPE } from '../../../config'
+import { BaseType } from 'd3'
 
 /**
  * Creates a link in the svg graph
@@ -52,7 +53,8 @@ export function addLinkIntoGrid (outputId: string, outputIndex: number, link: {i
       path.attr('stroke', LINK_FILL_COLOR)
     }
   })
-  path.on('dblclick', () => {
+  path.on('dblclick', function () {
+    d3.select(this).remove()
     addAndRemoveLink(outputIndex + '-' + outputId, link.index + '-' + link.id, false)
   })
   organizeCompAndLinksOverlay()

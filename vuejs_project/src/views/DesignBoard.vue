@@ -29,7 +29,7 @@ export default class DesignBoard extends Vue {
   private databaseElementList: Array<FDElement> = []
   private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
   private connection: WebSocket | null = null
-  private isLoadedOnce = false
+  public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
 
   mounted () {
@@ -57,9 +57,11 @@ export default class DesignBoard extends Vue {
           this.sendMessage(data)
           break
         case 'designer':
-          if (!this.isLoadedOnce || COMMUNICATION_TYPE === 'DIRECT') {
+          if (this.shouldReload > 0 || COMMUNICATION_TYPE === 'DIRECT') {
             this.sendDesignerData(data)
-            this.isLoadedOnce = true
+            --this.shouldReload
+            // if too many time is spend (1.5s) before the next designer data, close the opportunnity to reload
+            setTimeout( () => { this.shouldReload = 0 }, 1500)
           }
           break
         case 'error':
@@ -171,6 +173,7 @@ export default class DesignBoard extends Vue {
     if (this.connection !== null) {
       data.forEach(el => {
         if (this.connection !== null) {
+          this.shouldReload = 2
           this.connection.send(el)
         }
       })
