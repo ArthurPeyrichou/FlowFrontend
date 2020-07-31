@@ -40,6 +40,11 @@ npm run test:e2e
 npm run styleguide
 ```
 
+### Generate one couple of key private/public
+```
+npm run generate:ssl_keys
+```
+
 ### Compiles and minifies all docs from the project in folder styleguide/
 ```
 npm run styleguide:build

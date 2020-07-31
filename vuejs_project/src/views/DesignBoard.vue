@@ -14,6 +14,8 @@ import { FDComponent } from '../models/FDComponent'
 import { FDElement } from '../models/FDElement'
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { COMMUNICATION_TYPE } from '../config'
+import JSEncrypt from 'jsencrypt'
+import { BIconArrowDownLeftSquareFill } from 'bootstrap-vue'
 
 @Component({
   components: {
@@ -31,6 +33,9 @@ export default class DesignBoard extends Vue {
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
+  private encryptForBackend = new JSEncrypt()
+  private decryptForFrontend = new JSEncrypt()
+  private dataReceiving = ''
 
   mounted () {
     this.$nextTick(function () {
@@ -38,6 +43,7 @@ export default class DesignBoard extends Vue {
       if (process.env.NODE_ENV === 'test' || !this.backendUrl) {
         this.sendBlankDesignerData()
       } else {
+        this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
         this.connect(3, this.backendUrl)
       }
     })
@@ -51,7 +57,22 @@ export default class DesignBoard extends Vue {
    * @public
    */
   connect (connectionTries: number, url: string): void {
-    const treatMessage = (data: any) => {
+    const treatMessage = (msg: string) => {
+      let data = JSON.parse(this.decryptForFrontend.decrypt(msg))
+      if (data.msg) {
+        switch (data.msg) {
+          case 'start':
+            this.dataReceiving = data.value
+            return
+          case 'middle':
+            this.dataReceiving += data.value
+            return
+          case 'end':
+            this.dataReceiving += data.value
+            data = JSON.parse(this.dataReceiving)
+        }
+      }
+      console.log(data)
       switch (data.type) {
         case 'debug':
           this.sendMessage(data)
@@ -83,6 +104,10 @@ export default class DesignBoard extends Vue {
           break
       }
     }
+    const giveFrontendPublicKey = () => {
+      const msg = { type: 'key', value: this.decryptForFrontend.getPublicKey() }
+      this.sendMessageToBackend([JSON.stringify(msg)])
+    }
     console.log('Starting connection to WebSocket Server...')
     this.connection = new WebSocket(url)
     this.connection.addEventListener('error', e => {
@@ -99,9 +124,10 @@ export default class DesignBoard extends Vue {
     })
     this.connection.onopen = function () {
       console.log('Successfully connected to the echo websocket server...')
+      giveFrontendPublicKey()
     }
     this.connection.onmessage = function (event) {
-      treatMessage(JSON.parse(decodeURIComponent(event.data)))
+      treatMessage(decodeURIComponent(event.data))
     }
   }
 
@@ -174,7 +200,21 @@ export default class DesignBoard extends Vue {
       data.forEach(el => {
         if (this.connection !== null) {
           this.shouldReload = 2
-          this.connection.send(el)
+          if (el.length <= 125) {
+            this.connection.send(this.encryptForBackend.encrypt(el))
+          } else {
+            const msg = new Array<string>()
+            let offset = 0
+            while (offset < el.length) {
+              const size = Math.min(125, el.length - offset)
+              msg.push(el.substring(offset, offset + size))
+              offset += size
+            }
+            for (let i = 0; i < msg.length; ++i) {
+              const msgType = (i === 0) ? 'start' : i === (msg.length - 1) ? 'end' : 'middle'
+              this.connection.send(this.encryptForBackend.encrypt(JSON.stringify({ msg: msgType, value: msg[i] })))
+            }
+          }
         }
       })
     } else {

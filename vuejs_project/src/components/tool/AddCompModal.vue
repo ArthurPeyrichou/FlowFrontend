@@ -40,7 +40,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { BackendRequestFactory } from '../../models/BackendRequestFactory'
-import ConceptionGrid from '../conception/ConceptionGrid.vue'
+import DesignBoard from '../../views/DesignBoard.vue'
 
 /** Modal that allow users to upload Flowdata components files into the toolbar. */
 @Component
@@ -78,7 +78,7 @@ export default class AddCompModal extends Vue {
 
       fr.readAsText(this.file)
       const sendFile = (fileBody: string) => {
-        (this.$parent.$parent.$children[1] as ConceptionGrid).sendMessageToBackend([BackendRequestFactory.installComponent(fileName || '', fileBody)])
+        (this.$parent.$parent as DesignBoard).sendMessageToBackend([BackendRequestFactory.installComponent(fileName || '', fileBody)])
       }
 
       fr.onload = function () {
