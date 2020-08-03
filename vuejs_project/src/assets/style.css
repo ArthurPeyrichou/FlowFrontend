@@ -1,0 +1,172 @@
+/* MENU */
+body {
+    --MENU-BACKGROUND: #E27300;
+    --MENU-TEXT: #000000;
+    --MENU-BORDER: #C45100;
+
+    --MENU-BACKGROUND-ACTIVE: #101010;
+    --MENU-TEXT-ACTIVE: #FFFFFF;
+    --MENU-BORDER-ACTIVE: #C45100;
+
+    --MENU-BORDER-HOVER: #FFFFFF1A;
+
+    /* Global */
+    --BAR-HEADER-BACKGROUND: #101010;
+    --BAR-HEADER-TEXT: #c8c8c8;
+    --BAR-HEADER-BORDER: #FFFFFF1A;
+
+    --BAR-BODY-BACKGROUND: #202020;
+    --BAR-BODY-TEXT: #FFFFFF;
+    --BAR-BODY-BORDER: #FFFFFF1A;
+
+    /* Conception grid */
+    --CONCEPTION-GRID-MENU-BACKGROUND: #101010;
+    --CONCEPTION-GRID-MENU-TEXT: #c8c8c8;
+    --CONCEPTION-GRID-MENU-BORDER: #C45100;
+
+    --CONCEPTION-GRID-MENU-TEXT-ACTIVE: #FFFFFF;
+
+    --CONCEPTION-GRID-REDUCE-BUTTON-BACKGROUND: #303030;
+
+    
+    --CONCEPTION-GRID-BODY-BACKGROUND: #f89a59;
+
+    /* Console bar */
+    --CONSOLE-BAR-OUTPUT-TEXT: #c8c8c8;
+
+    /* Tool bar */
+    --TOOL-BAR-COMPONENT-GROUP-TEXT: #e8e8e8;
+
+    --TOOL-BAR-COMPONENT-BACKGROUND: #E27300;
+    --TOOL-BAR-COMPONENT-TEXT: #000000;
+    --TOOL-BAR-COMPONENT-BORDER: #C45100;
+
+    --TOOL-BAR-SEARCH-BOX-BACKGROUND: #303030;
+    --TOOL-BAR-SEARCH-BOX-TEXT: #808080;
+    --TOOL-BAR-SEARCH-BOX-BORDER: #E27300;
+
+}
+/* MENU */
+.custom #main-menu {
+    background-color: var(--MENU-BACKGROUND) !important;
+    color: var(--MENU-TEXT) !important;
+    border-color: var(--MENU-BORDER) !important;
+}
+.custom #main-menu .nav-item a {
+    background-color: var(--MENU-BACKGROUND) !important;
+    color: var(--MENU-TEXT) !important;
+    border-color: var(--MENU-BORDER) !important;
+}
+.custom #main-menu .nav-item .active {
+    background-color: var(--MENU-BACKGROUND-ACTIVE) !important;
+    color: var(--MENU-TEXT-ACTIVE) !important;
+    border-color: var(--MENU-BORDER-ACTIVE) !important;
+}
+.custom #main-menu .navbar-menu .nav-item a:hover {
+    border-color: var(--MENU-BORDER-HOVER) !important;
+}
+
+/* Conception grid */
+.custom #conception-grid {
+    border-left: 1px solid var(--BAR-BODY-BORDER) !important;
+    border-right: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #conception-board {
+    background-color: var(--CONCEPTION-GRID-BODY-BACKGROUND) !important;
+}
+.custom #conception-grid .header {
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+    color: var(--BAR-HEADER-TEXT) !important;
+}
+.custom #conception-grid .board {
+    border-top: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #conception-grid .reduce-button {
+    background-color: var(--CONCEPTION-GRID-REDUCE-BUTTON-BACKGROUND) !important;
+    border: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #conception-grid .navbar-menu {
+    background-color: var(--CONCEPTION-GRID-MENU-BACKGROUND) !important;
+    color: var(--CONCEPTION-GRID-MENU-TEXT) !important;
+    border-color: var(--CONCEPTION-GRID-MENU-BORDER) !important;
+}
+.custom #conception-grid .navbar-menu .nav-item .active {
+    background-color: var(--CONCEPTION-GRID-BODY-BACKGROUND) !important;
+    color: var(--CONCEPTION-GRID-MENU-TEXT-ACTIVE) !important;
+    border-color: var(--CONCEPTION-GRID-MENU-BORDER) !important;
+}
+.custom #conception-grid .navbar-menu .nav-item a:hover {
+    border-color: var(--CONCEPTION-GRID-MENU-BORDER) !important;
+}
+.custom #conception-grid .navbar-menu .nav-item a {
+    color: var(--BAR-HEADER-TEXT) !important;
+}
+
+/* Console bar */
+.custom #console-bar {
+    background-color: var(--BAR-BODY-BACKGROUND) !important;
+}
+.custom #console-bar .header {
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+    color: var(--BAR-HEADER-TEXT) !important;
+}
+.custom #console-bar .console-output {
+    color: var(--CONSOLE-BAR-OUTPUT-TEXT) !important;
+}
+.custom #console-bar .console-output p {
+    border-bottom: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+
+/* Tool bar */
+.custom #tool-bar {
+    background-color: var(--BAR-BODY-BACKGROUND) !important;
+}
+.custom #tool-bar .header {
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+    color: var(--BAR-HEADER-TEXT) !important;
+    border-bottom: 1px solid var(--BAR-HEADER-BORDER) !important;
+}
+.custom #tool-bar .setting-tool-navbar {
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+}
+.custom #tool-bar .navbar-toggler {
+    color: var(--BAR-HEADER-TEXT);
+    border-right: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #tool-bar #toolbar-option-navbar-toggle-collapse {
+    color: var(--BAR-HEADER-TEXT);
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+}
+.custom #tool-bar #toolbar-option-navbar-toggle-collapse a {
+    color: var(--BAR-HEADER-TEXT);
+    background-color: var(--BAR-HEADER-BACKGROUND) !important;
+}
+.custom #console-bar #tool-options {
+    border-bottom: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #tool-bar .board {
+    border-top: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #tool-bar .fdcomp-group-list {
+    border-top: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #tool-bar .fdcomp-group-name {
+    color: var(--TOOL-BAR-COMPONENT-GROUP-TEXT) !important;
+}
+.custom #tool-bar .comp-list li{
+    background-color: var(--TOOL-BAR-COMPONENT-BACKGROUND) !important;
+    color: var(--TOOL-BAR-COMPONENT-TEXT) !important;
+    border: 0.5px var(--TOOL-BAR-COMPONENT-BORDER) solid !important;
+}
+.custom #tool-bar .search-component-box {
+    background-color: var(--TOOL-BAR-SEARCH-BOX-BACKGROUND) !important;
+    border: 1px solid var(--TOOL-BAR-SEARCH-BOX-BORDER) !important;
+}
+.custom #tool-bar .search-component-box-text input {
+    color: var(--TOOL-BAR-SEARCH-BOX-TEXT) !important;
+    background-color: var(--TOOL-BAR-SEARCH-BOX-BACKGROUND) !important;
+}
+.custom #tool-bar .search-component-box-control {
+    border-left: 1px solid var(--TOOL-BAR-SEARCH-BOX-BORDER) !important;
+    color: var(--TOOL-BAR-SEARCH-BOX-TEXT) !important;
+}

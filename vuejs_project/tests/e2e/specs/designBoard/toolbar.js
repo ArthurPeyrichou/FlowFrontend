@@ -6,27 +6,27 @@ describe('Tool bar tests', () => {
   it('Header navbar show/hide', function () {
     cy.visit('/')
 
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
     cy.get('#tool-bar > .header > .navbar > .navbar-toggler > .bi-chevron-bar-down').click()
     cy.wait(TIMELAPS)
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse show'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse show'))
     cy.get('#tool-bar > .header > .navbar > .navbar-toggler > .bi-chevron-bar-up').click()
     cy.wait(TIMELAPS)
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
   })
 
   it('Open add-component-modal', function () {
     cy.visit('/')
 
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
 
     cy.get('#tool-bar > .header > .navbar > .navbar-toggler > .bi-chevron-bar-down').click()
     cy.wait(TIMELAPS)
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse show'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse show'))
 
-    cy.get('.navbar > #navbar-toggle-collapse > .navbar-nav > .nav-item:nth-child(1) > .nav-link').click()
+    cy.get('.navbar > #toolbar-option-navbar-toggle-collapse > .navbar-nav > .nav-item:nth-child(1) > .nav-link').click()
     cy.wait(TIMELAPS)
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
     expect(cy.get('#modal-add-component').should('have.attr', 'class', 'modal fade show'))
 
     cy.get('.modal-dialog > #modal-add-component___BV_modal_content_ > #modal-add-component___BV_modal_footer_ > .w-100 > #setting-modal-close').click()
@@ -36,15 +36,15 @@ describe('Tool bar tests', () => {
   it('Can\'t validate add-component-modal without file', function () {
     cy.visit('/')
 
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
 
     cy.get('#tool-bar > .header > .navbar > .navbar-toggler > .bi-chevron-bar-down').click()
     cy.wait(TIMELAPS)
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse show'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse show'))
 
-    cy.get('.navbar > #navbar-toggle-collapse > .navbar-nav > .nav-item:nth-child(1) > .nav-link').click()
+    cy.get('.navbar > #toolbar-option-navbar-toggle-collapse > .navbar-nav > .nav-item:nth-child(1) > .nav-link').click()
     cy.wait(TIMELAPS)
-    expect(cy.get('#navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
+    expect(cy.get('#toolbar-option-navbar-toggle-collapse').should('have.attr', 'class', 'navbar-collapse collapse'))
     expect(cy.get('#modal-add-component').should('have.attr', 'class', 'modal fade show'))
     expect(cy.get('#modal-add-component .invalid-feedback').should('have.attr', 'class', 'invalid-feedback'))
 

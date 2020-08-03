@@ -130,4 +130,8 @@ export class BackendRequestFactory {
       this.tabs.tabs = tabs
       elementToRemove.forEach(el => this.removeElementFromGrid(el.getId()))
     }
+
+    static installComponent (fileName: string, fileBody: string): string {
+      return JSON.stringify({ type: 'install', filename: fileName, body: fileBody })
+    }
 }

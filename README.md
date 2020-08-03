@@ -1,4 +1,4 @@
-Début avec le framework Vue.JS
+Frontend, conçu pour les utilisateurs, proposant une interface simple et souple avec une vue orientée composants
 =============================================================
 
 PEYRICHOU Arthur

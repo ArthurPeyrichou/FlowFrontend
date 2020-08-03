@@ -2,7 +2,7 @@
   <div id="tool-bar" v-bind:class="theme">
     <div class="header">
       <b-navbar toggleable v-bind:type="theme" class="setting-tool-navbar">
-        <b-navbar-toggle target="navbar-toggle-collapse">
+        <b-navbar-toggle target="toolbar-option-navbar-toggle-collapse">
           <template v-slot:default="{ expanded }">
             <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
             <b-icon v-else icon="chevron-bar-down"></b-icon>
@@ -13,7 +13,7 @@
           <button v-if="shouldShowApplyButton" v-on:click="updateDataToBackend" id="send-update-button" type="button" class="btn btn-outline-success float-right">Update</button>
         </div>
 
-        <b-collapse id="navbar-toggle-collapse" is-nav>
+        <b-collapse id="toolbar-option-navbar-toggle-collapse" is-nav>
           <b-navbar-nav class="ml-auto">
             <b-nav-item v-on:click="openAddCompModal()"><i class="fa fa-plus"></i> Component</b-nav-item>
             <b-nav-item href="#" disabled>Settings</b-nav-item>
