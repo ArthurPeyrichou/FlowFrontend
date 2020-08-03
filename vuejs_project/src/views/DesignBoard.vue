@@ -15,7 +15,6 @@ import { FDElement } from '../models/FDElement'
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { COMMUNICATION_TYPE } from '../config'
 import JSEncrypt from 'jsencrypt'
-import { BIconArrowDownLeftSquareFill } from 'bootstrap-vue'
 
 @Component({
   components: {
