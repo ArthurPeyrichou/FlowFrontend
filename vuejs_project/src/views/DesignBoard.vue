@@ -57,21 +57,9 @@ export default class DesignBoard extends Vue {
    */
   connect (connectionTries: number, url: string): void {
     const treatMessage = (msg: string) => {
-      let data = JSON.parse(this.decryptForFrontend.decrypt(msg))
-      if (data.msg) {
-        switch (data.msg) {
-          case 'start':
-            this.dataReceiving = data.value
-            return
-          case 'middle':
-            this.dataReceiving += data.value
-            return
-          case 'end':
-            this.dataReceiving += data.value
-            data = JSON.parse(this.dataReceiving)
-        }
-      }
-      console.log(data)
+      let res = ''
+      msg.split(',').forEach(el => { res += this.decryptForFrontend.decrypt(el) })
+      const data = JSON.parse(res)
       switch (data.type) {
         case 'debug':
           this.sendMessage(data)
@@ -104,7 +92,7 @@ export default class DesignBoard extends Vue {
       }
     }
     const giveFrontendPublicKey = () => {
-      const msg = { type: 'key', value: this.decryptForFrontend.getPublicKey() }
+      const msg = { type: 'key', body: this.decryptForFrontend.getPublicKey() }
       this.sendMessageToBackend([JSON.stringify(msg)])
     }
     console.log('Starting connection to WebSocket Server...')
@@ -204,15 +192,16 @@ export default class DesignBoard extends Vue {
           } else {
             const msg = new Array<string>()
             let offset = 0
+            let res = ''
             while (offset < el.length) {
               const size = Math.min(125, el.length - offset)
-              msg.push(el.substring(offset, offset + size))
+              res += this.encryptForBackend.encrypt(el.substring(offset, offset + size))
               offset += size
+              if (offset < el.length) {
+                res += ','
+              }
             }
-            for (let i = 0; i < msg.length; ++i) {
-              const msgType = (i === 0) ? 'start' : i === (msg.length - 1) ? 'end' : 'middle'
-              this.connection.send(this.encryptForBackend.encrypt(JSON.stringify({ msg: msgType, value: msg[i] })))
-            }
+            this.connection.send(res)
           }
         }
       })
