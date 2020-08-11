@@ -494,14 +494,16 @@ export default class ConceptionGrid extends Vue {
    * @param tabs the tab list: {id: string; index: number; name: string; linker: string; icon: string}
    */
   setTabs (tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}>) {
-    this.tabs = tabs.sort((a, b) => a.index - b.index)
-    this.backendRequestFactory.setTabs(this.tabs, [])
-    if (this.tabs.length > 0) {
-      if (this.currentTab === '') {
-        this.currentTab = this.tabs[0].id
+    if (tabs) {
+      this.tabs = tabs.sort((a, b) => a.index - b.index)
+      this.backendRequestFactory.setTabs(this.tabs, [])
+      if (this.tabs.length > 0) {
+        if (this.currentTab === '') {
+          this.currentTab = this.tabs[0].id
+        }
+      } else {
+        this.addNewTab('Main')
       }
-    } else {
-      this.addNewTab('Main')
     }
   }
 

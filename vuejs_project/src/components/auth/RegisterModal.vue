@@ -55,7 +55,7 @@
 
       <template v-slot:modal-footer>
         <div class="w-100">
-          <button id="register-modal-register" v-on:click="handleRegisterSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Register</button>
+          <button id="register-modal-submit" v-on:click="handleRegisterSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Register</button>
           <button id="register-modal-close" v-on:click="hideModal" type="button" class="btn btn-outline-primary float-right">Close</button>
         </div>
       </template>
