@@ -7,7 +7,7 @@
       ref="modal"
       :title="'Settings: ' + theName"
     >
-      <form ref="form" @submit.stop.prevent="handleSubmit">
+      <form ref="form" @submit.stop.prevent="handleUpdateSubmit">
         <b-form-group
           :state="nameState"
           label="Name"
@@ -84,7 +84,7 @@ export default class CompSettingModal extends Vue {
   checkFormValidity (): boolean {
     if (this.fdElement !== null) {
       this.nameState = this.name.length >= 3 && this.name.length <= 50
-      this.nameInvalidFeedback = 'Name with length in between [3;50] characters is required. Current ' + this.name.length + '.'
+      this.nameInvalidFeedback = 'Name with length [3;50] is required. Current ' + this.name.length + '.'
       const valid = this.nameState
       return valid
     }

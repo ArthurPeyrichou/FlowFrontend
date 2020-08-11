@@ -1,5 +1,5 @@
-import { FDComponent } from './FDComponent'
-import { FDElement } from './FDElement'
+import { FDComponent } from '../models/FDComponent'
+import { FDElement } from '../models/FDElement'
 
 /**
  * A body Object for backend update requests
@@ -133,5 +133,25 @@ export class BackendRequestFactory {
 
     static installComponent (fileName: string, fileBody: string): string {
       return JSON.stringify({ type: 'install', filename: fileName, body: fileBody })
+    }
+
+    static registerUser (userName: string, userPassword: string): string {
+      return JSON.stringify({ type: 'auth', body: { state: 'register', userName: userName, userPassword: userPassword } })
+    }
+
+    static loginUser (userName: string, userPassword: string): string {
+      return JSON.stringify({ type: 'auth', body: { state: 'login', userName: userName, userPassword: userPassword } })
+    }
+
+    static createGroup (groupName: string): string {
+      return JSON.stringify({ type: 'group', body: { state: 'create', group: groupName } })
+    }
+
+    static joinGroup (groupName: string): string {
+      return JSON.stringify({ type: 'group', body: { state: 'join', group: groupName } })
+    }
+
+    static leaveGroup (groupName: string): string {
+      return JSON.stringify({ type: 'group', body: { state: 'leave', group: groupName } })
     }
 }

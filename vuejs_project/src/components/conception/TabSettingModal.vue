@@ -7,7 +7,7 @@
       ref="modal"
       :title="'Add new tab: '"
     >
-      <form ref="form" @submit.stop.prevent="handleSubmit">
+      <form ref="form" @submit.stop.prevent="handleAddSubmit">
         <b-form-group
           :state="nameState"
           label="Name"

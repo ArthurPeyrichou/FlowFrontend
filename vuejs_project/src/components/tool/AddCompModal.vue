@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { BackendRequestFactory } from '../../models/BackendRequestFactory'
+import { BackendRequestFactory } from '../../services/BackendRequestFactory'
 import DesignBoard from '../../views/DesignBoard.vue'
 
 /** Modal that allow users to upload Flowdata components files into the toolbar. */
