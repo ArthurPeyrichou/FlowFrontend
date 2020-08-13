@@ -10,21 +10,17 @@
         <template v-slot:button-content>
           <i class="fas fa-sign-in-alt"></i>
         </template>
-        <b-dropdown-item v-on:click="openModal('register')">Register</b-dropdown-item>
-        <b-dropdown-item v-on:click="openModal('login')">Login</b-dropdown-item>
         <b-dropdown-item v-on:click="openModal('group')">Group management</b-dropdown-item>
       </b-dropdown>
     </div>
-    <RegisterModal ref="myRegisterModal" />
-    <LoginModal ref="myLoginModal" />
+    <AuthModal ref="myAuthModal" />
     <GroupManagementModal ref="myGroupManagementModal" />
     <router-view style="padding-bottom:50px" :theme="theme" ref="portal" />
   </div>
 </template>
 
 <script lang="ts">
-import RegisterModal from './components/auth/RegisterModal.vue'
-import LoginModal from './components/auth/LoginModal.vue'
+import AuthModal from './components/auth/AuthModal.vue'
 import GroupManagementModal from './components/auth/GroupManagementModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
 import { THEME, COMMUNICATION_TYPE } from './config'
@@ -34,8 +30,7 @@ import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 
 @Component({
   components: {
-    RegisterModal,
-    LoginModal,
+    AuthModal,
     GroupManagementModal
   }
 })
@@ -48,8 +43,9 @@ export default class App extends Vue {
   private encryptForBackend = new JSEncrypt()
   private decryptForFrontend = new JSEncrypt()
   private dataReceiving = ''
+  private user = { name: '', isLogged: '', group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
 
-  mounted () {
+  mounted (): void {
     this.$nextTick(function () {
       // If the node environment is test, we populate the toolbar of fake components for tests
       if (process.env.NODE_ENV === 'test' || !this.backendUrl) {
@@ -59,6 +55,7 @@ export default class App extends Vue {
       } else {
         this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
         this.connect(3, this.backendUrl)
+        this.openModal('auth')
       }
     })
   }
@@ -178,13 +175,10 @@ export default class App extends Vue {
    * Open AUthentification modals
    * @public
    */
-  openModal (modal: 'register' | 'login' | 'group'): void {
+  openModal (modal: 'auth' | 'group'): void {
     switch (modal) {
-      case 'register':
-        (this.$refs.myRegisterModal as RegisterModal).showModal()
-        break
-      case 'login':
-        (this.$refs.myLoginModal as LoginModal).showModal()
+      case 'auth':
+        (this.$refs.myAuthModal as AuthModal).showModal()
         break
       case 'group':
         (this.$refs.myGroupManagementModal as GroupManagementModal).showModal()

@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import DesignBoard from '../../views/DesignBoard.vue'
+import App from '../../App.vue'
 import { BackendRequestFactory } from '../../services/BackendRequestFactory'
 
 /** Modal that allow users to login a new account. */
@@ -76,8 +76,8 @@ export default class GroupManagementModal extends Vue {
    * @public
    */
   handleCreateSubmit (): void {
-    (this.$parent as DesignBoard).sendMessageToBackend([BackendRequestFactory.createGroup(this.name)]);
-    (this.$parent as DesignBoard).sendMessageToBackend([BackendRequestFactory.joinGroup(this.name)])
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.createGroup(this.name)]);
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.joinGroup(this.name)])
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -86,7 +86,7 @@ export default class GroupManagementModal extends Vue {
   }
 
   handleJoinSubmit (): void {
-    (this.$parent as DesignBoard).sendMessageToBackend([BackendRequestFactory.joinGroup(this.selectedGroup)])
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.joinGroup(this.selectedGroup)])
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -95,7 +95,7 @@ export default class GroupManagementModal extends Vue {
   }
 
   handleLeaveSubmit (): void {
-    (this.$parent as DesignBoard).sendMessageToBackend([BackendRequestFactory.leaveGroup(this.groupSituation.groupName)])
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.leaveGroup(this.groupSituation.groupName)])
 
     // Hide the modal manually
     this.$nextTick(() => {
