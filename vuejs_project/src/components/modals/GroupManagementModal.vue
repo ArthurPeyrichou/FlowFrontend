@@ -35,7 +35,6 @@
       <h5>Join a{{(groupSituation.isInGroup === true) ? 'nother' : ''}} group:</h5>
        <form ref="form" @submit.stop.prevent="handleJoinSubmit">
         <b-form-group
-          :state="nameState"
           label="Choose a group"
           label-for="group-selector"
         >

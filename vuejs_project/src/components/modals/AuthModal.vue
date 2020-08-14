@@ -10,7 +10,7 @@
       no-close-on-backdrop
       hide-header-close
     >
-      <form v-if="isLogin" ref="form" @submit.stop.prevent="handleLoginSubmit">
+      <form v-if="isLogin" @submit.stop.prevent="handleLoginSubmit">
         <b-form-group
           :state="nameState"
           label="Name"
@@ -44,7 +44,7 @@
         <p>Not registered? Register <a v-on:click="toggleAuth()">here</a>.</p>
       </form>
 
-      <form v-else ref="form" @submit.stop.prevent="handleRegisterSubmit">
+      <form v-else @submit.stop.prevent="handleRegisterSubmit">
         <b-form-group
           :state="nameState"
           label="Name"

@@ -42,4 +42,23 @@ describe('Bar hide and show tests', () => {
     cy.get('#conception-grid')
     cy.get('#console-bar')
   })
+
+  it('Switch themes', function () {
+    cy.visit('/')
+
+    cy.get('#app > .header > #auth-menu > #auth-menu__BV_toggle_').click()
+    cy.get('.header > #auth-menu > .dropdown-menu > li:nth-child(2) > .dropdown-item').click()
+    cy.wait(TIMELAPS)
+    
+    cy.get('#theme-selector').select('light')
+    cy.wait(TIMELAPS)
+    
+    cy.get('#theme-selector').select('custom')
+    cy.wait(TIMELAPS)
+    
+    cy.get('#theme-selector').select('dark')
+    cy.wait(TIMELAPS)
+ 
+    cy.get('#setting-modal-close').click()
+  })
 })

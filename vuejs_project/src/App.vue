@@ -8,20 +8,23 @@
       </b-nav>
       <b-dropdown id="auth-menu" size="lg"  variant="link" dropleft toggle-class="text-decoration-none" no-caret>
         <template v-slot:button-content>
-          <i class="fas fa-sign-in-alt"></i>
+          <i class="fas fa-cog"></i>
         </template>
         <b-dropdown-item v-on:click="openModal('group')">Group management</b-dropdown-item>
+        <b-dropdown-item v-on:click="openModal('setting')">Settings</b-dropdown-item>
       </b-dropdown>
     </div>
     <AuthModal ref="myAuthModal" />
     <GroupManagementModal ref="myGroupManagementModal" />
+    <SettingModal ref="mySettingModal" />
     <router-view style="padding-bottom:50px" :theme="theme" ref="portal" />
   </div>
 </template>
 
 <script lang="ts">
-import AuthModal from './components/auth/AuthModal.vue'
-import GroupManagementModal from './components/auth/GroupManagementModal.vue'
+import AuthModal from './components/modals/AuthModal.vue'
+import GroupManagementModal from './components/modals/GroupManagementModal.vue'
+import SettingModal from './components/modals/SettingModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
 import { THEME, COMMUNICATION_TYPE } from './config'
 import JSEncrypt from 'jsencrypt'
@@ -31,22 +34,28 @@ import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 @Component({
   components: {
     AuthModal,
-    GroupManagementModal
+    GroupManagementModal,
+    SettingModal
   }
 })
 export default class App extends Vue {
   // Dark or light
-  private theme = THEME
+  public theme = (localStorage.theme ? localStorage.theme : THEME)
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
   private encryptForBackend = new JSEncrypt()
   private decryptForFrontend = new JSEncrypt()
   private dataReceiving = ''
-  private user = { name: '', isLogged: '', group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
+  // WARNING, isLOgged have to be set to false when the auth service will worck on backend
+  private user = { name: '', password: '', isLogged: true, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
 
   mounted (): void {
     this.$nextTick(function () {
+      if (localStorage.user) {
+        this.user = JSON.parse(localStorage.user)
+      }
+
       // If the node environment is test, we populate the toolbar of fake components for tests
       if (process.env.NODE_ENV === 'test' || !this.backendUrl) {
         if (this.$refs.portal instanceof DesignBoard) {
@@ -55,7 +64,9 @@ export default class App extends Vue {
       } else {
         this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
         this.connect(3, this.backendUrl)
-        this.openModal('auth')
+        if (!this.user.isLogged) {
+          this.openModal('auth')
+        }
       }
     })
   }
@@ -169,19 +180,27 @@ export default class App extends Vue {
     }
   }
 
+  setTheme (theme: 'dark' | 'light' | 'custom'): void {
+    this.theme = theme
+    localStorage.theme = theme
+  }
+
   get currentRoute () { return this.$route.path }
 
   /**
    * Open AUthentification modals
    * @public
    */
-  openModal (modal: 'auth' | 'group'): void {
+  openModal (modal: 'auth' | 'group' | 'setting'): void {
     switch (modal) {
       case 'auth':
         (this.$refs.myAuthModal as AuthModal).showModal()
         break
       case 'group':
         (this.$refs.myGroupManagementModal as GroupManagementModal).showModal()
+        break
+      case 'setting':
+        (this.$refs.mySettingModal as SettingModal).showModal()
         break
     }
   }
