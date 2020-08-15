@@ -47,7 +47,7 @@ body {
 
 }
 /* MENU */
-.custom #main-menu {
+.custom #main-menu,.custom #auth-menu {
     background-color: var(--MENU-BACKGROUND) !important;
     color: var(--MENU-TEXT) !important;
     border-color: var(--MENU-BORDER) !important;

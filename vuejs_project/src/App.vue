@@ -30,6 +30,7 @@ import { THEME, COMMUNICATION_TYPE } from './config'
 import JSEncrypt from 'jsencrypt'
 import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
+import { RSAService } from './services/RSAService'
 
 @Component({
   components: {
@@ -45,7 +46,7 @@ export default class App extends Vue {
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
   private encryptForBackend = new JSEncrypt()
-  private decryptForFrontend = new JSEncrypt()
+  private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
   private dataReceiving = ''
   // WARNING, isLOgged have to be set to false when the auth service will worck on backend
   private user = { name: '', password: '', isLogged: true, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }

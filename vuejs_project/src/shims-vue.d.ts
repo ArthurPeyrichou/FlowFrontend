@@ -4,3 +4,4 @@ declare module '*.vue' {
 }
 
 declare module 'jsencrypt'
+declare module 'crypto-browserify'
