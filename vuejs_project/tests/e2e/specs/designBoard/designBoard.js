@@ -33,13 +33,32 @@ describe('Bar hide and show tests', () => {
     cy.get('#tool-bar')
     cy.get('#conception-grid')
     cy.get('#console-bar')
-    cy.get('body > #app > .nav > .nav-item:nth-child(2) > .nav-link').click()
+    cy.get('#app > .header > #main-menu > .nav-item:nth-child(2) > .nav-link').click()
     cy.wait(TIMELAPS)
     cy.get('.home h3').contains('This is a demo blank board.')
-    cy.get('body > #app > .nav > .nav-item:nth-child(1) > .nav-link').click()
+    cy.get('#app > .header > #main-menu > .nav-item:nth-child(1) > .nav-link').click()
     cy.wait(TIMELAPS)
     cy.get('#tool-bar')
     cy.get('#conception-grid')
     cy.get('#console-bar')
+  })
+
+  it('Switch themes', function () {
+    cy.visit('/')
+
+    cy.get('#app > .header > #auth-menu > #auth-menu__BV_toggle_').click()
+    cy.get('.header > #auth-menu > .dropdown-menu > li:nth-child(2) > .dropdown-item').click()
+    cy.wait(TIMELAPS)
+
+    cy.get('#theme-selector').select('light')
+    cy.wait(TIMELAPS)
+
+    cy.get('#theme-selector').select('custom')
+    cy.wait(TIMELAPS)
+
+    cy.get('#theme-selector').select('dark')
+    cy.wait(TIMELAPS)
+
+    cy.get('#setting-modal-close').click()
   })
 })

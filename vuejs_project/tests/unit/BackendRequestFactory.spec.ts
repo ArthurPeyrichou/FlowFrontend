@@ -1,6 +1,6 @@
 import { FDComponent } from '../../src/models/FDComponent'
 import { FDElement } from '../../src/models/FDElement'
-import { BackendRequestFactory } from '../../src/models/BackendRequestFactory'
+import { BackendRequestFactory } from '../../src/services/BackendRequestFactory'
 
 describe('BackendRequestFactory Model', () => {
   it('Empty request', () => {
@@ -254,5 +254,35 @@ describe('BackendRequestFactory Model', () => {
 
   it('Add new element, moove and update request, after the factory reset all changes', () => {
     expect(BackendRequestFactory.installComponent('fakeComp.py', 'print \'coucou\'')).toEqual('{"type":"install","filename":"fakeComp.py","body":"print \'coucou\'"}')
+  })
+
+  it('Register new user', () => {
+    const register = { type: 'auth', body: { state: 'register', userName: 'theUserName', userPassword: 'theUserPassword' } }
+    const res = BackendRequestFactory.registerUser('theUserName', 'theUserPassword')
+    expect(JSON.stringify(register)).toEqual(res)
+  })
+
+  it('Login new user', () => {
+    const register = { type: 'auth', body: { state: 'login', userName: 'theUserName', userPassword: 'theUserPassword' } }
+    const res = BackendRequestFactory.loginUser('theUserName', 'theUserPassword')
+    expect(JSON.stringify(register)).toEqual(res)
+  })
+
+  it('Create new group', () => {
+    const register = { type: 'group', body: { state: 'create', group: 'groupName1' } }
+    const res = BackendRequestFactory.createGroup('groupName1')
+    expect(JSON.stringify(register)).toEqual(res)
+  })
+
+  it('Join a group', () => {
+    const register = { type: 'group', body: { state: 'join', group: 'groupName2' } }
+    const res = BackendRequestFactory.joinGroup('groupName2')
+    expect(JSON.stringify(register)).toEqual(res)
+  })
+
+  it('Leave a group', () => {
+    const register = { type: 'group', body: { state: 'leave', group: 'groupName3' } }
+    const res = BackendRequestFactory.leaveGroup('groupName3')
+    expect(JSON.stringify(register)).toEqual(res)
   })
 })

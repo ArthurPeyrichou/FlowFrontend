@@ -13,8 +13,7 @@ import ConsoleBar from '../components/console/ConsoleBar.vue'
 import { FDComponent } from '../models/FDComponent'
 import { FDElement } from '../models/FDElement'
 import { Component, Vue, Prop } from 'vue-property-decorator'
-import { COMMUNICATION_TYPE } from '../config'
-import JSEncrypt from 'jsencrypt'
+import App from '../App.vue'
 
 @Component({
   components: {
@@ -29,94 +28,6 @@ export default class DesignBoard extends Vue {
 
   private databaseElementList: Array<FDElement> = []
   private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
-  private connection: WebSocket | null = null
-  public shouldReload = 2 // Backend send designerdata twice in short time
-  private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
-  private encryptForBackend = new JSEncrypt()
-  private decryptForFrontend = new JSEncrypt()
-  private dataReceiving = ''
-
-  mounted () {
-    this.$nextTick(function () {
-      // If the node environment is test, we populate the toolbar of fake components for tests
-      if (process.env.NODE_ENV === 'test' || !this.backendUrl) {
-        this.sendBlankDesignerData()
-      } else {
-        this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
-        this.connect(3, this.backendUrl)
-      }
-    })
-  }
-
-  /**
-   * Connect to backend by WebSocket
-   * And initialize listeners for communication
-   * @param connectionTries the maximum number of connections we want tries before give up
-   * @param url the backend url. Ex: ws://localhost:5001
-   * @public
-   */
-  connect (connectionTries: number, url: string): void {
-    const treatMessage = (msg: string) => {
-      let res = ''
-      msg.split(',').forEach(el => { res += this.decryptForFrontend.decrypt(el) })
-      const data = JSON.parse(res)
-      switch (data.type) {
-        case 'debug':
-          this.sendMessage(data)
-          break
-        case 'designer':
-          if (this.shouldReload > 0 || COMMUNICATION_TYPE === 'DIRECT') {
-            this.sendDesignerData(data)
-            --this.shouldReload
-            // if too many time is spend (1.5s) before the next designer data, close the opportunnity to reload
-            setTimeout(() => { this.shouldReload = 0 }, 1500)
-          }
-          break
-        case 'error':
-        case 'errors':
-          console.error(data.type, data)
-          break
-        case 'online':
-          console.log('Count of client connected: ' + data.count)
-          break
-        case 'status':
-          console.log('Message type "' + data.type + '".')
-          console.log(data)
-          break
-        case 'traffic':
-          (this.$children[1] as ConceptionGrid).setTraffic(data.body)
-          break
-        default:
-          console.warn('Message type "' + data.type + '" not treated.')
-          break
-      }
-    }
-    const giveFrontendPublicKey = () => {
-      const msg = { type: 'key', body: this.decryptForFrontend.getPublicKey() }
-      this.sendMessageToBackend([JSON.stringify(msg)])
-    }
-    console.log('Starting connection to WebSocket Server...')
-    this.connection = new WebSocket(url)
-    this.connection.addEventListener('error', e => {
-      // readyState === 3 is CLOSED
-      if ((e.target as WebSocket).readyState === 3) {
-        if (connectionTries > 0) {
-          setTimeout(() => this.connect(connectionTries - 1, url), 1000)
-        } else {
-          console.error('Maximum number of connection trials has been reached')
-        }
-      } else {
-        console.error('Websocket error: ' + event?.target)
-      }
-    })
-    this.connection.onopen = function () {
-      console.log('Successfully connected to the echo websocket server...')
-      giveFrontendPublicKey()
-    }
-    this.connection.onmessage = function (event) {
-      treatMessage(decodeURIComponent(event.data))
-    }
-  }
 
   /**
    * Sand fake data to toolbar in case of bakcend connection failed
@@ -183,31 +94,7 @@ export default class DesignBoard extends Vue {
    * @public
    */
   sendMessageToBackend (data: Array<string>): void {
-    if (this.connection !== null) {
-      data.forEach(el => {
-        if (this.connection !== null) {
-          this.shouldReload = 2
-          if (el.length <= 125) {
-            this.connection.send(this.encryptForBackend.encrypt(el))
-          } else {
-            const msg = new Array<string>()
-            let offset = 0
-            let res = ''
-            while (offset < el.length) {
-              const size = Math.min(125, el.length - offset)
-              res += this.encryptForBackend.encrypt(el.substring(offset, offset + size))
-              offset += size
-              if (offset < el.length) {
-                res += ','
-              }
-            }
-            this.connection.send(res)
-          }
-        }
-      })
-    } else {
-      console.log('Data received but no connection to send the message found.')
-    }
+    (this.$parent as App).sendMessageToBackend(data)
   }
 }
 </script>

@@ -1,24 +1,210 @@
 <template>
   <div id="app" v-bind:class="theme">
-    <b-nav tabs id="main-menu" class="navbar-menu" style="height:50px">
-      <b-nav-item v-bind:to="'/'" :active="currentRoute=='/'">Design Board</b-nav-item>
-      <b-nav-item v-bind:to="'/blank-board'" :active="currentRoute=='/blank-board'">Blank Board</b-nav-item>
-      <b-nav-item disabled>Disabled</b-nav-item>
-    </b-nav>
-    <router-view style="padding-bottom:50px" :theme="theme"/>
+    <div class="header">
+      <b-nav tabs id="main-menu" class="navbar-menu" style="height:50px">
+        <b-nav-item v-bind:to="'/'" :active="currentRoute=='/'">Design Board</b-nav-item>
+        <b-nav-item v-bind:to="'/blank-board'" :active="currentRoute=='/blank-board'">Blank Board</b-nav-item>
+        <b-nav-item disabled>Disabled</b-nav-item>
+      </b-nav>
+      <b-dropdown id="auth-menu" size="lg"  variant="link" dropleft toggle-class="text-decoration-none" no-caret>
+        <template v-slot:button-content>
+          <i class="fas fa-cog"></i>
+        </template>
+        <b-dropdown-item v-on:click="openModal('group')">Group management</b-dropdown-item>
+        <b-dropdown-item v-on:click="openModal('setting')">Settings</b-dropdown-item>
+      </b-dropdown>
+    </div>
+    <AuthModal ref="myAuthModal" />
+    <GroupManagementModal ref="myGroupManagementModal" />
+    <SettingModal ref="mySettingModal" />
+    <router-view style="padding-bottom:50px" :theme="theme" ref="portal" />
   </div>
 </template>
 
 <script lang="ts">
+import AuthModal from './components/modals/AuthModal.vue'
+import GroupManagementModal from './components/modals/GroupManagementModal.vue'
+import SettingModal from './components/modals/SettingModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
-import { THEME } from './config'
+import { THEME, COMMUNICATION_TYPE } from './config'
+import JSEncrypt from 'jsencrypt'
+import DesignBoard from './views/DesignBoard.vue'
+import ConceptionGrid from './components/conception/ConceptionGrid.vue'
+import { RSAService } from './services/RSAService'
 
-@Component
+@Component({
+  components: {
+    AuthModal,
+    GroupManagementModal,
+    SettingModal
+  }
+})
 export default class App extends Vue {
   // Dark or light
-  private theme = THEME;
+  public theme = (localStorage.theme ? localStorage.theme : THEME)
+  private connection: WebSocket | null = null
+  public shouldReload = 2 // Backend send designerdata twice in short time
+  private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
+  private encryptForBackend = new JSEncrypt()
+  private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
+  private dataReceiving = ''
+  // WARNING, isLOgged have to be set to false when the auth service will worck on backend
+  private user = { name: '', password: '', isLogged: true, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
+
+  mounted (): void {
+    this.$nextTick(function () {
+      if (localStorage.user) {
+        this.user = JSON.parse(localStorage.user)
+      }
+
+      // If the node environment is test, we populate the toolbar of fake components for tests
+      if (process.env.NODE_ENV === 'test' || !this.backendUrl) {
+        if (this.$refs.portal instanceof DesignBoard) {
+          (this.$refs.portal as DesignBoard).sendBlankDesignerData()
+        }
+      } else {
+        this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
+        this.connect(3, this.backendUrl)
+        if (!this.user.isLogged) {
+          this.openModal('auth')
+        }
+      }
+    })
+  }
+
+  /**
+   * Connect to backend by WebSocket
+   * And initialize listeners for communication
+   * @param connectionTries the maximum number of connections we want tries before give up
+   * @param url the backend url. Ex: ws://localhost:5001
+   * @public
+   */
+  connect (connectionTries: number, url: string): void {
+    const treatMessage = (msg: string) => {
+      let res = ''
+      msg.split(',').forEach(el => { res += this.decryptForFrontend.decrypt(el) })
+      const data = JSON.parse(res)
+      switch (data.type) {
+        case 'debug':
+          if (this.$refs.portal instanceof DesignBoard) {
+            (this.$refs.portal as DesignBoard).sendMessage(data)
+          }
+          break
+        case 'designer':
+          if (this.shouldReload > 0 || COMMUNICATION_TYPE === 'DIRECT') {
+            if (this.$refs.portal instanceof DesignBoard) {
+              (this.$refs.portal as DesignBoard).sendDesignerData(data)
+            }
+            --this.shouldReload
+            // if too many time is spend (1.5s) before the next designer data, close the opportunnity to reload
+            setTimeout(() => { this.shouldReload = 0 }, 1500)
+          }
+          break
+        case 'error':
+        case 'errors':
+          console.error(data.type, data)
+          break
+        case 'online':
+          console.log('Count of client connected: ' + data.count)
+          break
+        case 'status':
+          console.log('Message type "' + data.type + '".')
+          console.log(data)
+          break
+        case 'traffic':
+          if (this.$refs.portal instanceof DesignBoard) {
+            ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTraffic(data.body)
+          }
+          break
+        default:
+          console.warn('Message type "' + data.type + '" not treated.')
+          break
+      }
+    }
+    const giveFrontendPublicKey = () => {
+      const msg = { type: 'key', body: this.decryptForFrontend.getPublicKey() }
+      this.sendMessageToBackend([JSON.stringify(msg)])
+    }
+    console.log('Starting connection to WebSocket Server...')
+    this.connection = new WebSocket(url)
+    this.connection.addEventListener('error', e => {
+      // readyState === 3 is CLOSED
+      if ((e.target as WebSocket).readyState === 3) {
+        if (connectionTries > 0) {
+          setTimeout(() => this.connect(connectionTries - 1, url), 1000)
+        } else {
+          console.error('Maximum number of connection trials has been reached')
+        }
+      } else {
+        console.error('Websocket error: ' + event?.target)
+      }
+    })
+    this.connection.onopen = function () {
+      console.log('Successfully connected to the echo websocket server...')
+      giveFrontendPublicKey()
+    }
+    this.connection.onmessage = function (event) {
+      treatMessage(decodeURIComponent(event.data))
+    }
+  }
+
+  /**
+   * Call by a listener in addComponent.ts
+   * Will send a message to backend for trigger clicked component
+   * @param data
+   * @public
+   */
+  sendMessageToBackend (data: Array<string>): void {
+    if (this.connection !== null) {
+      data.forEach(el => {
+        if (this.connection !== null) {
+          this.shouldReload = 2
+          if (el.length <= 125) {
+            this.connection.send(this.encryptForBackend.encrypt(el))
+          } else {
+            let offset = 0
+            let res = ''
+            while (offset < el.length) {
+              const size = Math.min(125, el.length - offset)
+              res += this.encryptForBackend.encrypt(el.substring(offset, offset + size))
+              offset += size
+              if (offset < el.length) {
+                res += ','
+              }
+            }
+            this.connection.send(res)
+          }
+        }
+      })
+    } else {
+      console.log('Data received but no connection to send the message found.')
+    }
+  }
+
+  setTheme (theme: 'dark' | 'light' | 'custom'): void {
+    this.theme = theme
+    localStorage.theme = theme
+  }
 
   get currentRoute () { return this.$route.path }
+
+  /**
+   * Open AUthentification modals
+   * @public
+   */
+  openModal (modal: 'auth' | 'group' | 'setting'): void {
+    switch (modal) {
+      case 'auth':
+        (this.$refs.myAuthModal as AuthModal).showModal()
+        break
+      case 'group':
+        (this.$refs.myGroupManagementModal as GroupManagementModal).showModal()
+        break
+      case 'setting':
+        (this.$refs.mySettingModal as SettingModal).showModal()
+        break
+    }
+  }
 }
 </script>
 
@@ -31,6 +217,11 @@ export default class App extends Vue {
     text-align: center;
     color: #2c3e50;
   }
+  .header {
+    width: 100%;
+    display: flex;
+    background-color: #e8e8e8;
+  }
 
   .unselectable-text {
     -webkit-user-select: none; /* Safari */
@@ -39,13 +230,26 @@ export default class App extends Vue {
     user-select: none; /* Standard */
   }
   .navbar-menu {
-    width: 100%;
-    padding-top: 10px !important;
-    padding-bottom: 0px !important;
-    padding-left: 50px !important;
-    padding-right: 50px !important;
     background-color: #e8e8e8;
     border-color:  rgba(0, 0, 0, 0.3) !important;
+    padding-top: 10px !important;
+    padding-bottom: 0px !important;
+  }
+  #main-menu {
+    width: 90%;
+    padding-left: 50px !important;
+    padding-right: 50px !important;
+  }
+  #auth-menu button {
+    box-shadow: none;
+  }
+  #auth-menu svg {
+    color: black;
+  }
+  #auth-menu {
+    width: 10%;
+    padding-right: 50px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
   }
   .navbar-menu .nav-item .active {
     background-color: #b8b8b8 !important;
@@ -57,6 +261,10 @@ export default class App extends Vue {
   }
 
   /* Dark side */
+  .dark .header {
+    background-color: #404040;
+    color: #c8c8c8;
+  }
   .dark .navbar-menu {
     background-color: #404040;
     color: #c8c8c8;
@@ -73,12 +281,22 @@ export default class App extends Vue {
   .dark .navbar-menu .nav-item a {
     color: white !important;
   }
+  .dark #auth-menu {
+    border-color:  rgba(255, 255, 255, 0.3) !important;
+  }
+  .dark #auth-menu svg {
+    color: white;
+  }
 
   /* CSS mobile tablette ici */
   @media (max-width: 450px) {
-    .navbar-menu {
-      width: 100%;
+    #main-menu {
+      width: 85%;
       padding-left: 5% !important;
+      padding-right: 5% !important;
+    }
+    #auth-menu {
+      width: 15%;
       padding-right: 5% !important;
     }
     .navbar-menu .nav-item {
