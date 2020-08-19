@@ -194,6 +194,7 @@ export default class LoginModal extends Vue {
     if (!this.checkLoginFormValidity()) {
       return
     }
+    (this.$parent as App).setUserData(this.name, this.password);
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.loginUser(this.name, this.password)])
   }
 
@@ -203,6 +204,7 @@ export default class LoginModal extends Vue {
       return
     }
 
+    (this.$parent as App).setUserData(this.name, this.password);
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.registerUser(this.name, this.password)])
   }
 

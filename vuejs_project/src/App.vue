@@ -42,20 +42,20 @@ import { BackendRequestFactory } from './services/BackendRequestFactory'
 })
 export default class App extends Vue {
   // Dark or light
-  public theme = (localStorage.theme ? localStorage.theme : THEME)
+  public theme = (localStorage.getItem('theme') ? localStorage.getItem('theme') : THEME)
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
   private encryptForBackend = new JSEncrypt()
   private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
   private dataReceiving = ''
-  // WARNING, isLOgged have to be set to false when the auth service will worck on backend
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
 
   mounted (): void {
     this.$nextTick(function () {
-      if (localStorage.user) {
-        this.user = JSON.parse(localStorage.user)
+      let user = localStorage.getItem('user')
+      if (user) {
+        this.user = JSON.parse(user)
       }
 
       // If the node environment is test, we populate the toolbar of fake components for tests
@@ -90,6 +90,15 @@ export default class App extends Vue {
           console.log(data)
           if (data.body.state === 'login' || data.body.state === 'register') {
             (this.$refs.myAuthModal as AuthModal).setResponse({ success: data.body.success, msg: data.body.msg })
+            if (data.body.success) {
+              this.user.isLogged = true
+              localStorage.setItem('user', JSON.stringify(this.user))
+            }
+          } else if (data.body.state === 'key') {
+            if (this.user.isLogged) {
+              this.sendMessageToBackend([BackendRequestFactory.loginUser(this.user.name, this.user.password)])
+              this.user.isLogged = false
+            }
           }
           break
         case 'debug':
@@ -189,7 +198,12 @@ export default class App extends Vue {
 
   setTheme (theme: 'dark' | 'light' | 'custom'): void {
     this.theme = theme
-    localStorage.theme = theme
+    localStorage.setItem('theme', theme)
+  }
+
+  setUserData (name: string, password: string): void {
+    this.user.name = name
+    this.user.password = password
   }
 
   get currentRoute () { return this.$route.path }
