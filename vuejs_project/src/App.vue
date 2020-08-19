@@ -31,6 +31,7 @@ import JSEncrypt from 'jsencrypt'
 import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 import { RSAService } from './services/RSAService'
+import { BackendRequestFactory } from './services/BackendRequestFactory'
 
 @Component({
   components: {
@@ -49,7 +50,7 @@ export default class App extends Vue {
   private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
   private dataReceiving = ''
   // WARNING, isLOgged have to be set to false when the auth service will worck on backend
-  private user = { name: '', password: '', isLogged: true, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
+  private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
 
   mounted (): void {
     this.$nextTick(function () {
@@ -85,6 +86,12 @@ export default class App extends Vue {
       msg.split(',').forEach(el => { res += this.decryptForFrontend.decrypt(el) })
       const data = JSON.parse(res)
       switch (data.type) {
+        case 'auth':
+          console.log(data)
+          if (data.body.state === 'login' || data.body.state === 'register') {
+            (this.$refs.myAuthModal as AuthModal).setResponse({ success: data.body.success, msg: data.body.msg })
+          }
+          break
         case 'debug':
           if (this.$refs.portal instanceof DesignBoard) {
             (this.$refs.portal as DesignBoard).sendMessage(data)
@@ -122,8 +129,7 @@ export default class App extends Vue {
       }
     }
     const giveFrontendPublicKey = () => {
-      const msg = { type: 'key', body: this.decryptForFrontend.getPublicKey() }
-      this.sendMessageToBackend([JSON.stringify(msg)])
+      this.sendMessageToBackend([BackendRequestFactory.setUserkey(this.decryptForFrontend.getPublicKey())])
     }
     console.log('Starting connection to WebSocket Server...')
     this.connection = new WebSocket(url)

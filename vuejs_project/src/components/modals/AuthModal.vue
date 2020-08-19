@@ -10,6 +10,9 @@
       no-close-on-backdrop
       hide-header-close
     >
+      <div v-if="submitResponse.msg !== ''" :class="'alert alert-' + (submitResponse.success ? 'success' : 'danger')" role="alert">
+        {{submitResponse.msg}}
+      </div>
       <form v-if="isLogin" @submit.stop.prevent="handleLoginSubmit">
         <b-form-group
           :state="nameState"
@@ -118,6 +121,28 @@ export default class LoginModal extends Vue {
   password2 = ''
   password2State: boolean | null = null
   password2InvalidFeedBack = ''
+  response: {success: boolean; msg: string} = { success: false, msg: '' }
+
+  get submitResponse (): {success: boolean; msg: string} {
+    return this.response
+  }
+
+  /**
+   * Set feedback from backend through bootstrap alert
+   * @public
+   */
+  public setResponse (aResponse: {success: boolean; msg: string} = { success: false, msg: '' }): void {
+    this.response = aResponse
+    if (aResponse.success) {
+      this.$nextTick(() => {
+        this.$bvModal.hide('modal-auth-account')
+      })
+    } else {
+      this.nameState = null
+      this.passwordState = null
+      this.password2State = null
+    }
+  }
 
   /**
    * Check if the form is valide.
@@ -169,14 +194,7 @@ export default class LoginModal extends Vue {
     if (!this.checkLoginFormValidity()) {
       return
     }
-
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.loginUser(this.name, this.password)])
-
-    // Warning, tempory
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-auth-account')
-    })
   }
 
   handleRegisterSubmit (): void {
@@ -186,11 +204,6 @@ export default class LoginModal extends Vue {
     }
 
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.registerUser(this.name, this.password)])
-
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-auth-account')
-    })
   }
 
   /**

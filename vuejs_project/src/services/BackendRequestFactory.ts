@@ -143,6 +143,10 @@ export class BackendRequestFactory {
       return JSON.stringify({ type: 'auth', body: { state: 'login', userName: userName, userPassword: userPassword } })
     }
 
+    static setUserkey (userKey: string): string {
+      return JSON.stringify({ type: 'auth', body: { state: 'key', key: userKey } })
+    }
+
     static createGroup (groupName: string): string {
       return JSON.stringify({ type: 'group', body: { state: 'create', group: groupName } })
     }
