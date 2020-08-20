@@ -49,11 +49,11 @@ export default class App extends Vue {
   private encryptForBackend = new JSEncrypt()
   private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
   private dataReceiving = ''
-  private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
+  private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
 
   mounted (): void {
     this.$nextTick(function () {
-      let user = localStorage.getItem('user')
+      const user = localStorage.getItem('user')
       if (user) {
         this.user = JSON.parse(user)
       }
@@ -87,7 +87,6 @@ export default class App extends Vue {
       const data = JSON.parse(res)
       switch (data.type) {
         case 'auth':
-          console.log(data)
           if (data.body.state === 'login' || data.body.state === 'register') {
             (this.$refs.myAuthModal as AuthModal).setResponse({ success: data.body.success, msg: data.body.msg })
             if (data.body.success) {
@@ -98,6 +97,15 @@ export default class App extends Vue {
             if (this.user.isLogged) {
               this.sendMessageToBackend([BackendRequestFactory.loginUser(this.user.name, this.user.password)])
               this.user.isLogged = false
+            }
+          }
+          break
+        case 'group':
+          if (data.body.state === 'get') {
+            if (data.body.value) {
+              this.user.group.isInGroup = true
+              this.user.group.groupName = data.body.value.groupName
+              this.user.group.isGroupLeader = data.body.value.status === 'leader'
             }
           }
           break
@@ -121,7 +129,7 @@ export default class App extends Vue {
           console.error(data.type, data)
           break
         case 'online':
-          console.log('Count of client connected: ' + data.count)
+          console.log('Count of client connected: ' + data.body)
           break
         case 'status':
           console.log('Message type "' + data.type + '".')
@@ -133,7 +141,7 @@ export default class App extends Vue {
           }
           break
         default:
-          console.warn('Message type "' + data.type + '" not treated.')
+          console.warn('Message type "' + data.type + '" not treated.', 'Data: ' + JSON.stringify(data))
           break
       }
     }

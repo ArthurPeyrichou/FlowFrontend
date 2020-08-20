@@ -568,10 +568,26 @@ export default class ConceptionGrid extends Vue {
   /**
    * Update current FDElement in the graph
    */
-  updateCurrentComponent (fdElement: FDElement, name: string, color: string): void {
+  updateCurrentComponent (fdElement: FDElement, name: string, color: string, file: File | null): void {
     if (name !== '') {
       fdElement.setName(name)
       fdElement.setColor(color)
+      if (file) {
+        // DO SOMETHING HERE
+        const fr = new FileReader()
+
+        fr.readAsText(file)
+        const sendFile = (fileBody: string) => {
+          this.sendMessageToBackend([BackendRequestFactory.installComponent(file.name || '', fileBody)])
+        }
+
+        fr.onload = function () {
+          const res = fr.result
+          if (res) {
+            sendFile(res.toString())
+          }
+        }
+      }
       this.backendRequestFactory.updateElementFromGrid(fdElement)
       if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
         d3.select('#rect-' + fdElement.getId()).attr('fill', color)
