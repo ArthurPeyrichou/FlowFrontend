@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-bind:class="theme">
+  <div id="app" v-bind:class="configs.theme">
     <div class="header">
       <b-nav tabs id="main-menu" class="navbar-menu" style="height:50px">
         <b-nav-item v-bind:to="'/'" :active="currentRoute=='/'">Design Board</b-nav-item>
@@ -16,8 +16,8 @@
     </div>
     <AuthModal ref="myAuthModal" />
     <GroupManagementModal ref="myGroupManagementModal" />
-    <SettingModal ref="mySettingModal" />
-    <router-view style="padding-bottom:50px" :theme="theme" ref="portal" />
+    <SettingModal ref="mySettingModal" :configs="configs"/>
+    <router-view style="padding-bottom:50px" :configs="configs" ref="portal" />
   </div>
 </template>
 
@@ -26,7 +26,7 @@ import AuthModal from './components/modals/AuthModal.vue'
 import GroupManagementModal from './components/modals/GroupManagementModal.vue'
 import SettingModal from './components/modals/SettingModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
-import { THEME, COMMUNICATION_TYPE } from './config'
+import * as config from './config'
 import JSEncrypt from 'jsencrypt'
 import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
@@ -42,7 +42,31 @@ import { BackendRequestFactory } from './services/BackendRequestFactory'
 })
 export default class App extends Vue {
   // Dark or light
-  public theme = (localStorage.getItem('theme') ? localStorage.getItem('theme') : THEME)
+  public configs: {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transfertDuration: number; transferRadius: number;
+      transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+      outputFontSize: number; communicationType: string; dataLoadingType: string;} =
+    (localStorage.getItem('config') ? JSON.parse(localStorage.getItem('config')) : {
+      theme: config.THEME,
+      svgGridSize: config.SVG_GRID_SIZE,
+      svgGridBorderSize: config.SVG_GRID_BORDER_WIDTH,
+      svgMinScale: config.SVG_MIN_SCALE,
+      svgMaxScale: config.SVG_MAX_SCALE,
+      svgScaleStep: config.SVG_SCALE_STEP,
+      linkFillColor: config.LINK_FILL_COLOR,
+      activeLinkFillColor: config.ACTIVE_LINK_FILL_COLOR,
+      transferDuration: config.TRANSFER_DURATION,
+      transferRadius: config.TRANSFER_RADIUS,
+      transferFillColor: config.TRANSFER_FILL_COLOR,
+      transferStrokeColor: config.TRANSFER_STROKE_COLOR,
+      transferType: config.TRANSFER_TYPE,
+      transferBytesPrecision: config.TRANSFER_BYTES_PRECISION,
+      transferShowIO: config.TRANSFER_SHOW_IO,
+      outputFontSize: config.OUTPUT_FONT_SIZE,
+      communicationType: config.COMMUNICATION_TYPE,
+      dataLoadingType: config.DATA_LOADING_TYPE
+    })
+
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
@@ -52,6 +76,7 @@ export default class App extends Vue {
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
 
   mounted (): void {
+    console.log(this.configs)
     this.$nextTick(function () {
       const user = localStorage.getItem('user')
       if (user) {
@@ -115,7 +140,7 @@ export default class App extends Vue {
           }
           break
         case 'designer':
-          if (this.shouldReload > 0 || COMMUNICATION_TYPE === 'DIRECT') {
+          if (this.shouldReload > 0 || this.configs.communicationType === 'DIRECT') {
             if (this.$refs.portal instanceof DesignBoard) {
               (this.$refs.portal as DesignBoard).sendDesignerData(data)
             }
@@ -205,11 +230,6 @@ export default class App extends Vue {
     } else {
       console.log('Data received but no connection to send the message found.')
     }
-  }
-
-  setTheme (theme: 'dark' | 'light' | 'custom'): void {
-    this.theme = theme
-    localStorage.setItem('theme', theme)
   }
 
   setUserData (name: string, password: string): void {
