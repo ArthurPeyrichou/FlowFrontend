@@ -247,7 +247,7 @@ export default class ConceptionGrid extends Vue {
 
         this.backendRequestFactory.addElementIntoGrid(this.fdCompToDrop, mouse, this.currentTab, newId)
         if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
-          const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, {}, new Map())
+          const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, this.fdCompToDrop.getOptions(), new Map())
           const elements = this.graphs.get(this.currentTab)
           if (elements) {
             elements.push(newElement)

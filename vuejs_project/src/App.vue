@@ -111,7 +111,7 @@ export default class App extends Vue {
           break
         case 'debug':
           if (this.$refs.portal instanceof DesignBoard) {
-            (this.$refs.portal as DesignBoard).sendMessage(data)
+            (this.$refs.portal as DesignBoard).sendMessageToConsole(data)
           }
           break
         case 'designer':
@@ -125,6 +125,8 @@ export default class App extends Vue {
           }
           break
         case 'error':
+          (this.$refs.portal as DesignBoard).sendMessageToConsole(data)
+          break
         case 'errors':
           console.error(data.type, data)
           break
@@ -136,6 +138,7 @@ export default class App extends Vue {
           console.log(data)
           break
         case 'traffic':
+          console.log(data)
           if (this.$refs.portal instanceof DesignBoard) {
             ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTraffic(data.body)
           }

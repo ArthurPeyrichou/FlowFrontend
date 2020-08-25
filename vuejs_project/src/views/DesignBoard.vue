@@ -77,13 +77,13 @@ export default class DesignBoard extends Vue {
    * @param data
    * @public
    */
-  sendMessage (data: any): void {
+  sendMessageToConsole (data: any): void {
     const theElement: FDElement[] = this.databaseElementList.filter(el => el.getId() === data.id)
     if (theElement.length === 1) {
       const tab = this.tabList.filter(el => el.id === theElement[0].getTabId());
-      (this.$children[2] as ConsoleBar).addLog((tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.body, theElement[0].getColor())
+      (this.$children[2] as ConsoleBar).addLog(data.type, (tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.id, data.body, theElement[0].getColor())
     } else {
-      (this.$children[2] as ConsoleBar).addLog('Unknown', data.body, '#CF1D1D')
+      (this.$children[2] as ConsoleBar).addLog(data.type, 'Unknown', '', data.body, '#CF1D1D')
     }
   }
 
