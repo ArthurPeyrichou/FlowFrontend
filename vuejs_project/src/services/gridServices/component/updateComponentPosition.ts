@@ -1,7 +1,6 @@
 import * as d3 from 'd3'
 import * as linkCalculators from '../link/linkCalculators'
 import * as positionCal from './componentPositionCalculators'
-import { DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../../config'
 
 /**
  * Change the position of the component
@@ -10,7 +9,8 @@ import { DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../../config'
  * @param x position of the component
  * @param y position of the component
  */
-export function updateComponentPosition (theCompId: string, x: null | number = null, y: null | number = null): void {
+export function updateComponentPosition (theCompId: string, x: null | number = null, y: null | number = null, dataLoadingType: string,
+  transferShowIO: boolean, svgGridSize: number, svgGridBorderWidth: number): void {
   const rect = d3.select('#rect-' + theCompId)
   const theCompWidth = Number.parseInt(rect.attr('width'))
   const theCompHeight = Number.parseInt(rect.attr('height'))
@@ -23,46 +23,46 @@ export function updateComponentPosition (theCompId: string, x: null | number = n
     y = Number.parseInt(rect.attr('y')) + (theCompHeight / 2)
   }
 
-  const svg: HTMLElement | null = document.getElementById('conception-grid-svg' + ((DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + rect.attr('data-tab-id'))))
+  const svg: HTMLElement | null = document.getElementById('conception-grid-svg' + ((dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + rect.attr('data-tab-id'))))
   if (svg?.lastElementChild?.getAttribute('id') !== 'comp-' + theCompId) {
     d3.select('#comp-' + theCompId).raise()
   }
 
-  rect.attr('x', positionCal.rectPlaceX(x, theCompWidth))
-    .attr('y', positionCal.rectPlaceY(y, theCompHeight))
+  rect.attr('x', positionCal.rectPlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.rectPlaceY(y, theCompHeight, svgGridSize, svgGridBorderWidth))
 
   d3.select('#name-text-' + theCompId)
-    .attr('x', positionCal.namePlaceX(x, theCompWidth))
-    .attr('y', positionCal.namePlaceY(y, theCompHeight))
+    .attr('x', positionCal.namePlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.namePlaceY(y, theCompHeight, svgGridSize, svgGridBorderWidth, transferShowIO))
 
   d3.select('#title-text-' + theCompId)
-    .attr('x', positionCal.titlePlaceX(x, theCompWidth))
-    .attr('y', positionCal.titlePlaceY(y, theCompHeight))
+    .attr('x', positionCal.titlePlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.titlePlaceY(y, theCompHeight, svgGridSize, svgGridBorderWidth, transferShowIO))
 
   d3.select('#icon-' + theCompId)
-    .attr('x', positionCal.iconPlaceX(x, theCompWidth))
-    .attr('y', positionCal.iconPlaceY(y, theCompHeight))
-    .style('transform-origin', (positionCal.iconPlaceX(x, theCompWidth) + 12) + 'px ' + (positionCal.iconPlaceY(y, theCompHeight) - 9) + 'px')
+    .attr('x', positionCal.iconPlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.iconPlaceY(y, theCompHeight, svgGridSize, svgGridBorderWidth))
+    .style('transform-origin', (positionCal.iconPlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth) + 12) + 'px ' + (positionCal.iconPlaceY(y, theCompHeight, svgGridSize, svgGridBorderWidth) - 9) + 'px')
 
-  if (TRANSFER_SHOW_IO) {
+  if (transferShowIO) {
     d3.select('#io-' + theCompId)
-      .attr('x', positionCal.ioPlaceX(x, theCompWidth))
-      .attr('y', positionCal.ioPlaceY(y, theCompHeight))
+      .attr('x', positionCal.ioPlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+      .attr('y', positionCal.ioPlaceY(y, theCompHeight, svgGridSize, svgGridBorderWidth))
   }
 
   d3.select('#trigger-' + theCompId)
-    .attr('points', positionCal.getTriggerTrianglePoints(x, theCompWidth, y, theCompHeight))
+    .attr('points', positionCal.getTriggerTrianglePoints(x, theCompWidth, y, theCompHeight, svgGridSize, svgGridBorderWidth))
 
   for (let i = 0; i < theCompInputCount; ++i) {
     d3.select('#input-' + i + '-' + theCompId)
-      .attr('cx', positionCal.inputCirclePlaceX(x, theCompWidth))
-      .attr('cy', positionCal.inputCirclePlaceY(y, theCompHeight, i, theCompInputCount))
+      .attr('cx', positionCal.inputCirclePlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+      .attr('cy', positionCal.inputCirclePlaceY(y, theCompHeight, i, theCompInputCount, svgGridSize, svgGridBorderWidth))
   }
 
   for (let i = 0; i < theCompOutputCount; ++i) {
     d3.select('#output-' + i + '-' + theCompId)
-      .attr('cx', positionCal.outputCirclePlaceX(x, theCompWidth))
-      .attr('cy', positionCal.outputCirclePlaceY(y, theCompHeight, i, theCompOutputCount))
+      .attr('cx', positionCal.outputCirclePlaceX(x, theCompWidth, svgGridSize, svgGridBorderWidth))
+      .attr('cy', positionCal.outputCirclePlaceY(y, theCompHeight, i, theCompOutputCount, svgGridSize, svgGridBorderWidth))
   }
 
   d3.selectAll('.link-' + theCompId).each(function () {

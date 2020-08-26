@@ -1,5 +1,5 @@
 <template>
-  <div id="conception-grid" v-bind:class="theme">
+  <div id="conception-grid">
     <div class="header">
       <div class="reduce-button" v-on:click="toggleBar('tool')">
         <b-icon v-if="isToolBarHide" icon="chevron-bar-left"></b-icon>
@@ -75,7 +75,7 @@ import { createLinkIntoGrid } from '../../services/gridServices/link/createLinkI
 import { addLinkIntoGrid } from '../../services/gridServices/link/addLinkIntoGrid'
 
 import { transfertData } from '../../services/gridServices/link/transfertData'
-import { SVG_MIN_SCALE, SVG_MAX_SCALE, SVG_SCALE_STEP, TRANSFER_TYPE, COMMUNICATION_TYPE, DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../config'
+import * as CONFIGS from '../../config'
 import { FDElement } from '../../models/FDElement'
 import { BaseType, ContainerElement } from 'd3'
 
@@ -87,9 +87,12 @@ import { BaseType, ContainerElement } from 'd3'
   }
 })
 export default class ConceptionGrid extends Vue {
-  @Prop({ default: 'dark' }) theme!: string
-  @Prop({ default: (data: string) => { console.log('Data:' + data) } }) sendMessageToBackend!: Function
+  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+    svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+    transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+    outputFontSize: number; communicationType: string; dataLoadingType: string;};
 
+  @Prop({ default: (data: string) => { console.log('Data:' + data) } }) sendMessageToBackend!: Function;
   fdCompToDrop: FDComponent | undefined = undefined
   graphs: Map<string, Array<FDElement>> = new Map<string, Array<FDElement>>()
   idList: Array<string> = []
@@ -100,12 +103,19 @@ export default class ConceptionGrid extends Vue {
   hideConsoleBar = false
   backendRequestFactory = new BackendRequestFactory()
   isConnectedToBackEnd = process.env.NODE_ENV !== 'test'
-  isDataLoadingAtOnce = DATA_LOADING_TYPE === 'ALL_AT_ONCE'
+  isDataLoadingAtOnce = CONFIGS.DATA_LOADING_TYPE === 'ALL_AT_ONCE'
 
   constructor () {
     super()
     // This way we execute the code after the redering of the template
-    this.$nextTick(() => { this.initSvg() })
+    this.$nextTick(() => {
+      this.initSvg()
+      this.isDataLoadingAtOnce = this.configs.dataLoadingType === 'ALL_AT_ONCE'
+    })
+  }
+
+  get theme (): string {
+    return (this.configs !== null ? this.configs.theme : CONFIGS.THEME)
   }
 
   /**
@@ -127,7 +137,7 @@ export default class ConceptionGrid extends Vue {
           fdElement.removeLink(Number.parseInt(output[0]), { index: Number.parseInt(input[0]), id: input[1] })
         }
         this.backendRequestFactory.setALink(fdElement)
-        if (COMMUNICATION_TYPE === 'DIRECT') {
+        if (this.configs.communicationType === 'DIRECT') {
           this.sendMessageToBackend(this.backendRequestFactory.apply())
         }
       }
@@ -147,7 +157,7 @@ export default class ConceptionGrid extends Vue {
     this.graphs.set(newId, [])
     this.selectTab(newId)
     this.backendRequestFactory.setTabs(this.tabs, [])
-    if (COMMUNICATION_TYPE === 'DIRECT') {
+    if (this.configs.communicationType === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
     }
     if (!this.isDataLoadingAtOnce) {
@@ -165,7 +175,7 @@ export default class ConceptionGrid extends Vue {
     this.tabs = this.tabs.filter(el => el.id !== tabId)
     const elements = this.graphs.get(tabId)
     this.backendRequestFactory.setTabs(this.tabs, (elements || []))
-    if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+    if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
       this.graphs.delete(tabId)
       if (this.tabs.length > 0) {
         if (this.currentTab === tabId) {
@@ -174,7 +184,7 @@ export default class ConceptionGrid extends Vue {
       } else {
         this.addNewTab('Main')
       }
-    } else if (COMMUNICATION_TYPE === 'DIRECT') {
+    } else if (this.configs.communicationType === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
     }
   }
@@ -186,7 +196,7 @@ export default class ConceptionGrid extends Vue {
    */
   deleteTheComp (fdElementId: string): void {
     this.backendRequestFactory.removeElementFromGrid(fdElementId)
-    if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+    if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
       const elements = this.graphs.get(this.currentTab)
       this.graphs.set(this.currentTab, elements ? elements.filter(fdEl => {
         if (fdEl.getId() !== fdElementId) {
@@ -205,7 +215,7 @@ export default class ConceptionGrid extends Vue {
           el.remove()
         }
       }
-    } else if (COMMUNICATION_TYPE === 'DIRECT') {
+    } else if (this.configs.communicationType === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
     }
   }
@@ -246,15 +256,18 @@ export default class ConceptionGrid extends Vue {
         this.idList.push(newId)
 
         this.backendRequestFactory.addElementIntoGrid(this.fdCompToDrop, mouse, this.currentTab, newId)
-        if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+        if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
           const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, this.fdCompToDrop.getOptions(), new Map())
           const elements = this.graphs.get(this.currentTab)
           if (elements) {
             elements.push(newElement)
           }
-          addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
-          createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY', this.currentTab)
-        } else if (COMMUNICATION_TYPE === 'DIRECT') {
+          addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove,
+            this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
+          createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || this.configs.communicationType === 'ON_APPLY',
+            this.currentTab, this.configs.transferType, this.configs.dataLoadingType, this.configs.linkFillColor,
+            this.configs.activeLinkFillColor, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
+        } else if (this.configs.communicationType === 'DIRECT') {
           this.sendMessageToBackend(this.backendRequestFactory.apply())
         }
         this.fdCompToDrop = undefined
@@ -352,7 +365,7 @@ export default class ConceptionGrid extends Vue {
    */
   onComponentMoove (fdElementId: string, x: number, y: number): void {
     this.backendRequestFactory.mooveElementFromGrid(fdElementId, [x, y])
-    if (COMMUNICATION_TYPE === 'DIRECT') {
+    if (this.configs.communicationType === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
     }
   }
@@ -388,7 +401,8 @@ export default class ConceptionGrid extends Vue {
     graphs.forEach(graph => {
       if (graph) {
         graph.forEach(el => {
-          addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove)
+          addComponentIntoGrid([el.getX(), el.getY()], el, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove,
+            this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
         })
       }
     })
@@ -405,7 +419,9 @@ export default class ConceptionGrid extends Vue {
         })
       }
     })
-    createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || COMMUNICATION_TYPE === 'ON_APPLY', this.currentTab)
+    createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || this.configs.communicationType === 'ON_APPLY',
+      this.currentTab, this.configs.transferType, this.configs.dataLoadingType, this.configs.linkFillColor,
+      this.configs.activeLinkFillColor, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
   }
 
   /**
@@ -419,7 +435,7 @@ export default class ConceptionGrid extends Vue {
    */
   waitRenderingBeforeAddLink (outputId: string, outputIndex: number, link: {id: string; index: number}, tabId: string, tries = 10): void {
     if (document.getElementById('output-' + outputIndex + '-' + outputId) !== null && document.getElementById('input-' + link.index + '-' + link.id) !== null) {
-      addLinkIntoGrid(outputId, outputIndex, link, tabId, this.addAndRemoveLink)
+      addLinkIntoGrid(outputId, outputIndex, link, tabId, this.addAndRemoveLink, this.configs.dataLoadingType, this.configs.linkFillColor, this.configs.activeLinkFillColor)
     } else if (tries > 0) {
       this.$nextTick(() => { this.waitRenderingBeforeAddLink(outputId, outputIndex, link, tabId, --tries) })
     }
@@ -524,14 +540,16 @@ export default class ConceptionGrid extends Vue {
               setComponentBeingProcessed(el.getId(), false)
             }
           }
-          if (TRANSFER_SHOW_IO) {
-            setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output)
+          if (this.configs.transferShowIO) {
+            setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output, this.configs.transferBytesPrecision,
+              this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
           }
           el.getLinks().forEach((links, index) => {
             links.forEach(link => {
               // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
               if (index !== 99) {
-                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, TRANSFER_TYPE, this.currentTab)
+                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, this.configs.transferType, this.currentTab,
+                  this.configs.dataLoadingType, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
               }
             })
           })
@@ -589,10 +607,11 @@ export default class ConceptionGrid extends Vue {
         }
       }
       this.backendRequestFactory.updateElementFromGrid(fdElement)
-      if (COMMUNICATION_TYPE === 'ON_APPLY' || !this.isConnectedToBackEnd) {
+      if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
         d3.select('#rect-' + fdElement.getId()).attr('fill', color)
-        setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle())
-      } else if (COMMUNICATION_TYPE === 'DIRECT') {
+        setComponentName(fdElement.getId(), name, fdElement.getFDComponent().getTitle(),
+          this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
+      } else if (this.configs.communicationType === 'DIRECT') {
         this.sendMessageToBackend(this.backendRequestFactory.apply())
       }
     }
@@ -612,8 +631,8 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   public zoomInSvg (): void {
-    if (this.svgScale < SVG_MAX_SCALE) {
-      this.svgScale += SVG_SCALE_STEP
+    if (this.svgScale < this.configs.svgMaxScale) {
+      this.svgScale += this.configs.svgScaleStep
       d3.selectAll('.conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
@@ -623,8 +642,8 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   zoomOutSvg (): void {
-    if (this.svgScale > SVG_MIN_SCALE + SVG_SCALE_STEP) {
-      this.svgScale -= SVG_SCALE_STEP
+    if (this.svgScale > this.configs.svgMinScale + this.configs.svgScaleStep) {
+      this.svgScale -= this.configs.svgScaleStep
       d3.selectAll('.conception-grid-svg').selectAll('g').attr('transform', 'scale(' + this.svgScale.toFixed(1) + ')')
     }
   }
@@ -732,7 +751,7 @@ export default class ConceptionGrid extends Vue {
   }
 
   /* Dark side */
-  #conception-grid.dark {
+  .dark #conception-grid {
     background-color: #202020;
     border-left: 1px solid rgba(255, 255, 255, 0.1);
     border-right: 1px solid rgba(255, 255, 255, 0.1);

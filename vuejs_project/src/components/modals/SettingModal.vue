@@ -12,7 +12,7 @@
         <h6>Themes</h6>
         <b-form-group label="Choose a theme" label-for="theme-selector">
           <b-form-select id="theme-selector"
-            v-model="configs.theme" :options="themesOptions" v-on:change="applyChange()"></b-form-select>
+            v-model="configs.theme" :options="themesOptions"></b-form-select>
         </b-form-group>
       </div>
 
@@ -78,7 +78,7 @@
 
         <b-form-group label="Transfert type" label-for="transfer-type-input">
           <b-form-select id="transfer-type-input"
-            v-model="configs.transferType" :options="transferTypeOptions" v-on:change="applyChange()"></b-form-select>
+            v-model="configs.transferType" :options="transferTypeOptions"></b-form-select>
         </b-form-group>
 
         <b-form-group v-if="configs.transferType === 'CIRCLE'" label="Circle transfert radius" label-for="transfer-radius-input">
@@ -139,17 +139,18 @@
 
         <b-form-group label="Communication type" label-for="communication-type-input">
           <b-form-select id="communication-type-input"
-            v-model="configs.communicationType" :options="communicationTypeOptions" v-on:change="applyChange()"></b-form-select>
+            v-model="configs.communicationType" :options="communicationTypeOptions"></b-form-select>
         </b-form-group>
 
         <b-form-group label="Data loading type" label-for="data-loading-type-input">
           <b-form-select id="data-loading-type-input"
-            v-model="configs.dataLoadingType" :options="dataLoadingTypeOptions" v-on:change="applyChange()"></b-form-select>
+            v-model="configs.dataLoadingType" :options="dataLoadingTypeOptions"></b-form-select>
         </b-form-group>
       </div>
     </div>
       <template v-slot:modal-footer>
         <div class="w-100">
+          <button id="tab-setting-modal-add" v-on:click="applyChange" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Apply change</button>
           <button id="setting-modal-close" v-on:click="hideModal" type="button" class="btn btn-outline-primary float-right">Close</button>
         </div>
       </template>
@@ -187,6 +188,7 @@ export default class GroupManagementModal extends Vue {
 
   applyChange (): void {
     localStorage.setItem('config', JSON.stringify(this.configs))
+    this.hideModal()
   }
 
   /**
@@ -203,10 +205,7 @@ export default class GroupManagementModal extends Vue {
    * @public
    */
   showModal (): void {
-    console.log(this.configs)
-    this.$nextTick(() => {
-      this.$bvModal.show('modal-setting')
-    })
+    this.$bvModal.show('modal-setting')
   }
 }
 </script>

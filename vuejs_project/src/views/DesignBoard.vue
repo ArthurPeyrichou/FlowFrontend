@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-    <ToolBar ref="myToolBar" :theme="theme"/>
-    <ConceptionGrid ref="myConceptionGrid" :theme="theme" :sendMessageToBackend="sendMessageToBackend"/>
-    <ConsoleBar ref="myConsoleBar" :theme="theme"/>
+    <ToolBar ref="myToolBar" :configs="configs"/>
+    <ConceptionGrid ref="myConceptionGrid" :configs="configs" :sendMessageToBackend="sendMessageToBackend"/>
+    <ConsoleBar ref="myConsoleBar" :configs="configs"/>
   </div>
 </template>
 
@@ -23,8 +23,10 @@ import App from '../App.vue'
   }
 })
 export default class DesignBoard extends Vue {
-  // dark or light
-  @Prop({ default: 'dark' }) public theme!: string;
+  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+      transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+      outputFontSize: number; communicationType: string; dataLoadingType: string;};
 
   private databaseElementList: Array<FDElement> = []
   private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []

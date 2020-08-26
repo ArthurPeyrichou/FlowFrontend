@@ -1,6 +1,5 @@
 import * as d3 from 'd3'
 import * as linkCalculators from './linkCalculators'
-import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROKE_COLOR, DATA_LOADING_TYPE } from '../../../config'
 
 /**
  * Generates an animation for data transfer between two components.
@@ -9,11 +8,12 @@ import { TRANSFER_DURATION, TRANSFER_RADIUS, TRANSFER_FILL_COLOR, TRANSFER_STROK
  * @param theInputId
  * @param tabId
  */
-export function transfertDataWithCircle (theOuputId: string, theInputId: string, tabId: string): void {
+export function transfertDataWithCircle (theOuputId: string, theInputId: string, tabId: string, dataLoadingType: string, transferDuration: number,
+  transferRadius: number, transferFillColor: string, transferStrokeColor: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
 
-  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+  const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
   // Gets the link path and initialize the circle which represent the data transfer
   const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
@@ -40,11 +40,11 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string,
     .attr('transform', d3.select(theSvg).select('g').attr('transform'))
     .attr('cx', theOuputCircle.attr('cx'))
     .attr('cy', theOuputCircle.attr('cy'))
-    .attr('r', TRANSFER_RADIUS)
-    .attr('fill', TRANSFER_FILL_COLOR)
-    .attr('stroke', TRANSFER_STROKE_COLOR)
+    .attr('r', transferRadius)
+    .attr('fill', transferFillColor)
+    .attr('stroke', transferStrokeColor)
     .transition()
-    .duration(TRANSFER_DURATION)
+    .duration(transferDuration)
     .tween('pathTween', function () { return pathTween(path) })
 }
 
@@ -55,11 +55,12 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string,
  * @param theInputId
  * @param tabId
  */
-export function transfertDataWithPath (theOuputId: string, theInputId: string, tabId: string): void {
+export function transfertDataWithPath (theOuputId: string, theInputId: string, tabId: string, dataLoadingType: string, transferDuration: number,
+  transferRadius: number, transferFillColor: string, transferStrokeColor: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
 
-  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+  const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
   // Gets the link path and initialize the circle which represent the data transfer
   const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
@@ -90,11 +91,11 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string, t
     .attr('transform', d3.select(theSvg).select('g').attr('transform'))
     .datum([source, source])
     .attr('d', linkCalculators.lineFunction)
-    .attr('stroke', TRANSFER_FILL_COLOR)
+    .attr('stroke', transferFillColor)
     .attr('stroke-width', '3px')
     .attr('fill', 'none')
     .transition()
-    .duration(TRANSFER_DURATION)
+    .duration(transferDuration)
     .tween('pathTween', function () { return pathTween(path) })
 }
 
@@ -105,16 +106,17 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string, t
  * @param typeOfTransfer
  * @param tabId
  */
-export function transfertData (theOuputId: string, theInputId: string, typeOfTransfer: string, tabId: string): void {
+export function transfertData (theOuputId: string, theInputId: string, typeOfTransfer: string, tabId: string, dataLoadingType: string, transferDuration: number,
+  transferRadius: number, transferFillColor: string, transferStrokeColor: string): void {
   switch (typeOfTransfer.toUpperCase()) {
     case 'CIRCLE':
-      transfertDataWithCircle(theOuputId, theInputId, tabId)
+      transfertDataWithCircle(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
       break
     case 'PATH':
-      transfertDataWithPath(theOuputId, theInputId, tabId)
+      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
       break
     default:
-      transfertDataWithPath(theOuputId, theInputId, tabId)
+      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
       break
   }
 }

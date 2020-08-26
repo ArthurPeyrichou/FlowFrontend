@@ -1,7 +1,7 @@
 <template>
-  <div id="tool-bar" v-bind:class="theme">
+  <div id="tool-bar">
     <div class="header">
-      <b-navbar toggleable v-bind:type="theme" class="setting-tool-navbar">
+      <b-navbar toggleable v-bind:type="configs.theme" class="setting-tool-navbar">
         <b-navbar-toggle target="toolbar-option-navbar-toggle-collapse">
           <template v-slot:default="{ expanded }">
             <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
@@ -63,18 +63,24 @@ import ConceptionGrid from '../conception/ConceptionGrid.vue'
   }
 })
 export default class ToolBar extends Vue {
-  @Prop({ default: 'dark' }) theme!: string;
+  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+    svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+    transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+    outputFontSize: number; communicationType: string; dataLoadingType: string;};
 
   compList: any = {};
   compGroupsList: string[] = [];
   compSearchPattern = '';
   /** FlowData components list got from DesignBoard vue, got itself by the api.  */
   compBrutList: FDComponent[] = []
-  shouldShowApplyButton = COMMUNICATION_TYPE === 'ON_APPLY' && process.env.NODE_ENV !== 'test'
 
   constructor () {
     super()
     this.filterList()
+  }
+
+  get shouldShowApplyButton (): boolean {
+    return (this.configs !== null ? this.configs.communicationType === 'ON_APPLY' : COMMUNICATION_TYPE === 'ON_APPLY') && process.env.NODE_ENV !== 'test'
   }
 
   /**
@@ -282,7 +288,7 @@ export default class ToolBar extends Vue {
   }
 
   /* Dark side */
-  .dark#tool-bar {
+  .dark #tool-bar {
     background-color: #202020;
   }
   .dark .header {

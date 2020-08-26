@@ -26,7 +26,7 @@ import AuthModal from './components/modals/AuthModal.vue'
 import GroupManagementModal from './components/modals/GroupManagementModal.vue'
 import SettingModal from './components/modals/SettingModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
-import * as config from './config'
+import * as CONFIGS from './config'
 import JSEncrypt from 'jsencrypt'
 import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
@@ -47,24 +47,24 @@ export default class App extends Vue {
       transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
       outputFontSize: number; communicationType: string; dataLoadingType: string;} =
     (localStorage.getItem('config') ? JSON.parse(localStorage.getItem('config')) : {
-      theme: config.THEME,
-      svgGridSize: config.SVG_GRID_SIZE,
-      svgGridBorderSize: config.SVG_GRID_BORDER_WIDTH,
-      svgMinScale: config.SVG_MIN_SCALE,
-      svgMaxScale: config.SVG_MAX_SCALE,
-      svgScaleStep: config.SVG_SCALE_STEP,
-      linkFillColor: config.LINK_FILL_COLOR,
-      activeLinkFillColor: config.ACTIVE_LINK_FILL_COLOR,
-      transferDuration: config.TRANSFER_DURATION,
-      transferRadius: config.TRANSFER_RADIUS,
-      transferFillColor: config.TRANSFER_FILL_COLOR,
-      transferStrokeColor: config.TRANSFER_STROKE_COLOR,
-      transferType: config.TRANSFER_TYPE,
-      transferBytesPrecision: config.TRANSFER_BYTES_PRECISION,
-      transferShowIO: config.TRANSFER_SHOW_IO,
-      outputFontSize: config.OUTPUT_FONT_SIZE,
-      communicationType: config.COMMUNICATION_TYPE,
-      dataLoadingType: config.DATA_LOADING_TYPE
+      theme: CONFIGS.THEME,
+      svgGridSize: CONFIGS.SVG_GRID_SIZE,
+      svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
+      svgMinScale: CONFIGS.SVG_MIN_SCALE,
+      svgMaxScale: CONFIGS.SVG_MAX_SCALE,
+      svgScaleStep: CONFIGS.SVG_SCALE_STEP,
+      linkFillColor: CONFIGS.LINK_FILL_COLOR,
+      activeLinkFillColor: CONFIGS.ACTIVE_LINK_FILL_COLOR,
+      transferDuration: CONFIGS.TRANSFER_DURATION,
+      transferRadius: CONFIGS.TRANSFER_RADIUS,
+      transferFillColor: CONFIGS.TRANSFER_FILL_COLOR,
+      transferStrokeColor: CONFIGS.TRANSFER_STROKE_COLOR,
+      transferType: CONFIGS.TRANSFER_TYPE,
+      transferBytesPrecision: CONFIGS.TRANSFER_BYTES_PRECISION,
+      transferShowIO: CONFIGS.TRANSFER_SHOW_IO,
+      outputFontSize: CONFIGS.OUTPUT_FONT_SIZE,
+      communicationType: CONFIGS.COMMUNICATION_TYPE,
+      dataLoadingType: CONFIGS.DATA_LOADING_TYPE
     })
 
   private connection: WebSocket | null = null

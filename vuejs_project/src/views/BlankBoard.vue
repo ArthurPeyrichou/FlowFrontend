@@ -9,8 +9,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator'
 
 @Component
 export default class BlankBoard extends Vue {
-  // dark or light
-  @Prop({ default: 'dark' }) public theme!: string;
+
 }
 </script>
 

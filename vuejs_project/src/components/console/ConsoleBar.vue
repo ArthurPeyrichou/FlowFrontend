@@ -1,5 +1,5 @@
 <template>
-  <div id="console-bar" v-bind:class="theme">
+  <div id="console-bar">
     <div class="header">
       <div class="header-content">
         <b-nav tabs class="navbar-menu">
@@ -36,7 +36,10 @@ import { OUTPUT_FONT_SIZE } from '../../config'
 /** Gives an user interface that will allow texts output and flowdata monitoring. (NOT IMPLEMENTED YET) */
 @Component
 export default class ConsoleBar extends Vue {
-  @Prop({ default: 'dark' }) public theme!: string;
+  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+      transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+      outputFontSize: number; communicationType: string; dataLoadingType: string;};
 
   debuglogs: Array<{from: string; fromId: string; time: string; text: string; color: string}> = []
   errorslogs: Array<{from: string; fromId: string; time: string; text: string; color: string}> = []
@@ -136,7 +139,7 @@ export default class ConsoleBar extends Vue {
    * @public
    */
   get fontSize (): string {
-    return 'font-size: ' + OUTPUT_FONT_SIZE + 'px;'
+    return 'font-size: ' + (this.configs !== null ? this.configs.outputFontSize : OUTPUT_FONT_SIZE) + 'px;'
   }
 
   /**
@@ -272,7 +275,7 @@ export default class ConsoleBar extends Vue {
   }
 
   /* Dark side */
-  .dark#console-bar {
+  .dark #console-bar {
     background-color: #202020;
   }
   .dark .header {

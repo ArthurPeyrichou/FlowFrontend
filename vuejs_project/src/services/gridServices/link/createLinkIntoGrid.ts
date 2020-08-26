@@ -2,7 +2,6 @@ import * as d3 from 'd3'
 import * as linkCalculators from './linkCalculators'
 import { organizeCompAndLinksOverlay } from './organizeCompAndLinksOverlay'
 import { transfertData } from './transfertData'
-import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE, DATA_LOADING_TYPE } from '../../../config'
 
 /**
  * Selects all connectors of '#conception-grid-svg' and sets drag&drop listeners for links creation.
@@ -13,8 +12,9 @@ import { LINK_FILL_COLOR, ACTIVE_LINK_FILL_COLOR, TRANSFER_TYPE, DATA_LOADING_TY
  * @param addTheLinkInTheSvg if true add the link in the svg grid, otherwise remove the g and the path of the animation
  * @param tabId the tab id
  */
-export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheSvg: boolean, tabId: string): void {
-  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheSvg: boolean, tabId: string, transferType: string, dataLoadingType: string, linkFillColor: string,
+  activeLinkFillColor: string, transferDuration: number, transferRadius: number, transferFillColor: string, transferStrokeColor: string): void {
+  const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
   const dragLinkCompHandler = d3.drag()
     .on('drag', function () {
@@ -35,7 +35,7 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
           .attr('id', 'link-' + theSourceCompId)
           .datum(linkCalculators.getLineData(source, target, isSourceInput))
           .attr('d', linkCalculators.lineFunction)
-          .attr('stroke', LINK_FILL_COLOR)
+          .attr('stroke', linkFillColor)
           .attr('stroke-width', '3px')
           .attr('fill', 'none')
           .style('cursor', 'pointer')
@@ -46,12 +46,12 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
           path.attr('stroke-width', '3px')
         })
         path.on('click', () => {
-          if (path.attr('stroke') === LINK_FILL_COLOR) {
-            d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
-            path.attr('stroke', ACTIVE_LINK_FILL_COLOR)
+          if (path.attr('stroke') === linkFillColor) {
+            d3.selectAll('.link-path').attr('stroke', linkFillColor)
+            path.attr('stroke', activeLinkFillColor)
           } else {
-            d3.selectAll('.link-path').attr('stroke', LINK_FILL_COLOR)
-            path.attr('stroke', LINK_FILL_COLOR)
+            d3.selectAll('.link-path').attr('stroke', linkFillColor)
+            path.attr('stroke', linkFillColor)
           }
         })
 
@@ -122,7 +122,7 @@ export function createLinkIntoGrid (addAndRemoveLink: Function, addTheLinkInTheS
                     addAndRemoveLink(outputInput.output.id, outputInput.input.id, false)
                   })
 
-                transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, TRANSFER_TYPE, tabId)
+                transfertData('#output-' + outputInput.output.id, '#input-' + outputInput.input.id, transferType, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
               }
             }
           }
