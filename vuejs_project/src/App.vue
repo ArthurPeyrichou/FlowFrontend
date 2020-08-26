@@ -43,29 +43,28 @@ import { BackendRequestFactory } from './services/BackendRequestFactory'
 export default class App extends Vue {
   // Dark or light
   public configs: {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
-      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transfertDuration: number; transferRadius: number;
+      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
       transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
-      outputFontSize: number; communicationType: string; dataLoadingType: string;} =
-    (localStorage.getItem('config') ? JSON.parse(localStorage.getItem('config')) : {
-      theme: CONFIGS.THEME,
-      svgGridSize: CONFIGS.SVG_GRID_SIZE,
-      svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
-      svgMinScale: CONFIGS.SVG_MIN_SCALE,
-      svgMaxScale: CONFIGS.SVG_MAX_SCALE,
-      svgScaleStep: CONFIGS.SVG_SCALE_STEP,
-      linkFillColor: CONFIGS.LINK_FILL_COLOR,
-      activeLinkFillColor: CONFIGS.ACTIVE_LINK_FILL_COLOR,
-      transferDuration: CONFIGS.TRANSFER_DURATION,
-      transferRadius: CONFIGS.TRANSFER_RADIUS,
-      transferFillColor: CONFIGS.TRANSFER_FILL_COLOR,
-      transferStrokeColor: CONFIGS.TRANSFER_STROKE_COLOR,
-      transferType: CONFIGS.TRANSFER_TYPE,
-      transferBytesPrecision: CONFIGS.TRANSFER_BYTES_PRECISION,
-      transferShowIO: CONFIGS.TRANSFER_SHOW_IO,
-      outputFontSize: CONFIGS.OUTPUT_FONT_SIZE,
-      communicationType: CONFIGS.COMMUNICATION_TYPE,
-      dataLoadingType: CONFIGS.DATA_LOADING_TYPE
-    })
+      outputFontSize: number; communicationType: string; dataLoadingType: string;} = {
+        theme: CONFIGS.THEME,
+        svgGridSize: CONFIGS.SVG_GRID_SIZE,
+        svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
+        svgMinScale: CONFIGS.SVG_MIN_SCALE,
+        svgMaxScale: CONFIGS.SVG_MAX_SCALE,
+        svgScaleStep: CONFIGS.SVG_SCALE_STEP,
+        linkFillColor: CONFIGS.LINK_FILL_COLOR,
+        activeLinkFillColor: CONFIGS.ACTIVE_LINK_FILL_COLOR,
+        transferDuration: CONFIGS.TRANSFER_DURATION,
+        transferRadius: CONFIGS.TRANSFER_RADIUS,
+        transferFillColor: CONFIGS.TRANSFER_FILL_COLOR,
+        transferStrokeColor: CONFIGS.TRANSFER_STROKE_COLOR,
+        transferType: CONFIGS.TRANSFER_TYPE,
+        transferBytesPrecision: CONFIGS.TRANSFER_BYTES_PRECISION,
+        transferShowIO: CONFIGS.TRANSFER_SHOW_IO,
+        outputFontSize: CONFIGS.OUTPUT_FONT_SIZE,
+        communicationType: CONFIGS.COMMUNICATION_TYPE,
+        dataLoadingType: CONFIGS.DATA_LOADING_TYPE
+      }
 
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
@@ -74,6 +73,14 @@ export default class App extends Vue {
   private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
   private dataReceiving = ''
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
+
+  constructor () {
+    super()
+    const c = localStorage.getItem('config')
+    if (c) {
+      this.configs = JSON.parse(c)
+    }
+  }
 
   mounted (): void {
     console.log(this.configs)

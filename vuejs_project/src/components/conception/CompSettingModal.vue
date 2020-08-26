@@ -99,9 +99,9 @@ export default class CompSettingModal extends Vue {
   defaultColor = ''
   hideColorPicker = true
   nameInvalidFeedback = 'Name with length in between [3;50] characters is required.'
-  file: File = null
+  file: File | null = null
 
-  capitalize (s): string {
+  capitalize (s: string): string {
     if (typeof s !== 'string') return ''
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
   }

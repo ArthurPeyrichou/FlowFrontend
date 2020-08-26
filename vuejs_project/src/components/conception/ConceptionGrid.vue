@@ -87,10 +87,29 @@ import { BaseType, ContainerElement } from 'd3'
   }
 })
 export default class ConceptionGrid extends Vue {
-  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+  @Prop() public configs: {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
     svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
     transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
-    outputFontSize: number; communicationType: string; dataLoadingType: string;};
+    outputFontSize: number; communicationType: string; dataLoadingType: string;} = {
+      theme: CONFIGS.THEME,
+      svgGridSize: CONFIGS.SVG_GRID_SIZE,
+      svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
+      svgMinScale: CONFIGS.SVG_MIN_SCALE,
+      svgMaxScale: CONFIGS.SVG_MAX_SCALE,
+      svgScaleStep: CONFIGS.SVG_SCALE_STEP,
+      linkFillColor: CONFIGS.LINK_FILL_COLOR,
+      activeLinkFillColor: CONFIGS.ACTIVE_LINK_FILL_COLOR,
+      transferDuration: CONFIGS.TRANSFER_DURATION,
+      transferRadius: CONFIGS.TRANSFER_RADIUS,
+      transferFillColor: CONFIGS.TRANSFER_FILL_COLOR,
+      transferStrokeColor: CONFIGS.TRANSFER_STROKE_COLOR,
+      transferType: CONFIGS.TRANSFER_TYPE,
+      transferBytesPrecision: CONFIGS.TRANSFER_BYTES_PRECISION,
+      transferShowIO: CONFIGS.TRANSFER_SHOW_IO,
+      outputFontSize: CONFIGS.OUTPUT_FONT_SIZE,
+      communicationType: CONFIGS.COMMUNICATION_TYPE,
+      dataLoadingType: CONFIGS.DATA_LOADING_TYPE
+    }
 
   @Prop({ default: (data: string) => { console.log('Data:' + data) } }) sendMessageToBackend!: Function;
   fdCompToDrop: FDComponent | undefined = undefined
@@ -103,7 +122,7 @@ export default class ConceptionGrid extends Vue {
   hideConsoleBar = false
   backendRequestFactory = new BackendRequestFactory()
   isConnectedToBackEnd = process.env.NODE_ENV !== 'test'
-  isDataLoadingAtOnce = CONFIGS.DATA_LOADING_TYPE === 'ALL_AT_ONCE'
+  isDataLoadingAtOnce = this.configs.dataLoadingType === 'ALL_AT_ONCE'
 
   constructor () {
     super()
@@ -115,7 +134,7 @@ export default class ConceptionGrid extends Vue {
   }
 
   get theme (): string {
-    return (this.configs !== null ? this.configs.theme : CONFIGS.THEME)
+    return this.configs.theme
   }
 
   /**

@@ -147,7 +147,7 @@ export default class ConsoleBar extends Vue {
    * Will actualise the console panel
    * @public
    */
-  setCurrentTab (str): void {
+  setCurrentTab (str: 'debug' | 'errors' | 'infos'): void {
     this.currentTab = str
   }
 
@@ -155,7 +155,10 @@ export default class ConsoleBar extends Vue {
     if (fromId !== '') {
       console.log(fromId)
       d3.select('#rect-' + fromId).attr('stroke', 'white').attr('stroke-width', '3')
-      document.getElementById('rect-' + fromId).scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+      const rect = document.getElementById('rect-' + fromId)
+      if (rect) {
+        rect.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+      }
       setTimeout(() => d3.select('#rect-' + fromId).attr('stroke', 'black').attr('stroke-width', '1'), 1000)
     }
   }

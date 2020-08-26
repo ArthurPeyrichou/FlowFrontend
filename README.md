@@ -1,18 +1,40 @@
-Frontend, conçu pour les utilisateurs, proposant une interface simple et souple avec une vue orientée composants
+Frontend, designed for users, offering a simple and flexible interface with a component-oriented view of the automation process.
 =============================================================
 
 PEYRICHOU Arthur
 
-Configuration
+To learn more about Vue.JS (https://vueschool.io/courses)
+
+> Serve on https://github.com/ArthurPeyrichou/FlowBackend
+
+Configurations
 =============
 
-**En mode développement :**
+**Dev mode :**
 
-Pour démarrer le serveur vue.JS, aller dans le dossier /vuejs_ptoject et taper :
+To start the server vue.JS, go to the folder /vuejs_project and type :
 
 `npm install`
+
+puis
+
 `npm run serve`
 
-> Le serveur tourne sur le port 4200 par default (http://localhost:4200)
+> The server is running on port 4200 by default (http://localhost:4200)
 
-> Pour en apprendre plus sur Vue.JS (https://vueschool.io/courses)
+**Prod mode :**
+
+Go to the folder /vuejs_project and type :
+
+`npm install`
+`npm run build`
+
+Get the folder dist/ in root, and move his contains in production root folder.
+
+
+Docker
+=============
+
+To start the server vue.JS with docker, go to the root folder and type :
+
+`docker-compose up -d`
