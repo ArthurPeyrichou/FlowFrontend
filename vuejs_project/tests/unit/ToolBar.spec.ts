@@ -13,7 +13,7 @@ describe('ToolBar.vue', () => {
   it('Props check', () => {
     expect(wrapper.vm.$props.configs).toEqual({
       theme: CONFIGS.THEME,
-      communicationType: CONFIGS.COMMUNICATION_TYPE,
+      communicationType: CONFIGS.COMMUNICATION_TYPE
     })
   })
 })

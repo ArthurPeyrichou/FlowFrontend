@@ -278,7 +278,6 @@ describe('BackendRequestFactory Model', () => {
     expect(JSON.stringify(register)).toEqual(res)
   })
 
-
   it('Create new group', () => {
     const register = { type: 'group', body: { state: 'create', group: 'groupName1' } }
     const res = BackendRequestFactory.createGroup('groupName1')

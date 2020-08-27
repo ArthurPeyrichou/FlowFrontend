@@ -52,7 +52,7 @@ describe('FDElement Model', () => {
     expect(fdElement.getY()).toEqual(2500)
     expect(fdElement.getNotes()).toEqual('')
     expect(fdElement.getState()).toEqual({})
-    expect(fdElement.getOptions()).toEqual({debug: false})
+    expect(fdElement.getOptions()).toEqual({ debug: false })
     expect(fdElement.getLinks().has(0)).toEqual(true)
   })
 

@@ -83,7 +83,6 @@ export default class App extends Vue {
   }
 
   mounted (): void {
-    console.log(this.configs)
     this.$nextTick(function () {
       const user = localStorage.getItem('user')
       if (user) {
@@ -170,7 +169,6 @@ export default class App extends Vue {
           console.log(data)
           break
         case 'traffic':
-          console.log(data)
           if (this.$refs.portal instanceof DesignBoard) {
             ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTraffic(data.body)
           }

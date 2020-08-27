@@ -8,7 +8,6 @@ import * as d3 from 'd3'
  */
 export function getComponentWidth (name: string, title: string, compId: undefined | string, transferShowIO: boolean): number {
   let ioLength = 0
-  console.log(transferShowIO)
   if (compId !== undefined && transferShowIO) {
     ioLength = d3.select('#io-' + compId).text().length
   }

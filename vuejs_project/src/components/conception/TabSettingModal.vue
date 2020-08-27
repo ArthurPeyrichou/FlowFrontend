@@ -21,11 +21,35 @@
             required
           ></b-form-input>
         </b-form-group>
+
+        <b-form-group
+          :state="positionState"
+          label="Postion"
+          label-for="tab-position-input"
+          :invalid-feedback="positionInvalidFeedback"
+        >
+          <b-form-input
+            id="tab-position-input"
+            v-model="position"
+            :state="positionState"
+            type="number"
+            :min="first"
+            :max="last"
+            required
+          ></b-form-input>
+        </b-form-group>
       </form>
 
       <template v-slot:modal-footer>
         <div class="w-100">
-          <button id="tab-setting-modal-add" v-on:click="handleAddSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Add</button>
+          <template v-if="updateTab">
+            <button id="tab-setting-modal-add" v-on:click="handleDeleteSubmit" type="button" class="btn btn-outline-danger float-right" style="margin-left: 5px;" >Delete</button>
+            <button id="tab-setting-modal-add" v-on:click="handleUpdateSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Update</button>
+          </template>
+          <template v-else>
+            <button id="tab-setting-modal-add" v-on:click="handleAddSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Add</button>
+          </template>
+
           <button id="tab-setting-modal-close" v-on:click="hideModal" type="button" class="btn btn-outline-primary float-right">Close</button>
         </div>
       </template>
@@ -35,16 +59,29 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import ConceptionGrid from './ConceptionGrid.vue'
 
 /** Modal that allow users to add new tab in the #conception-grid-svg. */
 @Component
 export default class TabSettingModal extends Vue {
-  /** Method which come from parent ComceptionGrid vue. Used for updating the current component. */
-  @Prop({ default: () => { console.log('Not implemented!') } }) addNewTab!: Function
-
   name = ''
   nameState: boolean | null = null
   nameInvalidFeedback = 'Name with length in between [3;50] characters is required.'
+
+  firstPosition = 1
+  lastPositon = 1
+
+  position = 1
+  positionState: boolean | null = null
+  positionInvalidFeedback = 'Position between [' + this.firstPosition + ';' + this.lastPositon + '] is required.'
+
+  currentId = ''
+
+  isUpdate = false
+
+  get updateTab (): boolean {
+    return this.isUpdate
+  }
 
   /**
    * Check if the form is valide.
@@ -54,7 +91,11 @@ export default class TabSettingModal extends Vue {
   checkFormValidity (): boolean {
     this.nameState = this.name.length >= 3 && this.name.length <= 50
     this.nameInvalidFeedback = 'Name with length in between [3;50] characters is required. Current ' + this.name.length + '.'
-    return this.nameState
+
+    this.positionState = this.position >= this.firstPosition && this.position <= this.lastPositon
+    this.positionInvalidFeedback = 'Position between [' + this.firstPosition + ';' + this.lastPositon + '] is required.'
+
+    return this.nameState && this.positionState
   }
 
   /**
@@ -67,8 +108,40 @@ export default class TabSettingModal extends Vue {
     if (!this.checkFormValidity()) {
       return
     }
-    // Do something here
-    this.addNewTab(this.name)
+
+    (this.$parent as ConceptionGrid).addNewTab(this.name, this.position)
+
+    // Hide the modal manually
+    this.$nextTick(() => {
+      this.$bvModal.hide('modal-edit-tab')
+    })
+  }
+
+  handleDeleteSubmit (): void {
+    // Exit when the form isn't valid
+    if (!this.checkFormValidity()) {
+      return
+    }
+
+    if (this.currentId !== '') {
+      (this.$parent as ConceptionGrid).removeTab(this.currentId)
+    }
+
+    // Hide the modal manually
+    this.$nextTick(() => {
+      this.$bvModal.hide('modal-edit-tab')
+    })
+  }
+
+  handleUpdateSubmit (): void {
+    // Exit when the form isn't valid
+    if (!this.checkFormValidity()) {
+      return
+    }
+
+    if (this.currentId !== '') {
+      (this.$parent as ConceptionGrid).updateTab(this.currentId, this.name, this.position)
+    }
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -85,13 +158,41 @@ export default class TabSettingModal extends Vue {
   }
 
   /**
-   * Shows the modal from the user interface.
+   * Shows the modal from the user interface in add mode.
    * @public
    */
-  showModal (): void {
+  showAddModal (lastPositon: number): void {
+    this.isUpdate = false
+    this.currentId = ''
     this.name = ''
     this.nameState = null
+    this.lastPositon = lastPositon + 1
+    this.position = this.lastPositon
+    this.positionState = null
     this.$bvModal.show('modal-edit-tab')
+  }
+
+  /**
+   * Shows the modal from the user interface in update mode.
+   * @public
+   */
+  showUpdateModal (lastPositon: number, tab: {id: string; index: number; name: string; linker: string; icon: string}): void {
+    this.isUpdate = true
+    this.currentId = tab.id
+    this.name = tab.name
+    this.nameState = null
+    this.lastPositon = lastPositon
+    this.position = tab.index + 1
+    this.positionState = null
+    this.$bvModal.show('modal-edit-tab')
+  }
+
+  get first (): number {
+    return this.firstPosition
+  }
+
+  get last (): number {
+    return this.lastPositon
   }
 }
 </script>

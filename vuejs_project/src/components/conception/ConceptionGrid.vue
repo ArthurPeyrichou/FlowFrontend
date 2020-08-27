@@ -7,9 +7,9 @@
       </div>
       <div class="header-content">
         <b-nav tabs class="navbar-menu">
-          <b-nav-item v-for="tab in tabs" :key="tab.id" :active="tab.id === currentTab" v-on:click="selectTab(tab.id)">{{tab.name}}</b-nav-item>
+          <b-nav-item v-for="tab in tabs" :key="tab.id" :active="tab.id === currentTab" v-on:click="selectTab(tab.id)" v-on:dblclick="openTabSettingModal(tab.id)">{{tab.name}}</b-nav-item>
           <b-nav-item id="new-tab-button" v-on:click="openTabSettingModal()"><i class="fa fa-plus"></i> Tab</b-nav-item>
-          <TabSettingModal ref="myTabSettingModal" :addNewTab="addNewTab" />
+          <TabSettingModal ref="myTabSettingModal" :tabs="tabs" />
         </b-nav>
       </div>
       <div class="reduce-button reduce-button-right" v-on:click="toggleBar('console')">
@@ -166,14 +166,23 @@ export default class ConceptionGrid extends Vue {
    * Create a new tab and go into it
    * @public
    */
-  addNewTab (aName: string) {
+  addNewTab (aName: string, index: number) {
     let newId = this.makeId(13)
     while (this.idList.includes(newId)) {
       newId = this.makeId(13)
     }
-    this.tabs.push({ id: newId, index: this.tabs.length, name: aName, linker: aName.toLowerCase(), icon: 'fa-object-ungroup' })
+    this.tabs.push({ id: newId, index: index, name: aName, linker: aName.toLowerCase(), icon: 'fa-object-ungroup' })
+    if (index < this.tabs.length - 1) {
+      this.tabs.forEach(el => {
+        if (el.index >= index && el.id !== newId) {
+          el.index += 1
+        }
+      })
+    }
+    this.tabs = this.tabs.sort((a, b) => a.index - b.index)
     this.graphs.set(newId, [])
     this.selectTab(newId)
+
     this.backendRequestFactory.setTabs(this.tabs, [])
     if (this.configs.communicationType === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
@@ -184,23 +193,62 @@ export default class ConceptionGrid extends Vue {
   }
 
   /**
-   * Remove a new tab
+   * Update an existing tab
+   * On tab change reorganize positions
+   * @public
+   */
+  updateTab (tabId: string, aName: string, index: number): void {
+    let oldIndex = 1
+    this.tabs.forEach(tab => {
+      if (tab.id === tabId) {
+        tab.name = aName
+        tab.linker = aName.toLowerCase()
+        oldIndex = tab.index
+        tab.index = index
+      }
+    })
+    this.tabs.forEach(el => {
+      if (el.index >= index && el.index <= oldIndex && el.id !== tabId) {
+        el.index += 1
+      }
+    })
+    this.tabs = this.tabs.sort((a, b) => a.index - b.index)
+
+    this.backendRequestFactory.setTabs(this.tabs, [])
+    if (this.configs.communicationType === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
+    if (!this.isDataLoadingAtOnce) {
+      this.$nextTick(() => { this.initSvg() })
+    }
+  }
+
+  /**
+   * Remove an existing tab
    * On tab removing, remove all elements inside
    * If the tab list is empty create a new tab with name 'Main' and go into it
    * @public
    */
-  removeTab (tabId: string) {
+  removeTab (tabId: string): void {
+    const index = this.tabs.filter(el => el.id === tabId)[0].index
     this.tabs = this.tabs.filter(el => el.id !== tabId)
     const elements = this.graphs.get(tabId)
     this.backendRequestFactory.setTabs(this.tabs, (elements || []))
     if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
       this.graphs.delete(tabId)
       if (this.tabs.length > 0) {
+        this.tabs.forEach(el => {
+          if (el.index >= index) {
+            el.index -= 1
+          }
+        })
+        this.tabs = this.tabs.sort((a, b) => a.index - b.index)
+
         if (this.currentTab === tabId) {
           this.selectTab(this.tabs[0].id)
         }
       } else {
-        this.addNewTab('Main')
+        this.addNewTab('Main', 0)
       }
     } else if (this.configs.communicationType === 'DIRECT') {
       this.sendMessageToBackend(this.backendRequestFactory.apply())
@@ -401,8 +449,12 @@ export default class ConceptionGrid extends Vue {
    * Called by add new tab navbar item.
    * @public
    */
-  openTabSettingModal (): void {
-    (this.$refs.myTabSettingModal as TabSettingModal).showModal()
+  openTabSettingModal (tabId = null): void {
+    if (tabId == null) {
+      (this.$refs.myTabSettingModal as TabSettingModal).showAddModal(this.tabs.length)
+    } else {
+      (this.$refs.myTabSettingModal as TabSettingModal).showUpdateModal(this.tabs.length, this.tabs.filter(tab => tab.id === tabId)[0])
+    }
   }
 
   /**
@@ -536,7 +588,7 @@ export default class ConceptionGrid extends Vue {
           this.currentTab = this.tabs[0].id
         }
       } else {
-        this.addNewTab('Main')
+        this.addNewTab('Main', 0)
       }
     }
   }
