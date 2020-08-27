@@ -17,7 +17,11 @@ export class RSAService {
 
     try {
       const buffer = new Buffer(plaintext)
-      const encrypted = crypto.publicEncrypt(this.publicKey, buffer)
+      const encrypted = crypto.publicEncrypt({
+        key: this.publicKey,
+        passphrase: '',
+        padding: crypto.constants.RSA_PKCS1_PADDING
+      }, buffer)
       return encrypted.toString('base64')
     } catch (e) {
       return ''
@@ -42,5 +46,9 @@ export class RSAService {
 
   getPublicKey (): string {
     return this.publicKey
+  }
+
+  getPrivateKey (): string {
+    return this.privateKey
   }
 }

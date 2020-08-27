@@ -4,4 +4,4 @@ services:
     build: vuejs_project
     container_name: dataflow-frontend
     ports:
-      - 8000:8000
+      - 4200:4200

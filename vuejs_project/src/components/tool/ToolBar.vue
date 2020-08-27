@@ -53,7 +53,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import AddCompModal from '@/components/tool/AddCompModal.vue'
 import { FDComponent } from '../../models/FDComponent'
-import { COMMUNICATION_TYPE } from '../../config'
+import * as CONFIGS from '../../config'
 import ConceptionGrid from '../conception/ConceptionGrid.vue'
 
 /** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
@@ -63,10 +63,10 @@ import ConceptionGrid from '../conception/ConceptionGrid.vue'
   }
 })
 export default class ToolBar extends Vue {
-  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
-    svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
-    transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
-    outputFontSize: number; communicationType: string; dataLoadingType: string;};
+  @Prop() public configs: { theme: string; communicationType: string } = {
+    theme: CONFIGS.THEME,
+    communicationType: CONFIGS.COMMUNICATION_TYPE
+  }
 
   compList: any = {};
   compGroupsList: string[] = [];
@@ -80,7 +80,7 @@ export default class ToolBar extends Vue {
   }
 
   get shouldShowApplyButton (): boolean {
-    return (this.configs !== null ? this.configs.communicationType === 'ON_APPLY' : COMMUNICATION_TYPE === 'ON_APPLY') && process.env.NODE_ENV !== 'test'
+    return this.configs.communicationType === 'ON_APPLY'
   }
 
   /**

@@ -87,10 +87,10 @@ import { BaseType, ContainerElement } from 'd3'
   }
 })
 export default class ConceptionGrid extends Vue {
-  @Prop() public configs: {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+  @Prop() public configs: { theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
     svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
     transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
-    outputFontSize: number; communicationType: string; dataLoadingType: string;} = {
+    communicationType: string; dataLoadingType: string; } = {
       theme: CONFIGS.THEME,
       svgGridSize: CONFIGS.SVG_GRID_SIZE,
       svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
@@ -106,7 +106,6 @@ export default class ConceptionGrid extends Vue {
       transferType: CONFIGS.TRANSFER_TYPE,
       transferBytesPrecision: CONFIGS.TRANSFER_BYTES_PRECISION,
       transferShowIO: CONFIGS.TRANSFER_SHOW_IO,
-      outputFontSize: CONFIGS.OUTPUT_FONT_SIZE,
       communicationType: CONFIGS.COMMUNICATION_TYPE,
       dataLoadingType: CONFIGS.DATA_LOADING_TYPE
     }

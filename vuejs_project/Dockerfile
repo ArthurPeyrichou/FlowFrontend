@@ -19,6 +19,6 @@ COPY . .
 RUN npm run build
 
 # define running port
-EXPOSE 8000
+EXPOSE 4200
 
 CMD [ "http-server", "dist" ]

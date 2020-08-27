@@ -36,10 +36,9 @@ import { OUTPUT_FONT_SIZE } from '../../config'
 /** Gives an user interface that will allow texts output and flowdata monitoring. (NOT IMPLEMENTED YET) */
 @Component
 export default class ConsoleBar extends Vue {
-  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
-      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
-      transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
-      outputFontSize: number; communicationType: string; dataLoadingType: string;};
+  @Prop() public configs: { outputFontSize: number } = {
+    outputFontSize: OUTPUT_FONT_SIZE
+  }
 
   debuglogs: Array<{from: string; fromId: string; time: string; text: string; color: string}> = []
   errorslogs: Array<{from: string; fromId: string; time: string; text: string; color: string}> = []
