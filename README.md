@@ -16,7 +16,7 @@ To start the server vue.JS, go to the folder /vuejs_project and type :
 
 `npm install`
 
-puis
+then
 
 `npm run serve`
 
