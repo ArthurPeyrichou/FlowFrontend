@@ -11,39 +11,61 @@
       <h5>Create and join a new group:</h5>
       <form ref="form" @submit.stop.prevent="handleCreateSubmit">
         <b-form-group
-          :state="nameState"
+          :state="groupNameState"
           label="Group name"
           label-for="new-group-name-input"
         >
           <b-form-input
             id="new-group-name-input"
-            v-model="name"
-            :state="nameState"
+            v-model="groupName"
+            :state="groupNameState"
             required
           ></b-form-input>
         </b-form-group>
       </form>
-      <button id="group-management-modal-login" v-on:click="handleCreateSubmit" type="button" class="btn btn-outline-success float-right">Create and join</button>
+      <button id="group-management-modal-create" v-on:click="handleCreateSubmit" type="button" class="btn btn-outline-success float-right">Create and join</button>
     </div>
 
     <div v-if="groupSituation.isInGroup === true" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
       <p>Your are currently in the group: {{groupSituation.groupName}}</p>
-      <button id="group-management-modal-login" v-on:click="handleLeaveSubmit" type="button" class="btn btn-outline-danger float-right">Leave the group</button>
+      <button id="group-management-modal-leave" v-on:click="handleLeaveSubmit" type="button" class="btn btn-outline-danger float-right">Leave the group</button>
     </div>
 
-    <div v-if="groupList.length > 0" class="group-option-container">
+    <div v-if="groupSituation.isInGroup && groupSituation.isGroupLeader" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
+      <h5>Invit somebody to your group:</h5>
+      <form ref="form" @submit.stop.prevent="handleCreateSubmit">
+        <b-form-group
+          :state="groupNameState"
+          label="User name"
+          label-for="new-user-name-input"
+        >
+          <b-form-input
+            id="new-user-name-input"
+            v-model="invitUserName"
+            :state="invitUserNameState"
+            required
+          ></b-form-input>
+        </b-form-group>
+      </form>
+      <button id="group-management-modal-invit" v-on:click="handleInvitSubmit" type="button" class="btn btn-outline-success float-right">Invite</button>
+    </div>
+
+    <div v-if="invitations.length > 0" class="group-option-container">
       <h5>Join a{{(groupSituation.isInGroup === true) ? 'nother' : ''}} group:</h5>
        <form ref="form" @submit.stop.prevent="handleJoinSubmit">
         <b-form-group
           label="Choose a group"
           label-for="group-selector"
         >
-          <b-form-select id="group-selector" v-model="selectedGroup" :options="groupList"></b-form-select>
+          <b-form-select id="group-selector" v-model="selectedGroup" :options="invitations"></b-form-select>
         </b-form-group>
       </form>
-      <button id="group-management-modal-login" v-on:click="handleJoinSubmit" type="button" class="btn btn-primary float-right">Join</button>
+      <button id="group-management-modal-join" v-on:click="handleJoinSubmit" type="button" class="btn btn-success float-right">Join</button>
+      <button id="group-management-modal-decline" v-on:click="handleDeclineSubmit" type="button" class="btn btn-danger float-right">Decline</button>
     </div>
-
+    <div v-else class="group-option-container">
+      <h5>You don't have any invitation yet</h5>
+    </div>
       <template v-slot:modal-footer>
         <div class="w-100">
           <button id="group-management-modal-close" v-on:click="hideModal" type="button" class="btn btn-outline-primary float-right">Close</button>
@@ -54,19 +76,20 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import App from '../../App.vue'
 import { BackendRequestFactory } from '../../services/BackendRequestFactory'
 
 /** Modal that allow users to login a new account. */
 @Component
 export default class GroupManagementModal extends Vue {
-  name = ''
-  nameState: boolean | null = null
-  password = ''
-  passwordState: boolean | null = null
-  groupSituation: { isInGroup: boolean; groupName: string } = { isInGroup: false, groupName: '' }
-  groupList: Array<string> = ['group1', 'group2']
+  @Prop({ default: { isInGroup: false, isGroupLeader: false, groupName: '' } }) groupSituation!: { isInGroup: boolean; isGroupLeader: boolean; groupName: string };
+  @Prop({ default: [] }) invitations!: Array<{value: string; text: string}>;
+
+  groupName = ''
+  groupNameState: boolean | null = null
+  invitUserName = ''
+  invitUserNameState: boolean | null = null
   selectedGroup = ''
 
   /**
@@ -75,8 +98,7 @@ export default class GroupManagementModal extends Vue {
    * @public
    */
   handleCreateSubmit (): void {
-    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.createGroup(this.name)]);
-    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.joinGroup(this.name)])
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.createGroup(this.groupName)])
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -85,7 +107,19 @@ export default class GroupManagementModal extends Vue {
   }
 
   handleJoinSubmit (): void {
+    if (this.groupSituation.isInGroup) {
+      return
+    }
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.joinGroup(this.selectedGroup)])
+
+    // Hide the modal manually
+    this.$nextTick(() => {
+      this.$bvModal.hide('modal-group-management')
+    })
+  }
+
+  handleDeclineSubmit (): void {
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.declineGroup(this.selectedGroup)])
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -102,6 +136,15 @@ export default class GroupManagementModal extends Vue {
     })
   }
 
+  handleInvitSubmit (): void {
+    (this.$parent as App).sendMessageToBackend([BackendRequestFactory.inviteUserToGroup(this.invitUserName)])
+
+    // Hide the modal manually
+    this.$nextTick(() => {
+      this.$bvModal.hide('modal-group-management')
+    })
+  }
+
   /**
    * Hides the modal from the user interface.
    * @public
@@ -111,15 +154,15 @@ export default class GroupManagementModal extends Vue {
   }
 
   /**
-   * Init name and passwords
+   * Init groupName and invitUserName
    * Then shows the modal from the user interface.
    * @public
    */
   showModal (): void {
-    this.name = ''
-    this.nameState = null
-    this.password = ''
-    this.passwordState = null
+    this.groupName = ''
+    this.groupNameState = null
+    this.invitUserName = ''
+    this.invitUserNameState = null
     this.$bvModal.show('modal-group-management')
   }
 }

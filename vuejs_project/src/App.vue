@@ -12,10 +12,11 @@
         </template>
         <b-dropdown-item v-on:click="openModal('group')">Group management</b-dropdown-item>
         <b-dropdown-item v-on:click="openModal('setting')">Settings</b-dropdown-item>
+        <b-dropdown-item v-on:click="logoutRequest()">Logout</b-dropdown-item>
       </b-dropdown>
     </div>
     <AuthModal ref="myAuthModal" />
-    <GroupManagementModal ref="myGroupManagementModal" />
+    <GroupManagementModal ref="myGroupManagementModal" :groupSituation="user.group" :invitations="invitations"/>
     <SettingModal ref="mySettingModal" :configs="configs"/>
     <router-view style="padding-bottom:50px" :configs="configs" ref="portal" />
   </div>
@@ -73,6 +74,7 @@ export default class App extends Vue {
   private decryptForFrontend = new RSAService('', '')
   private dataReceiving = ''
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
+  private invitations: Array<{value: string; text: string}> = []
   constructor () {
     super()
     const c = localStorage.getItem('config')
@@ -115,29 +117,100 @@ export default class App extends Vue {
   connect (connectionTries: number, url: string): void {
     const treatMessage = (msg: string) => {
       const res = this.decryptForFrontend.decrypt(msg)
-      const data = JSON.parse(res)
+      let data = JSON.parse('{}')
+      try {
+        data = JSON.parse(res)
+      } catch {
+        return
+      }
+      console.log(data)
       switch (data.type) {
         case 'auth':
-          if (data.body.state === 'login' || data.body.state === 'register') {
-            (this.$refs.myAuthModal as AuthModal).setResponse({ success: data.body.success, msg: data.body.msg })
-            if (data.body.success) {
-              this.user.isLogged = true
-              localStorage.setItem('user', JSON.stringify(this.user))
-            }
-          } else if (data.body.state === 'key') {
-            if (this.user.isLogged) {
-              this.sendMessageToBackend([BackendRequestFactory.loginUser(this.user.name, this.user.password)])
-              this.user.isLogged = false
-            }
+          switch (data.body.state) {
+            case 'login':
+            case 'register':
+              (this.$refs.myAuthModal as AuthModal).setResponse({ success: data.body.success, msg: data.body.msg })
+              if (data.body.success) {
+                this.user.isLogged = true
+                localStorage.setItem('user', JSON.stringify(this.user))
+              }
+              break
+            case 'key':
+              if (this.user.isLogged) {
+                this.sendMessageToBackend([BackendRequestFactory.loginUser(this.user.name, this.user.password)])
+                this.user.isLogged = false
+              }
+              break
+            case 'logout':
+              localStorage.clear()
+              location.reload()
+              break
           }
+
           break
         case 'group':
-          if (data.body.state === 'get') {
-            if (data.body.value) {
-              this.user.group.isInGroup = true
-              this.user.group.groupName = data.body.value.groupName
-              this.user.group.isGroupLeader = data.body.value.status === 'leader'
-            }
+          switch (data.body.state) {
+            case 'create':
+              if (data.body.success) {
+                console.log(data.body.msg)
+              } else {
+                console.error(data.body.msg)
+              }
+              break
+            case 'get':
+              if (data.body.success) {
+                if (data.body.msg === false) {
+                  this.user.group.isInGroup = false
+                  this.user.group.groupName = ''
+                  this.user.group.isGroupLeader = false
+                } else {
+                  this.user.group.isInGroup = true
+                  this.user.group.groupName = data.body.msg.groupName
+                  this.user.group.isGroupLeader = data.body.msg.status === 'leader'
+                }
+                localStorage.setItem('user', JSON.stringify(this.user))
+              }
+              break
+            case 'leave':
+              if (data.body.success) {
+                console.log(data.body.msg)
+              } else {
+                console.error(data.body.msg)
+              }
+              break
+            case 'invit':
+              if (data.body.success) {
+                console.log(data.body.msg)
+              } else {
+                console.error(data.body.msg)
+              }
+              break
+            case 'join':
+              if (data.body.success) {
+                console.log(data.body.msg)
+              } else {
+                console.error(data.body.msg)
+              }
+              break
+            case 'decline':
+              if (data.body.success) {
+                console.log(data.body.msg)
+              } else {
+                console.error(data.body.msg)
+              }
+              break
+            case 'invitations':
+              if (data.body.success) {
+                this.invitations = []
+                const invits: Array<{id: string; groupName: string}> = JSON.parse(data.body.msg)
+                invits.forEach(invit => {
+                  this.invitations.push({ value: invit.id, text: invit.groupName })
+                })
+                console.log(this.invitations)
+              } else {
+                console.error(data.body.msg)
+              }
+              break
           }
           break
         case 'debug':
@@ -202,6 +275,10 @@ export default class App extends Vue {
     this.connection.onmessage = function (event) {
       treatMessage(decodeURIComponent(event.data))
     }
+  }
+
+  logoutRequest () {
+    this.sendMessageToBackend([BackendRequestFactory.logoutUser()])
   }
 
   /**

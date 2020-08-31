@@ -151,6 +151,10 @@ export class BackendRequestFactory {
       return JSON.stringify({ type: 'auth', body: { state: 'login', userName: userName, userPassword: userPassword } })
     }
 
+    static logoutUser (): string {
+      return JSON.stringify({ type: 'auth', body: { state: 'logout' } })
+    }
+
     static setUserkey (userKey: string): string {
       return JSON.stringify({ type: 'auth', body: { state: 'key', key: userKey } })
     }
@@ -159,11 +163,19 @@ export class BackendRequestFactory {
       return JSON.stringify({ type: 'group', body: { state: 'create', group: groupName } })
     }
 
-    static joinGroup (groupName: string): string {
-      return JSON.stringify({ type: 'group', body: { state: 'join', group: groupName } })
+    static joinGroup (invitationId: string): string {
+      return JSON.stringify({ type: 'group', body: { state: 'join', invitationId: invitationId } })
+    }
+
+    static declineGroup (invitationId: string): string {
+      return JSON.stringify({ type: 'group', body: { state: 'decline', invitationId: invitationId } })
     }
 
     static leaveGroup (groupName: string): string {
       return JSON.stringify({ type: 'group', body: { state: 'leave', group: groupName } })
+    }
+
+    static inviteUserToGroup (userName: string): string {
+      return JSON.stringify({ type: 'group', body: { state: 'invit', user: userName } })
     }
 }
