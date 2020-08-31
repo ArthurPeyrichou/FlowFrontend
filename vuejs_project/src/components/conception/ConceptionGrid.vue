@@ -87,10 +87,8 @@ import { BaseType, ContainerElement } from 'd3'
   }
 })
 export default class ConceptionGrid extends Vue {
-  @Prop() public configs: { theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
-    svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
-    transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
-    communicationType: string; dataLoadingType: string; } = {
+  @Prop({
+    default: {
       theme: CONFIGS.THEME,
       svgGridSize: CONFIGS.SVG_GRID_SIZE,
       svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
@@ -109,6 +107,10 @@ export default class ConceptionGrid extends Vue {
       communicationType: CONFIGS.COMMUNICATION_TYPE,
       dataLoadingType: CONFIGS.DATA_LOADING_TYPE
     }
+  }) public configs!: { theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+    svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+    transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+    communicationType: string; dataLoadingType: string; }
 
   @Prop({ default: (data: string) => { console.log('Data:' + data) } }) sendMessageToBackend!: Function;
   fdCompToDrop: FDComponent | undefined = undefined
@@ -175,7 +177,7 @@ export default class ConceptionGrid extends Vue {
     if (index < this.tabs.length - 1) {
       this.tabs.forEach(el => {
         if (el.index >= index && el.id !== newId) {
-          el.index += 1
+          el.index++
         }
       })
     }
@@ -209,7 +211,7 @@ export default class ConceptionGrid extends Vue {
     })
     this.tabs.forEach(el => {
       if (el.index >= index && el.index <= oldIndex && el.id !== tabId) {
-        el.index += 1
+        el.index++
       }
     })
     this.tabs = this.tabs.sort((a, b) => a.index - b.index)
@@ -239,7 +241,7 @@ export default class ConceptionGrid extends Vue {
       if (this.tabs.length > 0) {
         this.tabs.forEach(el => {
           if (el.index >= index) {
-            el.index -= 1
+            el.index--
           }
         })
         this.tabs = this.tabs.sort((a, b) => a.index - b.index)

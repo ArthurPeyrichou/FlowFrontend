@@ -36,9 +36,11 @@ import { OUTPUT_FONT_SIZE } from '../../config'
 /** Gives an user interface that will allow texts output and flowdata monitoring. (NOT IMPLEMENTED YET) */
 @Component
 export default class ConsoleBar extends Vue {
-  @Prop() public configs: { outputFontSize: number } = {
-    outputFontSize: OUTPUT_FONT_SIZE
-  }
+  @Prop({
+    default: {
+      outputFontSize: OUTPUT_FONT_SIZE
+    }
+  }) public configs!: { outputFontSize: number }
 
   debuglogs: Array<{from: string; fromId: string; time: string; text: string; color: string}> = []
   errorslogs: Array<{from: string; fromId: string; time: string; text: string; color: string}> = []

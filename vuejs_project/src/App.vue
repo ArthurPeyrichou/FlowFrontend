@@ -69,11 +69,10 @@ export default class App extends Vue {
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
-  private encryptForBackend = new JSEncrypt()
-  private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
+  private encryptForBackend = new RSAService('', '')
+  private decryptForFrontend = new RSAService('', '')
   private dataReceiving = ''
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
-
   constructor () {
     super()
     const c = localStorage.getItem('config')
@@ -95,7 +94,9 @@ export default class App extends Vue {
           (this.$refs.portal as DesignBoard).sendBlankDesignerData()
         }
       } else {
-        this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
+        this.encryptForBackend = new RSAService('', process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '')
+        const temp = new JSEncrypt()
+        this.decryptForFrontend = new RSAService(temp.getPrivateKey(), temp.getPublicKey())
         this.connect(3, this.backendUrl)
         if (!this.user.isLogged) {
           this.openModal('auth')
@@ -113,8 +114,7 @@ export default class App extends Vue {
    */
   connect (connectionTries: number, url: string): void {
     const treatMessage = (msg: string) => {
-      let res = ''
-      msg.split(',').forEach(el => { res += this.decryptForFrontend.decrypt(el) })
+      const res = this.decryptForFrontend.decrypt(msg)
       const data = JSON.parse(res)
       switch (data.type) {
         case 'auth':
@@ -214,22 +214,7 @@ export default class App extends Vue {
     if (this.connection !== null) {
       data.forEach(el => {
         if (this.connection !== null) {
-          this.shouldReload = 2
-          if (el.length <= 125) {
-            this.connection.send(this.encryptForBackend.encrypt(el))
-          } else {
-            let offset = 0
-            let res = ''
-            while (offset < el.length) {
-              const size = Math.min(125, el.length - offset)
-              res += this.encryptForBackend.encrypt(el.substring(offset, offset + size))
-              offset += size
-              if (offset < el.length) {
-                res += ','
-              }
-            }
-            this.connection.send(res)
-          }
+          this.connection.send(this.encryptForBackend.encrypt(el))
         }
       })
     } else {

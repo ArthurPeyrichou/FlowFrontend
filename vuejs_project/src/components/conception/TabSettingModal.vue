@@ -43,8 +43,8 @@
       <template v-slot:modal-footer>
         <div class="w-100">
           <template v-if="updateTab">
-            <button id="tab-setting-modal-add" v-on:click="handleDeleteSubmit" type="button" class="btn btn-outline-danger float-right" style="margin-left: 5px;" >Delete</button>
-            <button id="tab-setting-modal-add" v-on:click="handleUpdateSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Update</button>
+            <button id="tab-setting-modal-delete" v-on:click="handleDeleteSubmit" type="button" class="btn btn-outline-danger float-right" style="margin-left: 5px;" >Delete</button>
+            <button id="tab-setting-modal-update" v-on:click="handleUpdateSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Update</button>
           </template>
           <template v-else>
             <button id="tab-setting-modal-add" v-on:click="handleAddSubmit" type="button" class="btn btn-primary float-right" style="margin-left: 5px;" >Add</button>
@@ -99,8 +99,7 @@ export default class TabSettingModal extends Vue {
   }
 
   /**
-   * Called when user click "Apply Settings" button.
-   * WARNING: empty function
+   * Called when user click "Add" button.
    * @public
    */
   handleAddSubmit (): void {
@@ -109,7 +108,7 @@ export default class TabSettingModal extends Vue {
       return
     }
 
-    (this.$parent as ConceptionGrid).addNewTab(this.name, this.position)
+    (this.$parent as ConceptionGrid).addNewTab(this.name, this.position - 1)
 
     // Hide the modal manually
     this.$nextTick(() => {
@@ -117,12 +116,11 @@ export default class TabSettingModal extends Vue {
     })
   }
 
+  /**
+   * Called when user click "Delete" button.
+   * @public
+   */
   handleDeleteSubmit (): void {
-    // Exit when the form isn't valid
-    if (!this.checkFormValidity()) {
-      return
-    }
-
     if (this.currentId !== '') {
       (this.$parent as ConceptionGrid).removeTab(this.currentId)
     }
@@ -133,6 +131,10 @@ export default class TabSettingModal extends Vue {
     })
   }
 
+  /**
+   * Called when user click "Update" button.
+   * @public
+   */
   handleUpdateSubmit (): void {
     // Exit when the form isn't valid
     if (!this.checkFormValidity()) {
@@ -140,7 +142,7 @@ export default class TabSettingModal extends Vue {
     }
 
     if (this.currentId !== '') {
-      (this.$parent as ConceptionGrid).updateTab(this.currentId, this.name, this.position)
+      (this.$parent as ConceptionGrid).updateTab(this.currentId, this.name, this.position - 1)
     }
 
     // Hide the modal manually

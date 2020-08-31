@@ -63,10 +63,12 @@ import ConceptionGrid from '../conception/ConceptionGrid.vue'
   }
 })
 export default class ToolBar extends Vue {
-  @Prop() public configs: { theme: string; communicationType: string } = {
-    theme: CONFIGS.THEME,
-    communicationType: CONFIGS.COMMUNICATION_TYPE
-  }
+  @Prop({
+    default: {
+      theme: CONFIGS.THEME,
+      communicationType: CONFIGS.COMMUNICATION_TYPE
+    }
+  }) public configs!: { theme: string; communicationType: string }
 
   compList: any = {};
   compGroupsList: string[] = [];
