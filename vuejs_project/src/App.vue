@@ -1,5 +1,5 @@
 <template>
-  <div id="app" v-bind:class="theme">
+  <div id="app" v-bind:class="configs.theme">
     <div class="header">
       <b-nav tabs id="main-menu" class="navbar-menu" style="height:50px">
         <b-nav-item v-bind:to="'/'" :active="currentRoute=='/'">Design Board</b-nav-item>
@@ -16,8 +16,8 @@
     </div>
     <AuthModal ref="myAuthModal" />
     <GroupManagementModal ref="myGroupManagementModal" />
-    <SettingModal ref="mySettingModal" />
-    <router-view style="padding-bottom:50px" :theme="theme" ref="portal" />
+    <SettingModal ref="mySettingModal" :configs="configs"/>
+    <router-view style="padding-bottom:50px" :configs="configs" ref="portal" />
   </div>
 </template>
 
@@ -26,11 +26,12 @@ import AuthModal from './components/modals/AuthModal.vue'
 import GroupManagementModal from './components/modals/GroupManagementModal.vue'
 import SettingModal from './components/modals/SettingModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
-import { THEME, COMMUNICATION_TYPE } from './config'
+import * as CONFIGS from './config'
 import JSEncrypt from 'jsencrypt'
 import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 import { RSAService } from './services/RSAService'
+import { BackendRequestFactory } from './services/BackendRequestFactory'
 
 @Component({
   components: {
@@ -41,20 +42,50 @@ import { RSAService } from './services/RSAService'
 })
 export default class App extends Vue {
   // Dark or light
-  public theme = (localStorage.theme ? localStorage.theme : THEME)
+  public configs: {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+      transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+      outputFontSize: number; communicationType: string; dataLoadingType: string;} = {
+        theme: CONFIGS.THEME,
+        svgGridSize: CONFIGS.SVG_GRID_SIZE,
+        svgGridBorderSize: CONFIGS.SVG_GRID_BORDER_WIDTH,
+        svgMinScale: CONFIGS.SVG_MIN_SCALE,
+        svgMaxScale: CONFIGS.SVG_MAX_SCALE,
+        svgScaleStep: CONFIGS.SVG_SCALE_STEP,
+        linkFillColor: CONFIGS.LINK_FILL_COLOR,
+        activeLinkFillColor: CONFIGS.ACTIVE_LINK_FILL_COLOR,
+        transferDuration: CONFIGS.TRANSFER_DURATION,
+        transferRadius: CONFIGS.TRANSFER_RADIUS,
+        transferFillColor: CONFIGS.TRANSFER_FILL_COLOR,
+        transferStrokeColor: CONFIGS.TRANSFER_STROKE_COLOR,
+        transferType: CONFIGS.TRANSFER_TYPE,
+        transferBytesPrecision: CONFIGS.TRANSFER_BYTES_PRECISION,
+        transferShowIO: CONFIGS.TRANSFER_SHOW_IO,
+        outputFontSize: CONFIGS.OUTPUT_FONT_SIZE,
+        communicationType: CONFIGS.COMMUNICATION_TYPE,
+        dataLoadingType: CONFIGS.DATA_LOADING_TYPE
+      }
+
   private connection: WebSocket | null = null
   public shouldReload = 2 // Backend send designerdata twice in short time
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
-  private encryptForBackend = new JSEncrypt()
-  private decryptForFrontend = new RSAService(this.encryptForBackend.getPrivateKey(), this.encryptForBackend.getPublicKey())
+  private encryptForBackend = new RSAService('', '')
+  private decryptForFrontend = new RSAService('', '')
   private dataReceiving = ''
-  // WARNING, isLOgged have to be set to false when the auth service will worck on backend
-  private user = { name: '', password: '', isLogged: true, group: { isInGroup: false, isGroupAdmin: false, groupName: '' } }
+  private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
+  constructor () {
+    super()
+    const c = localStorage.getItem('config')
+    if (c) {
+      this.configs = JSON.parse(c)
+    }
+  }
 
   mounted (): void {
     this.$nextTick(function () {
-      if (localStorage.user) {
-        this.user = JSON.parse(localStorage.user)
+      const user = localStorage.getItem('user')
+      if (user) {
+        this.user = JSON.parse(user)
       }
 
       // If the node environment is test, we populate the toolbar of fake components for tests
@@ -63,7 +94,9 @@ export default class App extends Vue {
           (this.$refs.portal as DesignBoard).sendBlankDesignerData()
         }
       } else {
-        this.encryptForBackend.setPublicKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY)
+        this.encryptForBackend = new RSAService('', process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '')
+        const temp = new JSEncrypt()
+        this.decryptForFrontend = new RSAService(temp.getPrivateKey(), temp.getPublicKey())
         this.connect(3, this.backendUrl)
         if (!this.user.isLogged) {
           this.openModal('auth')
@@ -81,17 +114,39 @@ export default class App extends Vue {
    */
   connect (connectionTries: number, url: string): void {
     const treatMessage = (msg: string) => {
-      let res = ''
-      msg.split(',').forEach(el => { res += this.decryptForFrontend.decrypt(el) })
+      const res = this.decryptForFrontend.decrypt(msg)
       const data = JSON.parse(res)
       switch (data.type) {
+        case 'auth':
+          if (data.body.state === 'login' || data.body.state === 'register') {
+            (this.$refs.myAuthModal as AuthModal).setResponse({ success: data.body.success, msg: data.body.msg })
+            if (data.body.success) {
+              this.user.isLogged = true
+              localStorage.setItem('user', JSON.stringify(this.user))
+            }
+          } else if (data.body.state === 'key') {
+            if (this.user.isLogged) {
+              this.sendMessageToBackend([BackendRequestFactory.loginUser(this.user.name, this.user.password)])
+              this.user.isLogged = false
+            }
+          }
+          break
+        case 'group':
+          if (data.body.state === 'get') {
+            if (data.body.value) {
+              this.user.group.isInGroup = true
+              this.user.group.groupName = data.body.value.groupName
+              this.user.group.isGroupLeader = data.body.value.status === 'leader'
+            }
+          }
+          break
         case 'debug':
           if (this.$refs.portal instanceof DesignBoard) {
-            (this.$refs.portal as DesignBoard).sendMessage(data)
+            (this.$refs.portal as DesignBoard).sendMessageToConsole(data)
           }
           break
         case 'designer':
-          if (this.shouldReload > 0 || COMMUNICATION_TYPE === 'DIRECT') {
+          if (this.shouldReload > 0 || this.configs.communicationType === 'DIRECT') {
             if (this.$refs.portal instanceof DesignBoard) {
               (this.$refs.portal as DesignBoard).sendDesignerData(data)
             }
@@ -101,11 +156,13 @@ export default class App extends Vue {
           }
           break
         case 'error':
+          (this.$refs.portal as DesignBoard).sendMessageToConsole(data)
+          break
         case 'errors':
           console.error(data.type, data)
           break
         case 'online':
-          console.log('Count of client connected: ' + data.count)
+          console.log('Count of client connected: ' + data.body)
           break
         case 'status':
           console.log('Message type "' + data.type + '".')
@@ -117,13 +174,12 @@ export default class App extends Vue {
           }
           break
         default:
-          console.warn('Message type "' + data.type + '" not treated.')
+          console.warn('Message type "' + data.type + '" not treated.', 'Data: ' + JSON.stringify(data))
           break
       }
     }
     const giveFrontendPublicKey = () => {
-      const msg = { type: 'key', body: this.decryptForFrontend.getPublicKey() }
-      this.sendMessageToBackend([JSON.stringify(msg)])
+      this.sendMessageToBackend([BackendRequestFactory.setUserkey(this.decryptForFrontend.getPublicKey())])
     }
     console.log('Starting connection to WebSocket Server...')
     this.connection = new WebSocket(url)
@@ -158,22 +214,7 @@ export default class App extends Vue {
     if (this.connection !== null) {
       data.forEach(el => {
         if (this.connection !== null) {
-          this.shouldReload = 2
-          if (el.length <= 125) {
-            this.connection.send(this.encryptForBackend.encrypt(el))
-          } else {
-            let offset = 0
-            let res = ''
-            while (offset < el.length) {
-              const size = Math.min(125, el.length - offset)
-              res += this.encryptForBackend.encrypt(el.substring(offset, offset + size))
-              offset += size
-              if (offset < el.length) {
-                res += ','
-              }
-            }
-            this.connection.send(res)
-          }
+          this.connection.send(this.encryptForBackend.encrypt(el))
         }
       })
     } else {
@@ -181,9 +222,9 @@ export default class App extends Vue {
     }
   }
 
-  setTheme (theme: 'dark' | 'light' | 'custom'): void {
-    this.theme = theme
-    localStorage.theme = theme
+  setUserData (name: string, password: string): void {
+    this.user.name = name
+    this.user.password = password
   }
 
   get currentRoute () { return this.$route.path }

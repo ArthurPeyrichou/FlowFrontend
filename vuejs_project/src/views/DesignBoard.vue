@@ -1,8 +1,8 @@
 <template>
   <div class="home">
-    <ToolBar ref="myToolBar" :theme="theme"/>
-    <ConceptionGrid ref="myConceptionGrid" :theme="theme" :sendMessageToBackend="sendMessageToBackend"/>
-    <ConsoleBar ref="myConsoleBar" :theme="theme"/>
+    <ToolBar ref="myToolBar" :configs="configs"/>
+    <ConceptionGrid ref="myConceptionGrid" :configs="configs" :sendMessageToBackend="sendMessageToBackend"/>
+    <ConsoleBar ref="myConsoleBar" :configs="configs"/>
   </div>
 </template>
 
@@ -23,8 +23,10 @@ import App from '../App.vue'
   }
 })
 export default class DesignBoard extends Vue {
-  // dark or light
-  @Prop({ default: 'dark' }) public theme!: string;
+  @Prop({ default: null }) public configs!: null | {theme: string; svgGridSize: number; svgGridBorderSize: number; svgMinScale: number; svgMaxScale: number;
+      svgScaleStep: number; linkFillColor: string; activeLinkFillColor: string; transferDuration: number; transferRadius: number;
+      transferFillColor: string; transferStrokeColor: string; transferType: string; transferBytesPrecision: number; transferShowIO: boolean;
+      outputFontSize: number; communicationType: string; dataLoadingType: string;};
 
   private databaseElementList: Array<FDElement> = []
   private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
@@ -77,13 +79,13 @@ export default class DesignBoard extends Vue {
    * @param data
    * @public
    */
-  sendMessage (data: any): void {
+  sendMessageToConsole (data: any): void {
     const theElement: FDElement[] = this.databaseElementList.filter(el => el.getId() === data.id)
     if (theElement.length === 1) {
       const tab = this.tabList.filter(el => el.id === theElement[0].getTabId());
-      (this.$children[2] as ConsoleBar).addLog((tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.body, theElement[0].getColor())
+      (this.$children[2] as ConsoleBar).addLog(data.type, (tab.length === 1 ? tab[0].name + ': ' : '') + theElement[0].getName(), data.id, data.body, theElement[0].getColor())
     } else {
-      (this.$children[2] as ConsoleBar).addLog('Unknown', data.body, '#CF1D1D')
+      (this.$children[2] as ConsoleBar).addLog(data.type, 'Unknown', '', data.body, '#CF1D1D')
     }
   }
 

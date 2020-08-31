@@ -157,7 +157,7 @@ describe('BackendRequestFactory Model', () => {
     const res = backendRF.apply()
     expect(res.length).toEqual(3)
     expect(res[0]).toEqual(JSON.stringify({ type: 'apply', body: [{ type: 'add', com: { component: fdComp.getId(), state: { text: '', color: '' }, x: fdElement.getX(), y: fdElement.getY(), tab: newTab.id, connections: {}, id: fdElement.getId(), disabledio: { input: [], output: [] } } }, { type: 'mov', com: { id: fdElement.getId(), x: 345, y: 456 } }, { type: 'tabs', tabs: [newTab] }] }))
-    expect(res[1]).toEqual(JSON.stringify({ target: fdElement.getId(), type: 'options', body: { comname: fdElement.getName(), comcolor: fdElement.getColor(), comnotes: fdElement.getNotes() } }))
+    expect(res[1]).toEqual(JSON.stringify({ target: fdElement.getId(), type: 'options', body: { comname: fdElement.getName(), comcolor: fdElement.getColor(), comnotes: fdElement.getNotes(), debug: false } }))
     expect(res[2]).toEqual(JSON.stringify({ type: 'apply', body: [] }))
   })
 
@@ -245,15 +245,19 @@ describe('BackendRequestFactory Model', () => {
     let res = backendRF.apply()
     expect(res.length).toEqual(3)
     expect(res[0]).toEqual(JSON.stringify({ type: 'apply', body: [{ type: 'add', com: { component: fdComp.getId(), state: { text: '', color: '' }, x: fdElement.getX(), y: fdElement.getY(), tab: newTab.id, connections: {}, id: fdElement.getId(), disabledio: { input: [], output: [] } } }, { type: 'mov', com: { id: fdElement.getId(), x: 345, y: 456 } }, { type: 'tabs', tabs: [newTab] }] }))
-    expect(res[1]).toEqual(JSON.stringify({ target: fdElement.getId(), type: 'options', body: { comname: fdElement.getName(), comcolor: fdElement.getColor(), comnotes: fdElement.getNotes() } }))
+    expect(res[1]).toEqual(JSON.stringify({ target: fdElement.getId(), type: 'options', body: { comname: fdElement.getName(), comcolor: fdElement.getColor(), comnotes: fdElement.getNotes(), debug: false } }))
     expect(res[2]).toEqual(JSON.stringify({ type: 'apply', body: [] }))
     res = backendRF.apply()
     expect(res.length).toEqual(1)
     expect(res[0]).toEqual(JSON.stringify({ type: 'apply', body: [{ type: 'tabs', tabs: [newTab] }] }))
   })
 
-  it('Add new element, moove and update request, after the factory reset all changes', () => {
-    expect(BackendRequestFactory.installComponent('fakeComp.py', 'print \'coucou\'')).toEqual('{"type":"install","filename":"fakeComp.py","body":"print \'coucou\'"}')
+  it('Install Component', () => {
+    expect(BackendRequestFactory.installComponent('fakeComp.py', 'print \'coucou\'')).toEqual('{"type":"install","body":{"state":"component","filename":"fakeComp.py","fileBody":"print \'coucou\'"}}')
+  })
+
+  it('Install Public file', () => {
+    expect(BackendRequestFactory.installPublicFile('fakeComp.py', 'print \'coucou\'')).toEqual('{"type":"install","body":{"state":"asset","filename":"fakeComp.py","fileBody":"print \'coucou\'"}}')
   })
 
   it('Register new user', () => {
@@ -265,6 +269,12 @@ describe('BackendRequestFactory Model', () => {
   it('Login new user', () => {
     const register = { type: 'auth', body: { state: 'login', userName: 'theUserName', userPassword: 'theUserPassword' } }
     const res = BackendRequestFactory.loginUser('theUserName', 'theUserPassword')
+    expect(JSON.stringify(register)).toEqual(res)
+  })
+
+  it('Set user key', () => {
+    const register = { type: 'auth', body: { state: 'key', key: 'd2ekj8qef62qala68dlkd123ersgh' } }
+    const res = BackendRequestFactory.setUserkey('d2ekj8qef62qala68dlkd123ersgh')
     expect(JSON.stringify(register)).toEqual(res)
   })
 

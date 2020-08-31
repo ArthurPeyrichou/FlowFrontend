@@ -1,7 +1,7 @@
 <template>
-  <div id="tool-bar" v-bind:class="theme">
+  <div id="tool-bar">
     <div class="header">
-      <b-navbar toggleable v-bind:type="theme" class="setting-tool-navbar">
+      <b-navbar toggleable v-bind:type="configs.theme" class="setting-tool-navbar">
         <b-navbar-toggle target="toolbar-option-navbar-toggle-collapse">
           <template v-slot:default="{ expanded }">
             <b-icon v-if="expanded" icon="chevron-bar-up"></b-icon>
@@ -53,7 +53,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import AddCompModal from '@/components/tool/AddCompModal.vue'
 import { FDComponent } from '../../models/FDComponent'
-import { COMMUNICATION_TYPE } from '../../config'
+import * as CONFIGS from '../../config'
 import ConceptionGrid from '../conception/ConceptionGrid.vue'
 
 /** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
@@ -63,18 +63,26 @@ import ConceptionGrid from '../conception/ConceptionGrid.vue'
   }
 })
 export default class ToolBar extends Vue {
-  @Prop({ default: 'dark' }) theme!: string;
+  @Prop({
+    default: {
+      theme: CONFIGS.THEME,
+      communicationType: CONFIGS.COMMUNICATION_TYPE
+    }
+  }) public configs!: { theme: string; communicationType: string }
 
   compList: any = {};
   compGroupsList: string[] = [];
   compSearchPattern = '';
   /** FlowData components list got from DesignBoard vue, got itself by the api.  */
   compBrutList: FDComponent[] = []
-  shouldShowApplyButton = COMMUNICATION_TYPE === 'ON_APPLY' && process.env.NODE_ENV !== 'test'
 
   constructor () {
     super()
     this.filterList()
+  }
+
+  get shouldShowApplyButton (): boolean {
+    return this.configs.communicationType === 'ON_APPLY'
   }
 
   /**
@@ -282,7 +290,7 @@ export default class ToolBar extends Vue {
   }
 
   /* Dark side */
-  .dark#tool-bar {
+  .dark #tool-bar {
     background-color: #202020;
   }
   .dark .header {

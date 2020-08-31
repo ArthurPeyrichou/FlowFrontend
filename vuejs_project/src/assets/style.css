@@ -29,10 +29,15 @@ body {
     --CONCEPTION-GRID-REDUCE-BUTTON-BACKGROUND: #303030;
 
     
-    --CONCEPTION-GRID-BODY-BACKGROUND: #f89a59;
+    --CONCEPTION-GRID-BODY-BACKGROUND: #c8c8c8;
 
     /* Console bar */
+    --CONSOLE-BAR-MENU-BACKGROUND: #101010;
+    --CONSOLE-BAR-MENU-TEXT: #c8c8c8;
+    --CONSOLE-BAR-MENU-BORDER: #C45100;
+
     --CONSOLE-BAR-OUTPUT-TEXT: #c8c8c8;
+    
 
     /* Tool bar */
     --TOOL-BAR-COMPONENT-GROUP-TEXT: #e8e8e8;
@@ -115,6 +120,25 @@ body {
 }
 .custom #console-bar .console-output p {
     border-bottom: 1px solid var(--BAR-BODY-BORDER) !important;
+}
+.custom #console-bar .navbar-menu {
+    background-color: var(--CONSOLE-BAR-MENU-BACKGROUND) !important;
+    color: var(--CONSOLE-BAR-MENU-TEXT) !important;
+    border-color: var(--CONSOLE-BAR-MENU-BORDER) !important;
+}
+.custom #console-bar .navbar-menu .nav-item .active {
+    background-color: var(--BAR-BODY-BACKGROUND) !important;
+    color: var(--CONSOLE-BAR-MENU-TEXT-ACTIVE) !important;
+    border-color: var(--CONSOLE-BAR-MENU-BORDER) !important;
+}
+.custom #console-bar .navbar-menu .nav-item a:hover {
+    border-color: var(--CONSOLE-BAR-MENU-BORDER) !important;
+}
+.custom #console-bar .navbar-menu .nav-item a {
+    color: var(--BAR-HEADER-TEXT) !important;
+}
+.console-output-btn {
+    background-color: var(--BAR-BODY-BACKGROUND) !important;
 }
 
 /* Tool bar */

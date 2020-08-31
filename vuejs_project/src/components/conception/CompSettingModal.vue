@@ -36,6 +36,30 @@
             <i class="fa fa-circle" :style="'border: 1px black solid; border-radius: 50%; color:' + theColor"></i> Choose
           </button>
         </b-form-group>
+
+        <div v-if="fdElement != null">
+          <template v-for="[key] in Object.entries(fdElement.options)">
+            <b-form-group v-if="shouldChowOption(key)" v-bind:key="key"
+              :label="capitalize(key) + ':'"
+              :label-for="key + '-input'"
+            >
+              <b-form-checkbox v-if="selectRightType(key, fdElement.options[key]) === 'checkbox'"
+                :id="key + '-input'"
+                v-model="fdElement.options[key]"
+              ></b-form-checkbox>
+              <b-form-file v-else-if="selectRightType(key, fdElement.options[key]) === 'file'"
+                v-model="file"
+                :state="Boolean(fdElement.options[key])"
+                placeholder="Choose a file or drop it here..."
+                drop-placeholder="Drop file here..."
+              ></b-form-file>
+              <b-form-input v-else
+                :id="key + '-input'"
+                v-model="fdElement.options[key]"
+              ></b-form-input>
+            </b-form-group>
+          </template>
+        </div>
       </form>
 
       <template v-slot:modal-footer>
@@ -75,6 +99,32 @@ export default class CompSettingModal extends Vue {
   defaultColor = ''
   hideColorPicker = true
   nameInvalidFeedback = 'Name with length in between [3;50] characters is required.'
+  file: File | null = null
+
+  capitalize (s: string): string {
+    if (typeof s !== 'string') return ''
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+  }
+
+  shouldChowOption (key: string): boolean {
+    const k = this.capitalize(key)
+    if (k === 'Install' || k === 'Uninstall') {
+      return false
+    }
+    return true
+  }
+
+  selectRightType (key: string, value: any): string {
+    // If we want to let user upload files in backend's public folder, uncomment this past
+    /* const k = this.capitalize(key)
+    if (k === 'Filename') {
+      return 'file'
+    } else */
+    if (typeof value === 'boolean') {
+      return 'checkbox'
+    }
+    return 'text'
+  }
 
   /**
    * Check if the form is valide.

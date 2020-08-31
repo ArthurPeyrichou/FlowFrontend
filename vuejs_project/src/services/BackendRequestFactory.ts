@@ -82,7 +82,11 @@ export class BackendRequestFactory {
      */
     updateElementFromGrid (fdElement: FDElement): void {
       this.updateElements = this.updateElements.filter(el => el.target !== fdElement.getId())
-      this.updateElements.push({ target: fdElement.getId(), type: 'options', body: { comname: fdElement.getName(), comcolor: fdElement.getColor(), comnotes: fdElement.getNotes() } })
+      const theBody: any = { comname: fdElement.getName(), comcolor: fdElement.getColor(), comnotes: fdElement.getNotes() }
+      for (const [key, value] of Object.entries(fdElement.getOptions())) {
+        theBody[key] = value
+      }
+      this.updateElements.push({ target: fdElement.getId(), type: 'options', body: theBody })
     }
 
     /**
@@ -132,7 +136,11 @@ export class BackendRequestFactory {
     }
 
     static installComponent (fileName: string, fileBody: string): string {
-      return JSON.stringify({ type: 'install', filename: fileName, body: fileBody })
+      return JSON.stringify({ type: 'install', body: { state: 'component', filename: fileName, fileBody: fileBody } })
+    }
+
+    static installPublicFile (fileName: string, fileBody: string): string {
+      return JSON.stringify({ type: 'install', body: { state: 'asset', filename: fileName, fileBody: fileBody } })
     }
 
     static registerUser (userName: string, userPassword: string): string {
@@ -141,6 +149,10 @@ export class BackendRequestFactory {
 
     static loginUser (userName: string, userPassword: string): string {
       return JSON.stringify({ type: 'auth', body: { state: 'login', userName: userName, userPassword: userPassword } })
+    }
+
+    static setUserkey (userKey: string): string {
+      return JSON.stringify({ type: 'auth', body: { state: 'key', key: userKey } })
     }
 
     static createGroup (groupName: string): string {

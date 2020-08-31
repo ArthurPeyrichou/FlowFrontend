@@ -45,6 +45,9 @@ export class FDElement {
       this.notes = notes
       this.state = state
       this.options = options
+      if (!Object.keys(this.options).includes('debug')) {
+        this.options.debug = false
+      }
       this.links = new Map<number, Array<{index: number; id: string}>>()
       for (const [key, value] of Object.entries(links)) {
         this.links.set(Number.parseInt(key), value)

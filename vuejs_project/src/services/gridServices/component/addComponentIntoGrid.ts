@@ -3,7 +3,6 @@ import { getComponentWidth } from './getComponentWidth'
 import { updateComponentPosition } from './updateComponentPosition'
 import * as positionCal from './componentPositionCalculators'
 import { FDElement } from '@/models/FDElement'
-import { DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../../config'
 
 /**
  * Adds a new component into '#conception-grid-svg' and set his listeners.
@@ -14,14 +13,15 @@ import { DATA_LOADING_TYPE, TRANSFER_SHOW_IO } from '../../../config'
  * @param onComponentClick will apply change to the backend, then activate the component
  * @param onComponentMoove will notice changes to the BackendRequestFactory
  */
-export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, onComponentClick: Function, onComponentMoove: Function): void {
+export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: FDElement, openModal: Function, onComponentClick: Function, onComponentMoove: Function,
+  dataLoadingType: string, transferShowIO: boolean, svgGridSize: number, svgGridBorderWidth: number): void {
   const x = mouse[0]
   const y = mouse[1]
   const inputCount = fdElementToDrop.getFDComponent().getInput()
   const outputCount = fdElementToDrop.getFDComponent().getOutput()
-  const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, TRANSFER_SHOW_IO ? 65 : 45)
-  const compWidth = getComponentWidth(fdElementToDrop.getName(), '', undefined)
-  const theSvg = '#conception-grid-svg' + (DATA_LOADING_TYPE === 'ALL_AT_ONCE' ? '' : '-' + fdElementToDrop.getTabId())
+  const compHeight = Math.max(50 + (Math.max(inputCount, outputCount) - 1) * 15, transferShowIO ? 65 : 45)
+  const compWidth = getComponentWidth(fdElementToDrop.getName(), '', undefined, transferShowIO)
+  const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + fdElementToDrop.getTabId())
   const g = d3.select(theSvg)
     .append('g')
     .attr('class', 'component')
@@ -42,8 +42,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     .attr('data-input', inputCount)
     .attr('data-output', outputCount)
     .attr('rx', 5)
-    .attr('x', positionCal.rectPlaceX(x, compWidth))
-    .attr('y', positionCal.rectPlaceY(y, compHeight))
+    .attr('x', positionCal.rectPlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.rectPlaceY(y, compHeight, svgGridSize, svgGridBorderWidth))
     .on('click', () => {
       openModal(fdElementToDrop)
     })
@@ -55,8 +55,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     .attr('fill', 'black')
     .style('font-size', '14px')
     .html(fdElementToDrop.getName())
-    .attr('x', positionCal.namePlaceX(x, compWidth))
-    .attr('y', positionCal.namePlaceY(y, compHeight))
+    .attr('x', positionCal.namePlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.namePlaceY(y, compHeight, svgGridSize, svgGridBorderWidth, transferShowIO))
     .on('click', () => {
       openModal(fdElementToDrop)
     })
@@ -68,8 +68,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     .attr('fill', 'black')
     .style('font-size', '12px')
     .html(fdElementToDrop.getFDComponent().getTitle())
-    .attr('x', positionCal.titlePlaceX(x, compWidth))
-    .attr('y', positionCal.titlePlaceY(y, compHeight))
+    .attr('x', positionCal.titlePlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.titlePlaceY(y, compHeight, svgGridSize, svgGridBorderWidth, transferShowIO))
     .on('click', () => {
       openModal(fdElementToDrop)
     })
@@ -79,8 +79,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     .attr('class', 'draggable unselectable-text icon')
     .attr('data-id', fdElementToDrop.getId())
     .attr('data-icon', fdElementToDrop.getFDComponent().getIcon())
-    .attr('x', positionCal.iconPlaceX(x, compWidth))
-    .attr('y', positionCal.iconPlaceY(y, compHeight))
+    .attr('x', positionCal.iconPlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+    .attr('y', positionCal.iconPlaceY(y, compHeight, svgGridSize, svgGridBorderWidth))
     .attr('width', 24)
     .attr('height', 24)
     .on('click', function () {
@@ -90,7 +90,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
     .style('background-color', 'transparent')
     .html('<i class="icon-fixed-width fa fa-' + fdElementToDrop.getFDComponent().getIcon() + '" style="font:900 normal normal 24px \'Font Awesome 5 Free\'"></i>')
 
-  if (TRANSFER_SHOW_IO) {
+  if (transferShowIO) {
     g.append('text')
       .attr('id', 'io-' + fdElementToDrop.getId())
       .attr('class', 'draggable unselectable-text')
@@ -98,8 +98,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
       .attr('fill', 'black')
       .style('font', '900 normal normal 12px \'Font Awesome 5 Free\'')
       .text('IO: 0B \uf061 0B')
-      .attr('x', positionCal.ioPlaceX(x, compWidth))
-      .attr('y', positionCal.ioPlaceY(y, compHeight))
+      .attr('x', positionCal.ioPlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+      .attr('y', positionCal.ioPlaceY(y, compHeight, svgGridSize, svgGridBorderWidth))
       .on('click', () => {
         openModal(fdElementToDrop)
       })
@@ -108,7 +108,7 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
   if (fdElementToDrop.getFDComponent().isClickable()) {
     g.append('polygon')
       .attr('id', 'trigger-' + fdElementToDrop.getId())
-      .attr('points', positionCal.getTriggerTrianglePoints(x, compWidth, y, compHeight))
+      .attr('points', positionCal.getTriggerTrianglePoints(x, compWidth, y, compHeight, svgGridSize, svgGridBorderWidth))
       .attr('data-id', fdElementToDrop.getId())
       .attr('stroke', 'black')
       .attr('fill', 'white')
@@ -126,8 +126,8 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
       .attr('fill', 'white')
       .attr('data-index', i)
       .attr('data-id', fdElementToDrop.getId())
-      .attr('cx', positionCal.inputCirclePlaceX(x, compWidth))
-      .attr('cy', positionCal.inputCirclePlaceY(y, compHeight, i, inputCount))
+      .attr('cx', positionCal.inputCirclePlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+      .attr('cy', positionCal.inputCirclePlaceY(y, compHeight, i, inputCount, svgGridSize, svgGridBorderWidth))
   }
   for (let i = 0; i < outputCount; ++i) {
     g.append('circle')
@@ -138,14 +138,14 @@ export function addComponentIntoGrid (mouse: [number, number], fdElementToDrop: 
       .attr('fill', 'white')
       .attr('data-index', i)
       .attr('data-id', fdElementToDrop.getId())
-      .attr('cx', positionCal.outputCirclePlaceX(x, compWidth))
-      .attr('cy', positionCal.outputCirclePlaceY(y, compHeight, i, outputCount))
+      .attr('cx', positionCal.outputCirclePlaceX(x, compWidth, svgGridSize, svgGridBorderWidth))
+      .attr('cy', positionCal.outputCirclePlaceY(y, compHeight, i, outputCount, svgGridSize, svgGridBorderWidth))
   }
 
   const dragCompHandler = d3.drag()
     .on('drag', function () {
       d3.select('#rect-' + d3.select(this).attr('data-id')).style('opacity', 0.5)
-      updateComponentPosition(d3.select(this).attr('data-id'), Number.parseInt(d3.event.x), Number.parseInt(d3.event.y))
+      updateComponentPosition(d3.select(this).attr('data-id'), Number.parseInt(d3.event.x), Number.parseInt(d3.event.y), dataLoadingType, transferShowIO, svgGridSize, svgGridBorderWidth)
     })
     .on('end', function () {
       d3.selectAll('rect').style('opacity', 1)
