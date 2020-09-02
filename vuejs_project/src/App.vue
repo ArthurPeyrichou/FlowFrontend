@@ -28,7 +28,6 @@ import GroupManagementModal from './components/modals/GroupManagementModal.vue'
 import SettingModal from './components/modals/SettingModal.vue'
 import { Component, Vue } from 'vue-property-decorator'
 import * as CONFIGS from './config'
-import JSEncrypt from 'jsencrypt'
 import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 import { RSAService } from './services/RSAService'
@@ -97,13 +96,39 @@ export default class App extends Vue {
         }
       } else {
         this.encryptForBackend = new RSAService('', process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '')
-        const temp = new JSEncrypt()
-        this.decryptForFrontend = new RSAService(temp.getPrivateKey(), temp.getPublicKey())
-        this.connect(3, this.backendUrl)
+        // this.encryptForBackend.setCryptoPubKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '')
+        this.runCommunication()
         if (!this.user.isLogged) {
           this.openModal('auth')
         }
       }
+    })
+  }
+
+  async runCommunication () {
+    window.crypto.subtle.generateKey(
+      {
+        name: 'RSA-OAEP',
+        modulusLength: 4096,
+        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+        hash: 'SHA-256'
+      },
+      true,
+      ['encrypt', 'decrypt']
+    ).then(keyPair => {
+      window.crypto.subtle.exportKey(
+        'pkcs8',
+        keyPair.privateKey
+      ).then(exportedPrivateKey => {
+        window.crypto.subtle.exportKey(
+          'spki',
+          keyPair.publicKey
+        ).then(exportedPublicKey => {
+          this.decryptForFrontend = new RSAService(RSAService.bKeyToString(true, exportedPrivateKey as ArrayBuffer), RSAService.bKeyToString(false, exportedPublicKey))
+          this.decryptForFrontend.setCryptoKeys(keyPair)
+          this.connect(3, this.backendUrl)
+        })
+      })
     })
   }
 
@@ -114,7 +139,7 @@ export default class App extends Vue {
    * @param url the backend url. Ex: ws://localhost:5001
    * @public
    */
-  connect (connectionTries: number, url: string): void {
+  connect (connectionTries = 3, url = ''): void {
     const treatMessage = (msg: string) => {
       const res = this.decryptForFrontend.decrypt(msg)
       let data = JSON.parse('{}')
@@ -156,6 +181,7 @@ export default class App extends Vue {
               } else {
                 console.error(data.body.msg)
               }
+              (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'get':
               if (data.body.success) {
@@ -177,6 +203,7 @@ export default class App extends Vue {
               } else {
                 console.error(data.body.msg)
               }
+              (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'invit':
               if (data.body.success) {
@@ -184,6 +211,7 @@ export default class App extends Vue {
               } else {
                 console.error(data.body.msg)
               }
+              (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'join':
               if (data.body.success) {
@@ -191,6 +219,7 @@ export default class App extends Vue {
               } else {
                 console.error(data.body.msg)
               }
+              (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'decline':
               if (data.body.success) {
@@ -198,6 +227,7 @@ export default class App extends Vue {
               } else {
                 console.error(data.body.msg)
               }
+              (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'invitations':
               if (data.body.success) {

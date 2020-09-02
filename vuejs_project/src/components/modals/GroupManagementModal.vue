@@ -7,7 +7,12 @@
       ref="modal"
       title="Group management: "
     >
-    <div v-if="groupSituation.isInGroup === false" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
+
+    <div v-if="submitResponse.msg !== ''" :class="'alert alert-' + (submitResponse.success ? 'success' : 'danger')" role="alert">
+        {{submitResponse.msg}}
+    </div>
+
+    <div v-if="theGroupSituation.isInGroup === false" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
       <h5>Create and join a new group:</h5>
       <form ref="form" @submit.stop.prevent="handleCreateSubmit">
         <b-form-group
@@ -26,12 +31,12 @@
       <button id="group-management-modal-create" v-on:click="handleCreateSubmit" type="button" class="btn btn-outline-success float-right">Create and join</button>
     </div>
 
-    <div v-if="groupSituation.isInGroup === true" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
-      <p>Your are currently in the group: {{groupSituation.groupName}}</p>
+    <div v-if="theGroupSituation.isInGroup === true" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
+      <p>Your are currently in the group: {{theGroupSituation.groupName}}</p>
       <button id="group-management-modal-leave" v-on:click="handleLeaveSubmit" type="button" class="btn btn-outline-danger float-right">Leave the group</button>
     </div>
 
-    <div v-if="groupSituation.isInGroup && groupSituation.isGroupLeader" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
+    <div v-if="theGroupSituation.isInGroup && theGroupSituation.isGroupLeader" class="group-option-container" style="border-bottom: 1px solid #e9ecef; margin-bottom:15px;">
       <h5>Invit somebody to your group:</h5>
       <form ref="form" @submit.stop.prevent="handleCreateSubmit">
         <b-form-group
@@ -51,7 +56,7 @@
     </div>
 
     <div v-if="invitations.length > 0" class="group-option-container">
-      <h5>Join a{{(groupSituation.isInGroup === true) ? 'nother' : ''}} group:</h5>
+      <h5>Join a{{(theGroupSituation.isInGroup === true) ? 'nother' : ''}} group:</h5>
        <form ref="form" @submit.stop.prevent="handleJoinSubmit">
         <b-form-group
           label="Choose a group"
@@ -91,58 +96,52 @@ export default class GroupManagementModal extends Vue {
   invitUserName = ''
   invitUserNameState: boolean | null = null
   selectedGroup = ''
+  response: {success: boolean; msg: string} = { success: false, msg: '' }
+
+  get submitResponse (): {success: boolean; msg: string} {
+    return this.response
+  }
+
+  get theGroupSituation (): { isInGroup: boolean; isGroupLeader: boolean; groupName: string } {
+    return this.groupSituation
+  }
 
   /**
-   * Called when user click "Apply Settings" button.
-   * WARNING: empty function
    * @public
    */
   handleCreateSubmit (): void {
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.createGroup(this.groupName)])
-
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-group-management')
-    })
   }
 
+  /**
+   * @public
+   */
   handleJoinSubmit (): void {
     if (this.groupSituation.isInGroup) {
       return
     }
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.joinGroup(this.selectedGroup)])
-
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-group-management')
-    })
   }
 
+  /**
+   * @public
+   */
   handleDeclineSubmit (): void {
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.declineGroup(this.selectedGroup)])
-
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-group-management')
-    })
   }
 
+  /**
+   * @public
+   */
   handleLeaveSubmit (): void {
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.leaveGroup(this.groupSituation.groupName)])
-
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-group-management')
-    })
   }
 
+  /**
+   * @public
+   */
   handleInvitSubmit (): void {
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.inviteUserToGroup(this.invitUserName)])
-
-    // Hide the modal manually
-    this.$nextTick(() => {
-      this.$bvModal.hide('modal-group-management')
-    })
   }
 
   /**
