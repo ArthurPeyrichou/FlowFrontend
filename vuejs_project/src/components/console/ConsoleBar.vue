@@ -1,5 +1,5 @@
 <template>
-  <div id="console-bar">
+  <div id="console-bar" @dblclick.prevent>
     <div class="header">
       <div class="header-content">
         <b-nav tabs class="navbar-menu">

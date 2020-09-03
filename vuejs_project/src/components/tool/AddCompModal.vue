@@ -98,6 +98,14 @@ export default class AddCompModal extends Vue {
   }
 
   /**
+   * Show the modal from the user interface.
+   * @public
+   */
+  showModal (): void {
+    this.$bvModal.show('modal-add-component')
+  }
+
+  /**
    * Hides the modal from the user interface.
    * @public
    */

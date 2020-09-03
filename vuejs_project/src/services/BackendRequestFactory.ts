@@ -143,6 +143,15 @@ export class BackendRequestFactory {
       return JSON.stringify({ type: 'install', body: { state: 'asset', filename: fileName, fileBody: fileBody } })
     }
 
+    static getVariables (): string {
+      return JSON.stringify({ type: 'getvariables' }
+      )
+    }
+
+    static savedVariables (variables: string): string {
+      return JSON.stringify({ type: 'variables', body: variables })
+    }
+
     static registerUser (userName: string, userPassword: string): string {
       return JSON.stringify({ type: 'auth', body: { state: 'register', userName: userName, userPassword: userPassword } })
     }

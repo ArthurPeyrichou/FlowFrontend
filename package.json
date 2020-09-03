@@ -14,11 +14,11 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ArthurPeyrichou/VueJS.git"
+        "url": "git+https://github.com/ArthurPeyrichou/FlowFrontend.git"
     },
     "author": "Arthur Peyrichou",
     "license": "ISC",
-    "homepage": "https://github.com/ArthurPeyrichou/VueJS#readme",
+    "homepage": "https://github.com/ArthurPeyrichou/FlowFrontend#readme",
     "dependencies": {
         "vue": "^2.5.22"
     },

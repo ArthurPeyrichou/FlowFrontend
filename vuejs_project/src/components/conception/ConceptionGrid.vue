@@ -125,13 +125,9 @@ export default class ConceptionGrid extends Vue {
   isConnectedToBackEnd = process.env.NODE_ENV !== 'test'
   isDataLoadingAtOnce = this.configs.dataLoadingType === 'ALL_AT_ONCE'
 
-  constructor () {
-    super()
-    // This way we execute the code after the redering of the template
-    this.$nextTick(() => {
-      this.initSvg()
-      this.isDataLoadingAtOnce = this.configs.dataLoadingType === 'ALL_AT_ONCE'
-    })
+  mounted () {
+    this.initSvg()
+    this.isDataLoadingAtOnce = this.configs.dataLoadingType === 'ALL_AT_ONCE'
   }
 
   get theme (): string {
@@ -354,6 +350,11 @@ export default class ConceptionGrid extends Vue {
       let scrollLeft: number
       let startY: number
       let scrollTop: number
+      svgBoard.addEventListener('dblclick', (e) => {
+        window.getSelection().removeAllRanges()
+        e.preventDefault()
+        e.stopPropagation()
+      })
       svgBoard.addEventListener('mousedown', (e) => {
         isDown = true
         svgBoard.classList.add('active')

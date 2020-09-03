@@ -6,6 +6,9 @@
         <b-nav-item v-bind:to="'/blank-board'" :active="currentRoute=='/blank-board'">Blank Board</b-nav-item>
         <b-nav-item disabled>Disabled</b-nav-item>
       </b-nav>
+      <div v-if="isWaiting" class="spinner-border" style="width: 3rem; height: 3rem; position: fixed; margin-left: 50%; margin-top: 25%; z-index: 10;" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
       <b-dropdown id="auth-menu" size="lg"  variant="link" dropleft toggle-class="text-decoration-none" no-caret>
         <template v-slot:button-content>
           <i class="fas fa-cog"></i>
@@ -32,6 +35,8 @@ import DesignBoard from './views/DesignBoard.vue'
 import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 import { RSAService } from './services/RSAService'
 import { BackendRequestFactory } from './services/BackendRequestFactory'
+import VariableManagementModal from './components/tool/VariableManagementModal.vue'
+import ToolBar from './components/tool/ToolBar.vue'
 
 @Component({
   components: {
@@ -74,12 +79,21 @@ export default class App extends Vue {
   private dataReceiving = ''
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
   private invitations: Array<{value: string; text: string}> = []
+  private variables = ''
+
+  private wait = false
+  private isSecurityActive = false
+
   constructor () {
     super()
     const c = localStorage.getItem('config')
     if (c) {
       this.configs = JSON.parse(c)
     }
+  }
+
+  get isWaiting (): boolean {
+    return this.wait
   }
 
   mounted (): void {
@@ -95,9 +109,14 @@ export default class App extends Vue {
           (this.$refs.portal as DesignBoard).sendBlankDesignerData()
         }
       } else {
-        this.encryptForBackend = new RSAService('', process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '')
+        this.encryptForBackend = new RSAService('', process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '', this.isSecurityActive)
         // this.encryptForBackend.setCryptoPubKey(process.env.VUE_APP_BACKEND_PUBLIC_KEY ? process.env.VUE_APP_BACKEND_PUBLIC_KEY : '')
-        this.runCommunication()
+        if (this.isSecurityActive) {
+          this.runCommunication()
+        } else {
+          this.connect(3, this.backendUrl)
+        }
+
         if (!this.user.isLogged) {
           this.openModal('auth')
         }
@@ -106,6 +125,8 @@ export default class App extends Vue {
   }
 
   async runCommunication () {
+    const t1 = performance.now()
+    this.wait = true
     window.crypto.subtle.generateKey(
       {
         name: 'RSA-OAEP',
@@ -124,8 +145,11 @@ export default class App extends Vue {
           'spki',
           keyPair.publicKey
         ).then(exportedPublicKey => {
-          this.decryptForFrontend = new RSAService(RSAService.bKeyToString(true, exportedPrivateKey as ArrayBuffer), RSAService.bKeyToString(false, exportedPublicKey))
+          this.decryptForFrontend = new RSAService(RSAService.bKeyToString(true, exportedPrivateKey as ArrayBuffer), RSAService.bKeyToString(false, exportedPublicKey), this.isSecurityActive)
           this.decryptForFrontend.setCryptoKeys(keyPair)
+          const t2 = performance.now()
+          console.warn('Key Generation: ', Math.ceil(t2 - t1))
+          this.wait = false
           this.connect(3, this.backendUrl)
         })
       })
@@ -158,6 +182,7 @@ export default class App extends Vue {
               if (data.body.success) {
                 this.user.isLogged = true
                 localStorage.setItem('user', JSON.stringify(this.user))
+                this.sendMessageToBackend([BackendRequestFactory.getVariables()])
               }
               break
             case 'key':
@@ -176,11 +201,6 @@ export default class App extends Vue {
         case 'group':
           switch (data.body.state) {
             case 'create':
-              if (data.body.success) {
-                console.log(data.body.msg)
-              } else {
-                console.error(data.body.msg)
-              }
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'get':
@@ -198,35 +218,15 @@ export default class App extends Vue {
               }
               break
             case 'leave':
-              if (data.body.success) {
-                console.log(data.body.msg)
-              } else {
-                console.error(data.body.msg)
-              }
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'invit':
-              if (data.body.success) {
-                console.log(data.body.msg)
-              } else {
-                console.error(data.body.msg)
-              }
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'join':
-              if (data.body.success) {
-                console.log(data.body.msg)
-              } else {
-                console.error(data.body.msg)
-              }
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'decline':
-              if (data.body.success) {
-                console.log(data.body.msg)
-              } else {
-                console.error(data.body.msg)
-              }
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'invitations':
@@ -236,7 +236,6 @@ export default class App extends Vue {
                 invits.forEach(invit => {
                   this.invitations.push({ value: invit.id, text: invit.groupName })
                 })
-                console.log(this.invitations)
               } else {
                 console.error(data.body.msg)
               }
@@ -275,6 +274,16 @@ export default class App extends Vue {
           if (this.$refs.portal instanceof DesignBoard) {
             ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTraffic(data.body)
           }
+          break
+        case 'variables':
+          this.variables = data.body;
+          ((this.$refs.portal as DesignBoard).$children[0].$refs.myVariableManagementModal as VariableManagementModal).setVariables(data.body)
+          break
+        case 'variables-saved':
+          ((this.$refs.portal as DesignBoard).$children[0].$refs.myVariableManagementModal as VariableManagementModal).setResponse({ success: true, msg: 'Variables saved successfully.' })
+          break
+        case 'variables-error':
+          ((this.$refs.portal as DesignBoard).$children[0].$refs.myVariableManagementModal as VariableManagementModal).setResponse({ success: false, msg: data.body })
           break
         default:
           console.warn('Message type "' + data.type + '" not treated.', 'Data: ' + JSON.stringify(data))

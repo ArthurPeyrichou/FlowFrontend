@@ -15,7 +15,8 @@
 
         <b-collapse id="toolbar-option-navbar-toggle-collapse" is-nav>
           <b-navbar-nav class="ml-auto">
-            <b-nav-item v-on:click="openAddCompModal()"><i class="fa fa-plus"></i> Component</b-nav-item>
+            <b-nav-item v-on:click="openModal('component')"><i class="fa fa-plus"></i> Component</b-nav-item>
+            <b-nav-item v-on:click="openModal('variable')"><i class="fa fa-plus"></i> Variables</b-nav-item>
             <b-nav-item href="#" disabled>Settings</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
@@ -46,11 +47,13 @@
     </div>
 
     <AddCompModal ref="myAddCompModal" />
+    <VariableManagementModal ref="myVariableManagementModal" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import VariableManagementModal from '@/components/tool/VariableManagementModal.vue'
 import AddCompModal from '@/components/tool/AddCompModal.vue'
 import { FDComponent } from '../../models/FDComponent'
 import * as CONFIGS from '../../config'
@@ -59,7 +62,8 @@ import ConceptionGrid from '../conception/ConceptionGrid.vue'
 /** Gives an user interface that allow components import, components drag and drop into conception grid, and components filtering. */
 @Component({
   components: {
-    AddCompModal
+    AddCompModal,
+    VariableManagementModal
   }
 })
 export default class ToolBar extends Vue {
@@ -141,8 +145,15 @@ export default class ToolBar extends Vue {
    * Opens modal from AddCompModal Vue.
    * @public
    */
-  openAddCompModal (): void {
-    this.$children[0].$bvModal.show('modal-add-component')
+  openModal (modal: 'component' | 'variable'): void {
+    switch (modal) {
+      case 'component':
+        (this.$refs.myAddCompModal as AddCompModal).showModal()
+        break
+      case 'variable':
+        (this.$refs.myVariableManagementModal as VariableManagementModal).showModal()
+        break
+    }
   }
 
   /**

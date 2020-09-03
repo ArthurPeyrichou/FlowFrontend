@@ -12,13 +12,16 @@ export class RSAService {
   private cryptoPrivKey: CryptoKey | null
   private cryptoPubKey: CryptoKey | null
 
-  constructor (privateKey: string, publicKey: string, keySize = 4096) {
+  private isActive: boolean
+
+  constructor (privateKey: string, publicKey: string, isActive = true, keySize = 4096) {
     this.privateKey = privateKey
     this.publicKey = publicKey
     this.cryptoPrivKey = null
     this.cryptoPubKey = null
     this.keySize = keySize
     this.maxTextLenght = Math.round(this.keySize / 8) - 11
+    this.isActive = isActive
   }
 
   getPublicKey (): string {
@@ -30,22 +33,24 @@ export class RSAService {
   }
 
   encrypt (plaintext: string) {
-    if (this.publicKey === '') { return plaintext }
+    if (!this.isActive || this.publicKey === '') { return encodeURIComponent(plaintext) }
     try {
-      // key size / 8 - 11
-      if (plaintext.length < 100) {
+      const t1 = performance.now()
+      if (plaintext.length < this.maxTextLenght) {
         return this.encryptPart(plaintext)
       } else {
         let offset = 0
         let res = ''
         while (offset < plaintext.length) {
-          const size = Math.min(100, plaintext.length - offset)
+          const size = Math.min(this.maxTextLenght, plaintext.length - offset)
           res += this.encryptPart(plaintext.substring(offset, offset + size))
           offset += size
           if (offset < plaintext.length) {
             res += ','
           }
         }
+        const t2 = performance.now()
+        console.warn('Encrypt:', Math.ceil(t2 - t1))
         return res
       }
     } catch (e) {
@@ -57,17 +62,19 @@ export class RSAService {
     const buffer = new Buffer(plaintext)
     const encrypted = crypto.publicEncrypt({
       key: this.publicKey,
-      passphrase: '',
       padding: crypto.constants.RSA_PKCS1_PADDING
     }, buffer)
     return encrypted.toString('base64')
   }
 
   decrypt (cypher: string): string {
-    if (this.privateKey === '') { return cypher }
+    if (!this.isActive || this.privateKey === '') { return cypher }
     try {
+      const t1 = performance.now()
       let res = ''
       cypher.split(',').forEach(el => { res += this.decryptPart(el) })
+      const t2 = performance.now()
+      console.warn('Decrypt:', Math.ceil(t2 - t1))
       return res
     } catch (e) {
       return ''
@@ -78,7 +85,6 @@ export class RSAService {
     const buffer = Buffer.from(cypher, 'base64')
     const plaintext = crypto.privateDecrypt({
       key: this.privateKey,
-      passphrase: '',
       padding: crypto.constants.RSA_PKCS1_PADDING
     }, buffer)
     return plaintext.toString('utf8')
