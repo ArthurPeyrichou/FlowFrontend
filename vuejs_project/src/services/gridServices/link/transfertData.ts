@@ -56,7 +56,7 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string,
  * @param tabId
  */
 export function transfertDataWithPath (theOuputId: string, theInputId: string, tabId: string, dataLoadingType: string, transferDuration: number,
-  transferRadius: number, transferFillColor: string, transferStrokeColor: string): void {
+  transferRadius: number, transferFillColor: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
 
@@ -113,10 +113,10 @@ export function transfertData (theOuputId: string, theInputId: string, typeOfTra
       transfertDataWithCircle(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
       break
     case 'PATH':
-      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
+      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor)
       break
     default:
-      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
+      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor)
       break
   }
 }

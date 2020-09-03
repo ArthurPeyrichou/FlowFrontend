@@ -169,7 +169,6 @@ export class RSAService {
   private async cryptoEncryptPart (plaintext: string) {
     if (this.cryptoPubKey) {
       const enc = new TextEncoder()
-      const dec = new TextDecoder()
       const encodedMessage = enc.encode(plaintext)
       return await window.crypto.subtle.encrypt({
         name: 'RSA-OAEP'

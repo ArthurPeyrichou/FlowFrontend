@@ -17,6 +17,8 @@
           <b-navbar-nav class="ml-auto">
             <b-nav-item v-on:click="openModal('component')"><i class="fa fa-plus"></i> Component</b-nav-item>
             <b-nav-item v-on:click="openModal('variable')"><i class="fa fa-plus"></i> Variables</b-nav-item>
+            <b-nav-item v-on:click="openModal('import')"><i class="fa fa-file-import"></i> Import</b-nav-item>
+            <b-nav-item v-on:click="openModal('export')"><i class="fa fa-file-export"></i> Export</b-nav-item>
             <b-nav-item href="#" disabled>Settings</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
@@ -48,13 +50,17 @@
 
     <AddCompModal ref="myAddCompModal" />
     <VariableManagementModal ref="myVariableManagementModal" />
+    <ImportDataModal ref="myImportDataModal" />
+    <ExportDataModal ref="myExportDataModal" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import VariableManagementModal from '@/components/tool/VariableManagementModal.vue'
-import AddCompModal from '@/components/tool/AddCompModal.vue'
+import VariableManagementModal from './VariableManagementModal.vue'
+import ImportDataModal from './ImportDataModal.vue'
+import ExportDataModal from './ExportDataModal.vue'
+import AddCompModal from './AddCompModal.vue'
 import { FDComponent } from '../../models/FDComponent'
 import * as CONFIGS from '../../config'
 import ConceptionGrid from '../conception/ConceptionGrid.vue'
@@ -63,7 +69,9 @@ import ConceptionGrid from '../conception/ConceptionGrid.vue'
 @Component({
   components: {
     AddCompModal,
-    VariableManagementModal
+    VariableManagementModal,
+    ImportDataModal,
+    ExportDataModal
   }
 })
 export default class ToolBar extends Vue {
@@ -145,13 +153,19 @@ export default class ToolBar extends Vue {
    * Opens modal from AddCompModal Vue.
    * @public
    */
-  openModal (modal: 'component' | 'variable'): void {
+  openModal (modal: 'component' | 'variable' | 'import' | 'export'): void {
     switch (modal) {
       case 'component':
         (this.$refs.myAddCompModal as AddCompModal).showModal()
         break
       case 'variable':
         (this.$refs.myVariableManagementModal as VariableManagementModal).showModal()
+        break
+      case 'import':
+        (this.$refs.myImportDataModal as ImportDataModal).showModal()
+        break
+      case 'export':
+        (this.$refs.myExportDataModal as ExportDataModal).showModal()
         break
     }
   }

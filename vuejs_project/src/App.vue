@@ -36,7 +36,6 @@ import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 import { RSAService } from './services/RSAService'
 import { BackendRequestFactory } from './services/BackendRequestFactory'
 import VariableManagementModal from './components/tool/VariableManagementModal.vue'
-import ToolBar from './components/tool/ToolBar.vue'
 
 @Component({
   components: {
