@@ -162,11 +162,22 @@ export class FDElement {
     }
 
     toString (): string {
-      return JSON.stringify(this)
+      const res = JSON.stringify(this)
+      let connections = '{'
+      this.links.forEach((links, index) => {
+        if (connections.length > 1) { connections += ', ' }
+        connections += '"' + index + '": ' + JSON.stringify(links)
+      })
+      connections += '}'
+      return res.replace('"links":{}', '"links":' + connections)
     }
 
     static fromString (s: string): FDElement {
       const j = JSON.parse(s)
-      return new FDElement(j.id, j.hisFDComponent, j.tabId, j.name, j.color, j.x, j.y, j.notes, j.state, j.options, j.links)
+      return new FDElement(j.id, FDComponent.fromString(JSON.stringify(j.hisFDComponent)), j.tabId, j.name, j.color, j.x, j.y, j.notes, j.state, j.options, (j.links ? j.links : j.connections))
+    }
+
+    static fromStruct (j: any): FDElement {
+      return new FDElement(j.id, FDComponent.fromStruct(j.hisFDComponent), j.tabId, j.name, j.color, j.x, j.y, j.notes, j.state, j.options, (j.links ? j.links : j.connections))
     }
 }

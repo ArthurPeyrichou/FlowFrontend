@@ -122,7 +122,7 @@ describe('FDElement Model', () => {
   it('To string check', () => {
     const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"}]}'))
-    expect(fdElement.toString()).toEqual(JSON.stringify(fdElement))
+    expect(fdElement.toString()).toEqual('{"id":"id0","hisFDComponent":{"input":1,"output":5,"options":{"option1":"op1","option2":"op2"},"group":"FakeType1","id":"id0","title":"FakeComp1","color":"#967ADC","author":"autor","icon":"icon","version":"1.0","readme":"readme","click":false},"tabId":"tabId","name":"aName","color":"#967ADC","x":1235,"y":2500,"notes":"","state":{},"options":{"debug":false},"links":{"0": [{"index":"0","id":"1591868779323"}]}}')
   })
 
   it('From string check', () => {
@@ -130,6 +130,35 @@ describe('FDElement Model', () => {
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"},{"index":"1","id":"987654321"}],"1":[{"index":"0","id":"456123789"}]}'))
     const intoString = fdElement.toString()
     const newFDElement = FDElement.fromString(intoString)
+    expect(fdElement.getId()).toEqual(newFDElement.getId())
+    expect(fdElement.getFDComponent()).toEqual(newFDElement.getFDComponent())
+    expect(fdElement.getTabId()).toEqual(newFDElement.getTabId())
+    expect(fdElement.getName()).toEqual(newFDElement.getName())
+    expect(fdElement.getColor()).toEqual(newFDElement.getColor())
+    expect(fdElement.getX()).toEqual(newFDElement.getX())
+    expect(fdElement.getY()).toEqual(newFDElement.getY())
+    expect(fdElement.getNotes()).toEqual(newFDElement.getNotes())
+    expect(fdElement.getState()).toEqual(newFDElement.getState())
+    expect(fdElement.getOptions()).toEqual(newFDElement.getOptions())
+    for (const [key, value] of Object.entries(fdElement.getLinks())) {
+      expect(newFDElement.getLinks().has(Number.parseInt(key)))
+      expect(newFDElement.getLinks().get(Number.parseInt(key))?.length).toEqual(value.length)
+      for (let i = 0; i < value.length; ++i) {
+        const link = newFDElement.getLinks().get(Number.parseInt(key))
+        expect(link ? link[i].id : undefined).toEqual(value[i].id)
+        expect(link ? link[i].index : undefined).toEqual(value[i].index)
+      }
+    }
+
+    expect(JSON.stringify(fdElement.getOptions())).toEqual(JSON.stringify(newFDElement.getOptions()))
+  })
+
+  it('From struct check', () => {
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"},{"index":"1","id":"987654321"}],"1":[{"index":"0","id":"456123789"}]}'))
+    const intoString = fdElement.toString()
+    const intoStruct = JSON.parse(intoString)
+    const newFDElement = FDElement.fromStruct(intoStruct)
     expect(fdElement.getId()).toEqual(newFDElement.getId())
     expect(fdElement.getFDComponent()).toEqual(newFDElement.getFDComponent())
     expect(fdElement.getTabId()).toEqual(newFDElement.getTabId())

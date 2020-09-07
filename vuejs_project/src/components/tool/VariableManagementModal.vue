@@ -94,6 +94,7 @@ export default class VariableManagementModal extends Vue {
   setVariables (variables: string): void {
     this.variables = variables
     this.variablesVerif = variables
+    console.log(VariableManagementModal.stringToVariableList(this.variables))
   }
 
   /**
@@ -114,6 +115,45 @@ export default class VariableManagementModal extends Vue {
 
   get canSaveChange (): boolean {
     return this.variables !== this.variablesVerif
+  }
+
+  static stringToVariableList (s: string): any {
+    const res: any = {}
+    let state: 'varName' | 'varValue' = 'varName'
+    let lastVarName = ''
+    let lastVarValue = ''
+    let isInQuote = false
+    for (let i = 0; i < s.length; ++i) {
+      switch (s.charAt(i)) {
+        case '\'':
+          isInQuote = !isInQuote
+          break
+        case ':':
+          if (!isInQuote) {
+            state = 'varValue'
+            lastVarValue = ''
+          }
+          break
+        case '\n':
+          if (!isInQuote) {
+            res[lastVarName] = lastVarValue
+            state = 'varName'
+            lastVarName = ''
+          }
+          break
+        default:
+          if (isInQuote || (!isInQuote && s.charAt(i) !== ' ' && s.charAt(i) !== '\t')) {
+            if (state === 'varName') {
+              lastVarName += s.charAt(i)
+            } else {
+              lastVarValue += s.charAt(i)
+            }
+          }
+          break
+      }
+    }
+    res[lastVarName] = lastVarValue
+    return res
   }
 }
 </script>

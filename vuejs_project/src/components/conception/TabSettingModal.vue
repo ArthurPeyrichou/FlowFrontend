@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import ConceptionGrid from './ConceptionGrid.vue'
 
 /** Modal that allow users to add new tab in the #conception-grid-svg. */

@@ -35,7 +35,7 @@ export class RSAService {
   encrypt (plaintext: string) {
     if (!this.isActive || this.publicKey === '') { return encodeURIComponent(plaintext) }
     try {
-      const t1 = performance.now()
+      // const t1 = performance.now()
       if (plaintext.length < this.maxTextLenght) {
         return this.encryptPart(plaintext)
       } else {
@@ -49,8 +49,8 @@ export class RSAService {
             res += ','
           }
         }
-        const t2 = performance.now()
-        console.warn('Encrypt:', Math.ceil(t2 - t1))
+        // const t2 = performance.now()
+        // console.warn('Encrypt:', Math.ceil(t2 - t1))
         return res
       }
     } catch (e) {
@@ -70,11 +70,11 @@ export class RSAService {
   decrypt (cypher: string): string {
     if (!this.isActive || this.privateKey === '') { return cypher }
     try {
-      const t1 = performance.now()
+      // const t1 = performance.now()
       let res = ''
       cypher.split(',').forEach(el => { res += this.decryptPart(el) })
-      const t2 = performance.now()
-      console.warn('Decrypt:', Math.ceil(t2 - t1))
+      // const t2 = performance.now()
+      // console.warn('Decrypt:', Math.ceil(t2 - t1))
       return res
     } catch (e) {
       return ''

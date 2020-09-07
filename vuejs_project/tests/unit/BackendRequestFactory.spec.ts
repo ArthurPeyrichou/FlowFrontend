@@ -285,14 +285,20 @@ describe('BackendRequestFactory Model', () => {
   })
 
   it('Join a group', () => {
-    const register = { type: 'group', body: { state: 'join', group: 'groupName2' } }
-    const res = BackendRequestFactory.joinGroup('groupName2')
+    const register = { type: 'group', body: { state: 'join', invitationId: '156843265' } }
+    const res = BackendRequestFactory.joinGroup('156843265')
     expect(JSON.stringify(register)).toEqual(res)
   })
 
   it('Leave a group', () => {
-    const register = { type: 'group', body: { state: 'leave', group: 'groupName3' } }
-    const res = BackendRequestFactory.leaveGroup('groupName3')
+    const register = { type: 'group', body: { state: 'decline', invitationId: '89325679' } }
+    const res = BackendRequestFactory.declineGroup('89325679')
+    expect(JSON.stringify(register)).toEqual(res)
+  })
+
+  it('Leave a group', () => {
+    const register = { type: 'group', body: { state: 'leave', group: 'groupName' } }
+    const res = BackendRequestFactory.leaveGroup('groupName')
     expect(JSON.stringify(register)).toEqual(res)
   })
 })

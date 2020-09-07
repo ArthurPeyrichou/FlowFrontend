@@ -58,7 +58,7 @@
 
       <template v-slot:modal-footer>
         <div class="w-100">
-          <button id="export-data-modal-close" v-on:click="applyChange" type="button" class="btn btn-success float-right" style="margin-left: 5px;">Export</button>
+          <button id="export-data-modal-close" v-on:click="handleSubmit" type="button" class="btn btn-success float-right" style="margin-left: 5px;">Export data</button>
           <button id="export-data-modal-close" v-on:click="hideModal" type="button" class="btn btn-outline-danger float-right">Close</button>
         </div>
       </template>
@@ -148,11 +148,23 @@ export default class ExportDataModal extends Vue {
   }
 
   private getDataToExport (): string {
+    const structure: any = { tabs: this.tabsSelected.filter(el => this.tabsSelection.includes(el.id)), components: 'to_complete', notes: this.notes, created: new Date() }
     if (this.shouldExportVariables) {
-      return JSON.stringify({ tabs: this.tabsSelected.filter(el => this.tabsSelection.includes(el.id)), components: this.components.filter(el => this.tabsSelection.includes(el.getTabId())), variables: this.variables, notes: this.notes, created: new Date() })
-    } else {
-      return JSON.stringify({ tabs: this.tabsSelected.filter(el => this.tabsSelection.includes(el.id)), components: this.components.filter(el => this.tabsSelection.includes(el.getTabId())), notes: this.notes, created: new Date() })
+      structure.variables = this.variables
     }
+    const res = JSON.stringify(structure)
+    let components = '['
+    this.components.forEach(el => {
+      if (this.tabsSelection.includes(el.getTabId())) {
+        if (components.length > 1) {
+          components += ','
+        }
+        components += el.toString()
+      }
+    })
+    components += ']'
+    console.log(res)
+    return res.replace('"to_complete"', components)
   }
 
   private jsonToBigJson (s: string): string {
@@ -213,7 +225,7 @@ export default class ExportDataModal extends Vue {
   /**
    * @public
    */
-  applyChange (): void {
+  handleSubmit (): void {
     try {
       const a = document.createElement('a')
       const blob = new Blob([this.result], { type: 'octet/stream' })

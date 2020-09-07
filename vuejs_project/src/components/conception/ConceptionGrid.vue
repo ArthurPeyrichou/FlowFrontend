@@ -190,6 +190,31 @@ export default class ConceptionGrid extends Vue {
     }
   }
 
+  importTabs (importedTab: Array<{id: string; index: number; name: string; linker: string; icon: string}>): void {
+    importedTab.forEach(iTab => {
+      const isTabExist = this.tabs.filter(tab => tab.id === iTab.id).length > 0
+      if (!isTabExist) {
+        this.tabs.push(iTab)
+        this.graphs.set(iTab.id, [])
+        this.tabs.forEach(el => {
+          if (el.index >= iTab.index && el.id !== iTab.id) {
+            el.index++
+          }
+        })
+      }
+    })
+    this.tabs = this.tabs.sort((a, b) => a.index - b.index)
+    this.selectTab(this.tabs[0].id)
+
+    this.backendRequestFactory.setTabs(this.tabs, [])
+    if (this.configs.communicationType === 'DIRECT') {
+      this.sendMessageToBackend(this.backendRequestFactory.apply())
+    }
+    if (!this.isDataLoadingAtOnce) {
+      this.$nextTick(() => { this.initSvg() })
+    }
+  }
+
   /**
    * Update an existing tab
    * On tab change reorganize positions
@@ -265,7 +290,7 @@ export default class ConceptionGrid extends Vue {
       this.graphs.set(this.currentTab, elements ? elements.filter(fdEl => {
         if (fdEl.getId() !== fdElementId) {
           fdEl.getLinks().forEach((connections, index) => {
-            fdEl.getLinks().set(index, connections.filter(connection => connection.id === fdElementId))
+            fdEl.getLinks().set(index, connections.filter(connection => connection.id !== fdElementId))
           })
           return true
         }
@@ -351,7 +376,10 @@ export default class ConceptionGrid extends Vue {
       let startY: number
       let scrollTop: number
       svgBoard.addEventListener('dblclick', (e) => {
-        window.getSelection().removeAllRanges()
+        const selection = window.getSelection()
+        if (selection) {
+          selection.removeAllRanges()
+        }
         e.preventDefault()
         e.stopPropagation()
       })
@@ -484,9 +512,7 @@ export default class ConceptionGrid extends Vue {
         graph.forEach(component => {
           if (component.getLinks().size !== 0) {
             component.getLinks().forEach((links, index) => {
-              if (index !== 99) {
-                links.forEach(link => this.waitRenderingBeforeAddLink(component.getId(), index, link, component.getTabId()))
-              }
+              links.forEach(link => this.waitRenderingBeforeAddLink(component.getId(), index, link, component.getTabId()))
             })
           }
         })
@@ -559,6 +585,31 @@ export default class ConceptionGrid extends Vue {
         this.graphs.set(el.getTabId(), [el])
       }
     })
+    console.log(this.graphs)
+    this.afterRenderingPopulateSvg()
+  }
+
+  /**
+   * Load graphs elements list into the conception grid
+   * @public
+   * @param elementList a list of elements
+   */
+  importGraphsElements (elementList: FDElement[]) {
+    elementList.forEach(el => {
+      this.idList.push(el.getId())
+      if (this.graphs.has(el.getTabId())) {
+        const graph = this.graphs.get(el.getTabId())
+        if (graph && graph.filter(element => element.getId() === el.getId()).length === 0) {
+          graph.push(el)
+          this.backendRequestFactory.addElementIntoGrid(el.getFDComponent(), [el.getX(), el.getY()], el.getTabId(), el.getId())
+          this.backendRequestFactory.updateElementFromGrid(el)
+          this.backendRequestFactory.setALink(el)
+        }
+      } else {
+        this.graphs.set(el.getTabId(), [el])
+      }
+    })
+    console.log('heeee')
     this.afterRenderingPopulateSvg()
   }
 
@@ -619,11 +670,8 @@ export default class ConceptionGrid extends Vue {
           }
           el.getLinks().forEach((links, index) => {
             links.forEach(link => {
-              // Need to be removed in next versions of backend, 99 represent the debug output (which will not exist like that anymore)
-              if (index !== 99) {
-                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, this.configs.transferType, this.currentTab,
-                  this.configs.dataLoadingType, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
-              }
+              transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, this.configs.transferType, this.currentTab,
+                this.configs.dataLoadingType, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
             })
           })
         }
