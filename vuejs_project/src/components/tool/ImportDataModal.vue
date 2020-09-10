@@ -51,6 +51,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import ConceptionGrid from '../conception/ConceptionGrid.vue'
 import { FDElement } from '../../models/FDElement'
 import VariableManagementModal from './VariableManagementModal.vue'
+import DesignBoard from '../../views/DesignBoard.vue'
 
 /** Modal that allow users to import data from tabs and variables. */
 @Component
@@ -96,11 +97,13 @@ export default class ImportDataModal extends Vue {
             const importedData: {created: ''; variables: ''; notes: ''; components: Array<FDElement>; tabs: Array<{id: string; index: number; name: string; linker: string; icon: string}>} = JSON.parse(fileBody)
             this.notes = 'Created: ' + importedData.created + '\n\n' + importedData.notes;
 
+            // (this.$parent.$parent as DesignBoard).importTabs(importedData.tabs);
             (this.$parent.$parent.$refs.myConceptionGrid as ConceptionGrid).importTabs(importedData.tabs)
 
             const components: Array<FDElement> = []
             importedData.components.forEach(comp => components.push(FDElement.fromStruct(comp)));
             (this.$parent.$parent.$refs.myConceptionGrid as ConceptionGrid).importGraphsElements(components);
+            (this.$parent.$parent as DesignBoard).importDataBaseElements(components);
 
             (this.$parent.$refs.myVariableManagementModal as VariableManagementModal).variables = this.fusionVariables(importedData.variables, (this.$parent.$refs.myVariableManagementModal as VariableManagementModal).variables);
             (this.$parent.$refs.myVariableManagementModal as VariableManagementModal).applyChange()

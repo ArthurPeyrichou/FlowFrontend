@@ -78,6 +78,7 @@ import { transfertData } from '../../services/gridServices/link/transfertData'
 import * as CONFIGS from '../../config'
 import { FDElement } from '../../models/FDElement'
 import { BaseType, ContainerElement } from 'd3'
+import DesignBoard from '../../views/DesignBoard.vue'
 
 /** Gives an user interface that allow diagrams conception. Components displacements, connections, etc. */
 @Component({
@@ -294,6 +295,7 @@ export default class ConceptionGrid extends Vue {
           })
           return true
         }
+        (this.$parent as DesignBoard).updateDataBaseElements(fdEl, false)
         return false
       }) : [])
       d3.select('#comp-' + fdElementId).remove()
@@ -346,7 +348,8 @@ export default class ConceptionGrid extends Vue {
 
         this.backendRequestFactory.addElementIntoGrid(this.fdCompToDrop, mouse, this.currentTab, newId)
         if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
-          const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, this.fdCompToDrop.getOptions(), new Map())
+          const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, this.fdCompToDrop.getOptions(), new Map());
+          (this.$parent as DesignBoard).updateDataBaseElements(newElement)
           const elements = this.graphs.get(this.currentTab)
           if (elements) {
             elements.push(newElement)

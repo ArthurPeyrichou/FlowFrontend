@@ -29,7 +29,41 @@ export default class DesignBoard extends Vue {
       outputFontSize: number; communicationType: string; dataLoadingType: string;};
 
   private databaseElementList: Array<FDElement> = []
-  private tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
+  public tabList: Array<{id: string; index: number; name: string; linker: string; icon: string}> = []
+
+  /**
+   * Import new graphs elements into the designboard
+   * @public
+   * @param elementList a list of elements
+   */
+  importDataBaseElements (elementList: FDElement[]): void {
+    elementList.forEach(el => {
+      if (this.databaseElementList.filter(dataEl => dataEl.getId() === el.getTabId()).length === 0) {
+        this.databaseElementList.push(el)
+      }
+    })
+  }
+
+  updateDataBaseElements (element: FDElement, add = true): void {
+    if (add) {
+      this.databaseElementList.push(element)
+    } else {
+      this.databaseElementList = this.databaseElementList.filter(el => el.getId() !== element.getId())
+    }
+  }
+
+  /**
+   * Import new tabs into the designboard
+   * @public
+   * @param tabsList a list of tabs
+   */
+  importTabs (tabsList: Array<{id: string; index: number; name: string; linker: string; icon: string}>): void {
+    tabsList.forEach(tab => {
+      if (this.tabList.filter(dataTab => dataTab.id === tab.id).length === 0) {
+        this.tabList.push(tab)
+      }
+    })
+  }
 
   /**
    * Sand fake data to toolbar in case of bakcend connection failed
@@ -60,17 +94,21 @@ export default class DesignBoard extends Vue {
       map.set(el.id, comp)
     });
     (this.$children[0] as ToolBar).setCompList(databaseCompList)
-    this.tabList = data.tabs;
+    if (data.tabs) {
+      this.tabList = data.tabs
+    }
     (this.$children[1] as ConceptionGrid).setTabs(this.tabList)
 
     this.databaseElementList = []
 
-    data.components.forEach((el: any) => {
-      const comp = map.get(el.component)
-      if (comp !== undefined) {
-        this.databaseElementList.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
-      }
-    });
+    if (data.components) {
+      data.components.forEach((el: any) => {
+        const comp = map.get(el.component)
+        if (comp !== undefined) {
+          this.databaseElementList.push(new FDElement(el.id, comp, el.tab, el.name, el.color, el.x, el.y, el.notes, el.state, el.options, el.connections))
+        }
+      })
+    }
     (this.$children[1] as ConceptionGrid).setGraphsElements(this.databaseElementList)
   }
 

@@ -13,39 +13,41 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string,
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
 
-  const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+  if (theOuputCircle != undefined && theInputCircle != undefined) {
+    const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
-  // Gets the link path and initialize the circle which represent the data transfer
-  const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
-  const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
+    // Gets the link path and initialize the circle which represent the data transfer
+    const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
+    const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
 
-  // Make the circle follow the path line from the output to the input
-  function pathTween (path: any) {
-    const length = path.node().getTotalLength()
-    const r = d3.interpolate(0, length)
-    return function (t: number) {
-      const position = r(t)
-      const point = path.node().getPointAtLength(position)
-      if (position < length - 1) {
-        d3.select('#' + dataTransfertId).attr('cx', point.x)
-          .attr('cy', point.y)
-      } else {
-        d3.select('#' + dataTransfertId).remove()
+    // Make the circle follow the path line from the output to the input
+    function pathTween (path: any) {
+      const length = path.node().getTotalLength()
+      const r = d3.interpolate(0, length)
+      return function (t: number) {
+        const position = r(t)
+        const point = path.node().getPointAtLength(position)
+        if (position < length - 1) {
+          d3.select('#' + dataTransfertId).attr('cx', point.x)
+            .attr('cy', point.y)
+        } else {
+          d3.select('#' + dataTransfertId).remove()
+        }
       }
     }
-  }
 
-  d3.select(theSvg).append('circle')
-    .attr('id', dataTransfertId)
-    .attr('transform', d3.select(theSvg).select('g').attr('transform'))
-    .attr('cx', theOuputCircle.attr('cx'))
-    .attr('cy', theOuputCircle.attr('cy'))
-    .attr('r', transferRadius)
-    .attr('fill', transferFillColor)
-    .attr('stroke', transferStrokeColor)
-    .transition()
-    .duration(transferDuration)
-    .tween('pathTween', function () { return pathTween(path) })
+    d3.select(theSvg).append('circle')
+      .attr('id', dataTransfertId)
+      .attr('transform', d3.select(theSvg).select('g').attr('transform'))
+      .attr('cx', theOuputCircle.attr('cx'))
+      .attr('cy', theOuputCircle.attr('cy'))
+      .attr('r', transferRadius)
+      .attr('fill', transferFillColor)
+      .attr('stroke', transferStrokeColor)
+      .transition()
+      .duration(transferDuration)
+      .tween('pathTween', function () { return pathTween(path) })
+  }
 }
 
 /**
@@ -56,47 +58,49 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string,
  * @param tabId
  */
 export function transfertDataWithPath (theOuputId: string, theInputId: string, tabId: string, dataLoadingType: string, transferDuration: number,
-  transferRadius: number, transferFillColor: string): void {
+  transferFillColor: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
 
-  const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+  if (theOuputCircle != undefined && theInputCircle != undefined) {
+    const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
-  // Gets the link path and initialize the circle which represent the data transfer
-  const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
-  const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
-  const source: [number, number] = [Number.parseInt(theOuputCircle.attr('cx')), Number.parseInt(theOuputCircle.attr('cy'))]
+    // Gets the link path and initialize the circle which represent the data transfer
+    const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
+    const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
+    const source: [number, number] = [Number.parseInt(theOuputCircle.attr('cx')), Number.parseInt(theOuputCircle.attr('cy'))]
 
-  // Make the circle follow the path line from the output to the input
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function pathTween (path: any) {
-    const length = path.node().getTotalLength()
-    const r = d3.interpolate(0, length)
-    const xy: Array<[number, number]> = []
-    return function (t: number) {
-      const position = r(t)
-      const point = path.node().getPointAtLength(position)
-      xy.push([point.x, point.y])
-      if (position < length - 1) {
-        d3.select('#' + dataTransfertId).datum(xy)
-          .attr('d', linkCalculators.lineFunction)
-      } else {
-        d3.select('#' + dataTransfertId).remove()
+    // Make the circle follow the path line from the output to the input
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function pathTween (path: any) {
+      const length = path.node().getTotalLength()
+      const r = d3.interpolate(0, length)
+      const xy: Array<[number, number]> = []
+      return function (t: number) {
+        const position = r(t)
+        const point = path.node().getPointAtLength(position)
+        xy.push([point.x, point.y])
+        if (position < length - 1) {
+          d3.select('#' + dataTransfertId).datum(xy)
+            .attr('d', linkCalculators.lineFunction)
+        } else {
+          d3.select('#' + dataTransfertId).remove()
+        }
       }
     }
-  }
 
-  d3.select(theSvg).append('path')
-    .attr('id', dataTransfertId)
-    .attr('transform', d3.select(theSvg).select('g').attr('transform'))
-    .datum([source, source])
-    .attr('d', linkCalculators.lineFunction)
-    .attr('stroke', transferFillColor)
-    .attr('stroke-width', '3px')
-    .attr('fill', 'none')
-    .transition()
-    .duration(transferDuration)
-    .tween('pathTween', function () { return pathTween(path) })
+    d3.select(theSvg).append('path')
+      .attr('id', dataTransfertId)
+      .attr('transform', d3.select(theSvg).select('g').attr('transform'))
+      .datum([source, source])
+      .attr('d', linkCalculators.lineFunction)
+      .attr('stroke', transferFillColor)
+      .attr('stroke-width', '3px')
+      .attr('fill', 'none')
+      .transition()
+      .duration(transferDuration)
+      .tween('pathTween', function () { return pathTween(path) })
+  }
 }
 
 /**
@@ -113,10 +117,10 @@ export function transfertData (theOuputId: string, theInputId: string, typeOfTra
       transfertDataWithCircle(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor, transferStrokeColor)
       break
     case 'PATH':
-      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor)
+      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferFillColor)
       break
     default:
-      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferRadius, transferFillColor)
+      transfertDataWithPath(theOuputId, theInputId, tabId, dataLoadingType, transferDuration, transferFillColor)
       break
   }
 }

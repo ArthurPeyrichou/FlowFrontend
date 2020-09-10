@@ -75,7 +75,6 @@ export default class App extends Vue {
   private backendUrl: string | undefined = process.env.VUE_APP_BACKEND_URL
   private encryptForBackend = new RSAService('', '')
   private decryptForFrontend = new RSAService('', '')
-  private dataReceiving = ''
   private user = { name: '', password: '', isLogged: false, group: { isInGroup: false, isGroupLeader: false, groupName: '' } }
   private invitations: Array<{value: string; text: string}> = []
   private variables = ''
@@ -272,6 +271,7 @@ export default class App extends Vue {
         case 'traffic':
           if (this.$refs.portal instanceof DesignBoard) {
             ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTraffic(data.body)
+            console.log(data.body)
           }
           break
         case 'variables':
