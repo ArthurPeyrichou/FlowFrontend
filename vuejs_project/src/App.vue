@@ -170,7 +170,7 @@ export default class App extends Vue {
       } catch {
         return
       }
-      console.log(data)
+      // console.log(data)
       switch (data.type) {
         case 'auth':
           switch (data.body.state) {
@@ -256,7 +256,8 @@ export default class App extends Vue {
           }
           break
         case 'error':
-          (this.$refs.portal as DesignBoard).sendMessageToConsole(data)
+          (this.$refs.portal as DesignBoard).sendMessageToConsole(data);
+          ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTaskEnd(data.target, true)
           break
         case 'errors':
           console.error(data.type, data)
@@ -265,13 +266,13 @@ export default class App extends Vue {
           console.log('Count of client connected: ' + data.body)
           break
         case 'status':
-          console.log('Message type "' + data.type + '".')
-          console.log(data)
+          if (data.body.text === 'Finished') {
+            ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTaskEnd(data.target, false)
+          }
           break
         case 'traffic':
           if (this.$refs.portal instanceof DesignBoard) {
             ((this.$refs.portal as DesignBoard).$children[1] as ConceptionGrid).setTraffic(data.body)
-            console.log(data.body)
           }
           break
         case 'variables':
@@ -292,7 +293,7 @@ export default class App extends Vue {
     const giveFrontendPublicKey = () => {
       this.sendMessageToBackend([BackendRequestFactory.setUserkey(this.decryptForFrontend.getPublicKey())])
     }
-    console.log('Starting connection to WebSocket Server...')
+    // console.log('Starting connection to WebSocket Server...')
     this.connection = new WebSocket(url)
     this.connection.addEventListener('error', e => {
       // readyState === 3 is CLOSED
@@ -300,14 +301,14 @@ export default class App extends Vue {
         if (connectionTries > 0) {
           setTimeout(() => this.connect(connectionTries - 1, url), 1000)
         } else {
-          console.error('Maximum number of connection trials has been reached')
+          // console.error('Maximum number of connection trials has been reached')
         }
       } else {
-        console.error('Websocket error: ' + event?.target)
+        // console.error('Websocket error: ' + event?.target)
       }
     })
     this.connection.onopen = function () {
-      console.log('Successfully connected to the echo websocket server...')
+      // console.log('Successfully connected to the echo websocket server...')
       giveFrontendPublicKey()
     }
     this.connection.onmessage = function (event) {

@@ -12,41 +12,45 @@ export function transfertDataWithCircle (theOuputId: string, theInputId: string,
   transferRadius: number, transferFillColor: string, transferStrokeColor: string): void {
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
+  try {
+    if (theOuputCircle !== null && theInputCircle !== null) {
+      const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
-  if (theOuputCircle != undefined && theInputCircle != undefined) {
-    const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
+      // Gets the link path and initialize the circle which represent the data transfer
+      const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
+      const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
 
-    // Gets the link path and initialize the circle which represent the data transfer
-    const path = d3.select('#link-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id'))
-    const dataTransfertId = 'data-trans-' + theOuputCircle.attr('data-index') + '-' + theOuputCircle.attr('data-id') + '-to-' + theInputCircle.attr('data-index') + '-' + theInputCircle.attr('data-id')
-
-    // Make the circle follow the path line from the output to the input
-    function pathTween (path: any) {
-      const length = path.node().getTotalLength()
-      const r = d3.interpolate(0, length)
-      return function (t: number) {
-        const position = r(t)
-        const point = path.node().getPointAtLength(position)
-        if (position < length - 1) {
-          d3.select('#' + dataTransfertId).attr('cx', point.x)
-            .attr('cy', point.y)
-        } else {
-          d3.select('#' + dataTransfertId).remove()
+      // Make the circle follow the path line from the output to the input
+      const pathTween = (path: any) => {
+        const length = path.node().getTotalLength()
+        const r = d3.interpolate(0, length)
+        return function (t: number) {
+          const position = r(t)
+          const point = path.node().getPointAtLength(position)
+          if (position < length - 1) {
+            d3.select('#' + dataTransfertId).attr('cx', point.x)
+              .attr('cy', point.y)
+          } else {
+            d3.select('#' + dataTransfertId).remove()
+          }
         }
       }
-    }
 
-    d3.select(theSvg).append('circle')
-      .attr('id', dataTransfertId)
-      .attr('transform', d3.select(theSvg).select('g').attr('transform'))
-      .attr('cx', theOuputCircle.attr('cx'))
-      .attr('cy', theOuputCircle.attr('cy'))
-      .attr('r', transferRadius)
-      .attr('fill', transferFillColor)
-      .attr('stroke', transferStrokeColor)
-      .transition()
-      .duration(transferDuration)
-      .tween('pathTween', function () { return pathTween(path) })
+      d3.select(theSvg).append('circle')
+        .attr('id', dataTransfertId)
+        .attr('transform', d3.select(theSvg).select('g').attr('transform'))
+        .attr('cx', theOuputCircle.attr('cx'))
+        .attr('cy', theOuputCircle.attr('cy'))
+        .attr('r', transferRadius)
+        .attr('fill', transferFillColor)
+        .attr('stroke', transferStrokeColor)
+        .transition()
+        .duration(transferDuration)
+        .tween('pathTween', function () { return pathTween(path) })
+    }
+  } catch (e) {
+    console.warn(theOuputId, theInputId)
+    console.warn(e)
   }
 }
 
@@ -62,7 +66,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string, t
   const theOuputCircle = d3.select(theOuputId)
   const theInputCircle = d3.select(theInputId)
 
-  if (theOuputCircle != undefined && theInputCircle != undefined) {
+  if (theOuputCircle !== null && theInputCircle !== null) {
     const theSvg = '#conception-grid-svg' + (dataLoadingType === 'ALL_AT_ONCE' ? '' : '-' + tabId)
 
     // Gets the link path and initialize the circle which represent the data transfer
@@ -72,7 +76,7 @@ export function transfertDataWithPath (theOuputId: string, theInputId: string, t
 
     // Make the circle follow the path line from the output to the input
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function pathTween (path: any) {
+    const pathTween = (path: any) => {
       const length = path.node().getTotalLength()
       const r = d3.interpolate(0, length)
       const xy: Array<[number, number]> = []

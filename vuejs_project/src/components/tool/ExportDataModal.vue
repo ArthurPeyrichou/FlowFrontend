@@ -163,7 +163,6 @@ export default class ExportDataModal extends Vue {
       }
     })
     components += ']'
-    console.log(res)
     return res.replace('"to_complete"', components)
   }
 

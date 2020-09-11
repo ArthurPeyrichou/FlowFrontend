@@ -154,7 +154,6 @@ export default class ConsoleBar extends Vue {
 
   selectALog (fromId: string): void {
     if (fromId !== '') {
-      console.log(fromId)
       d3.select('#rect-' + fromId).attr('stroke', 'white').attr('stroke-width', '3')
       const rect = document.getElementById('rect-' + fromId)
       if (rect) {

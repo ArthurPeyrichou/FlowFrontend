@@ -45,6 +45,9 @@
         </div>
       </template>
       <div id="zoom-tools">
+        <button id="sprt-el-btn" title="Order Graph" data-exec="#designer.ordergraph" v-on:click="orderElementsPositions" class="btn btn-light btn-outline-dark">
+          <i class="fa fa-sort"></i>
+        </button>
         <button id="zoom-in-btn" title="Zoom in" data-exec="#designer.zoomin" v-on:click="zoomInSvg" class="btn btn-light btn-outline-dark">
           <i class="fa fa-search-plus"></i>
         </button>
@@ -70,6 +73,8 @@ import { BackendRequestFactory } from '../../services/BackendRequestFactory'
 import { addComponentIntoGrid } from '../../services/gridServices/component/addComponentIntoGrid'
 import { setComponentName } from '../../services/gridServices/component/setComponentName'
 import { setComponentIO } from '../../services/gridServices/component/setComponentIO'
+import { getComponentWidth } from '../../services/gridServices/component/getComponentWidth'
+import { updateComponentPosition } from '../../services/gridServices/component/updateComponentPosition'
 import { setComponentBeingProcessed } from '../../services/gridServices/component/setComponentBeingProcessed'
 import { createLinkIntoGrid } from '../../services/gridServices/link/createLinkIntoGrid'
 import { addLinkIntoGrid } from '../../services/gridServices/link/addLinkIntoGrid'
@@ -588,7 +593,6 @@ export default class ConceptionGrid extends Vue {
         this.graphs.set(el.getTabId(), [el])
       }
     })
-    console.log(this.graphs)
     this.afterRenderingPopulateSvg()
   }
 
@@ -612,7 +616,6 @@ export default class ConceptionGrid extends Vue {
         this.graphs.set(el.getTabId(), [el])
       }
     })
-    console.log('heeee')
     this.afterRenderingPopulateSvg()
   }
 
@@ -656,30 +659,42 @@ export default class ConceptionGrid extends Vue {
    * @public
    */
   setTraffic (traffic: any): void {
-    const graph = this.graphs.get(this.currentTab)
-    if (graph) {
-      graph.forEach(el => {
+    this.graphs.forEach( (value, key) => {
+      value.forEach( el => {
         if (traffic[el.getId()]) {
           if (el.getFDComponent().getOutput() > 0) {
             if (traffic[el.getId()].output === 0) {
               setComponentBeingProcessed(el.getId(), true)
-            } else {
-              setComponentBeingProcessed(el.getId(), false)
             }
           }
           if (this.configs.transferShowIO) {
             setComponentIO(el.getId(), traffic[el.getId()].input, traffic[el.getId()].output, this.configs.transferBytesPrecision,
               this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
           }
-          el.getLinks().forEach((links, index) => {
-            links.forEach(link => {
-              transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, this.configs.transferType, this.currentTab,
-                this.configs.dataLoadingType, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
-            })
-          })
         }
       })
-    }
+    })
+  }
+
+/**
+ * @public
+ */
+  setTaskEnd (id: string, isError = false): void {
+    this.graphs.forEach( (value, key) => {
+      value.forEach( el => {
+        if (el.getId() === id) {
+          setComponentBeingProcessed(el.getId(), false)
+          if (!isError) {
+            el.getLinks().forEach((links, index) => {
+              links.forEach(link => {
+                transfertData('#output-' + index + '-' + el.getId(), '#input-' + link.index + '-' + link.id, this.configs.transferType, this.currentTab,
+                  this.configs.dataLoadingType, this.configs.transferDuration, this.configs.transferRadius, this.configs.transferFillColor, this.configs.transferStrokeColor)
+              })
+            })
+          }
+        }
+      })
+    })
   }
 
   /**
@@ -741,12 +756,41 @@ export default class ConceptionGrid extends Vue {
     }
   }
 
+  orderElementsPositions (): void {
+    this.graphs.get(this.currentTab).forEach(el1 => {
+      console.log(el1.getX(), el1.getY())
+      const el1pos = [Math.round(el1.getX() / 10) * 10, Math.round(el1.getY() / 10) * 10]
+      console.log(el1pos)
+      el1.setPostion(el1pos[0], el1pos[1])
+      const el1Height = Math.max(50 + (Math.max(el1.getFDComponent().getInput(), el1.getFDComponent().getOutput()) - 1) * 15, this.configs.transferShowIO ? 65 : 45)
+      const el1Width = getComponentWidth(el1.getName(), '', undefined, this.configs.transferShowIO)
+
+      this.graphs.get(this.currentTab).forEach(el2 => {
+        if (el1.getId() !== el2.getId()) {
+          const el2Height = Math.max(50 + (Math.max(el2.getFDComponent().getInput(), el2.getFDComponent().getOutput()) - 1) * 15, this.configs.transferShowIO ? 65 : 45)
+          const el2Width = getComponentWidth(el2.getName(), '', undefined, this.configs.transferShowIO)
+
+          if ((el1pos[0] < el2.getX() && (el1pos[0] + el1Width) > el2.getX()) || ((el2.getX() + el2Width) > el1.getX() && (el2.getX() + el2Width) < (el1pos[0] + el1Width))) {
+            el2.setX(el1pos[0])
+          }
+
+          if ((el1pos[1] < el2.getY() && (el1pos[1] + el1Height) > el2.getY()) || ((el2.getY() + el2Height) > el1.getY() && (el2.getY() + el2Height) < (el1pos[1] + el1Height))) {
+            el2.setY(el1pos[1])
+          }
+        }
+      })
+    })
+    this.graphs.get(this.currentTab).forEach(el => {
+      updateComponentPosition(el.getId(), el.getX(), el.getY(), this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
+      this.backendRequestFactory.updateElementFromGrid(el)
+    })
+  }
+
   /**
    * Send all the modification made to the backend
    */
   updateDataToBackend (): void {
     const response = this.backendRequestFactory.apply()
-    console.log(response)
     this.sendMessageToBackend(response)
   }
 

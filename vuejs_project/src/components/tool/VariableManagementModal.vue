@@ -94,7 +94,6 @@ export default class VariableManagementModal extends Vue {
   setVariables (variables: string): void {
     this.variables = variables
     this.variablesVerif = variables
-    console.log(VariableManagementModal.stringToVariableList(this.variables))
   }
 
   /**

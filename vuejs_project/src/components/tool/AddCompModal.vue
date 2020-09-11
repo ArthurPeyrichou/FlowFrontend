@@ -88,8 +88,6 @@ export default class AddCompModal extends Vue {
         }
       }
 
-      console.log('upload validated.')
-
       // Hide the modal manually
       this.$nextTick(() => {
         this.$bvModal.hide('modal-add-component')

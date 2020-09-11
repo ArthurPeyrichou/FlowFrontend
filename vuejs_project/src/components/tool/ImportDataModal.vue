@@ -108,7 +108,7 @@ export default class ImportDataModal extends Vue {
             (this.$parent.$refs.myVariableManagementModal as VariableManagementModal).variables = this.fusionVariables(importedData.variables, (this.$parent.$refs.myVariableManagementModal as VariableManagementModal).variables);
             (this.$parent.$refs.myVariableManagementModal as VariableManagementModal).applyChange()
           } catch (error) {
-            console.log(error)
+            // console.log(error)
             this.response = { success: false, msg: 'An error occured while treating data.' }
           }
         }
