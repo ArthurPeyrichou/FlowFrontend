@@ -1,7 +1,7 @@
 {
-    "name": "vuejs_project",
+    "name": "dataflow_frontend",
     "version": "1.0.0",
-    "description": "Start a Vue.JS project for experiments",
+    "description": "Dataflow frontend with VueJs",
     "main": "",
     "engines": {
         "node": "12.13.x"
@@ -17,7 +17,7 @@
         "url": "git+https://github.com/ArthurPeyrichou/FlowFrontend.git"
     },
     "author": "Arthur Peyrichou",
-    "license": "ISC",
+    "license": "MIT",
     "homepage": "https://github.com/ArthurPeyrichou/FlowFrontend#readme",
     "dependencies": {
         "vue": "^2.5.22"
