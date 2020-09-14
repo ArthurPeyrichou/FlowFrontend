@@ -1,7 +1,0 @@
-version: '3'
-services:
-  frontend:
-    build: vuejs_project
-    container_name: dataflow-frontend
-    ports:
-      - 4200:4200

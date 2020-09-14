@@ -1,16 +1,18 @@
 .DS_Store
 node_modules
-
 /dist
 
-/styleguide
+/keys
+
 /docs
+/styleguide
 
-/coverage
+/tests/e2e/videos
+/tests/e2e/screenshots
+
+/coverages
 /.nyc_output
-
-/tests/e2e/videos/
-/tests/e2e/screenshots/
+/reports
 
 # local env files
 .env.local
