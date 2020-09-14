@@ -152,4 +152,8 @@ export class FDComponent {
       const j = JSON.parse(s)
       return new FDComponent(j.id, j.group, j.title, j.color, j.author, j.input, j.output, j.icon, j.version, j.readme, j.click, j.options)
     }
+
+    static fromStruct (j: any): FDComponent {
+      return new FDComponent(j.id, j.group, j.title, j.color, j.author, j.input, j.output, j.icon, j.version, j.readme, j.click, j.options)
+    }
 }
