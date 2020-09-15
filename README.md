@@ -45,6 +45,5 @@ Docker
 
 To start the server vue.JS with docker, go to the root folder and type :
 
-
-`docker build -t dataflow/frontend .`
-`docker run -it -p 4200:4200 --rm --name dataflow-frontend-1 dataflow/frontend`
+- `docker build -t dataflow-frontend .`
+- `docker run -it -p 4200:8080 --rm --name dataflow-frontend-1 dataflow-frontend`
