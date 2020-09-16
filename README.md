@@ -12,22 +12,19 @@ Configurations
 
 **Dev mode :**
 
-To start the server vue.JS, go to the folder /vuejs_project and type :
+To start the server vue.JS, go to the root folder and type :
 
-`npm install --only=prod`
-
-then
-
-`npm run serve`
+- `npm install --only=prod`
+- `npm run serve`
 
 > The server is running on port 4200 by default (http://localhost:4200)
 
 **Prod mode :**
 
-Go to the folder /vuejs_project and type :
+Go to the root folder and type :
 
-`npm install --only=prod`
-`npm run build`
+- `npm install --only=prod`
+- `npm run build`
 
 Get the folder dist/ in root, and move his contains in production root folder.
 
@@ -47,3 +44,7 @@ To start the server vue.JS with docker, go to the root folder and type :
 
 - `docker build -t dataflow-frontend .`
 - `docker run -it -p 4200:8080 --rm --name dataflow-frontend-1 dataflow-frontend`
+
+License
+=============
+[MIT](LICENSE)
