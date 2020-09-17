@@ -21,7 +21,7 @@ Configurations
 
 To start the server vue.JS, go to the root folder and type :
 
-- `npm install --only=prod`
+- `npm install`
 - `npm run serve`
 
 > The server is running on port 4200 by default (http://localhost:4200)
@@ -30,7 +30,7 @@ To start the server vue.JS, go to the root folder and type :
 
 Go to the root folder and type :
 
-- `npm install --only=prod`
+- `npm install`
 - `npm run build`
 
 Get the folder dist/ in root, and move his contains in production root folder.
