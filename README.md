@@ -7,6 +7,13 @@ To learn more about Vue.JS (https://vueschool.io/courses)
 
 > Backend on https://github.com/ArthurPeyrichou/FlowBackend
 
+Prerequisite
+=============
+
+You need to add backend hostname in .env.production
+You also need to give backend's RSA public key if you activate crypting communication (disable by default).
+If you run on docker, you need to give the docker vm ip and backend container port. (Ex: 192.168.99.100:5001)
+
 Configurations
 =============
 
