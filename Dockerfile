@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # install all project's dependencies
-RUN npm install --only=prod
+RUN npm install
 
 # copy projects folders and files in defined worckspace
 COPY . .
