@@ -200,6 +200,11 @@ export default class App extends Vue {
           switch (data.body.state) {
             case 'create':
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
+              if (data.body.success === true) {
+                this.user.group.isInGroup = true
+                this.user.group.groupName = data.body.group
+                this.user.group.isGroupLeader = true
+              }
               break
             case 'get':
               if (data.body.success) {
@@ -217,12 +222,24 @@ export default class App extends Vue {
               break
             case 'leave':
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
+              if (data.body.success === true) {
+                this.user.group.isInGroup = false
+                this.user.group.groupName = ''
+                this.user.group.isGroupLeader = false
+              }
+              (this.$refs.portal as DesignBoard).sendDesignerData({ database: [], tabs: [], components: [] });
+              ((this.$refs.portal as DesignBoard).$children[0].$refs.myVariableManagementModal as VariableManagementModal).setVariables('')
               break
             case 'invit':
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
               break
             case 'join':
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }
+              if (data.body.success === true) {
+                this.user.group.isInGroup = true
+                this.user.group.groupName = data.body.group
+                this.user.group.isGroupLeader = false
+              }
               break
             case 'decline':
               (this.$refs.myGroupManagementModal as GroupManagementModal).response = { success: data.body.success, msg: data.body.msg }

@@ -19,6 +19,7 @@
           :state="groupNameState"
           label="Group name"
           label-for="new-group-name-input"
+          :invalid-feedback="groupNameInvalidFeedBack"
         >
           <b-form-input
             id="new-group-name-input"
@@ -93,6 +94,7 @@ export default class GroupManagementModal extends Vue {
 
   groupName = ''
   groupNameState: boolean | null = null
+  groupNameInvalidFeedBack = ''
   invitUserName = ''
   invitUserNameState: boolean | null = null
   selectedGroup = ''
@@ -110,6 +112,11 @@ export default class GroupManagementModal extends Vue {
    * @public
    */
   handleCreateSubmit (): void {
+    this.groupNameState = this.groupName.length >= 3
+    if (!this.groupNameState) {
+      this.groupNameInvalidFeedBack = 'Group name lenght should be greater than 2 characters.'
+      return
+    }
     (this.$parent as App).sendMessageToBackend([BackendRequestFactory.createGroup(this.groupName)])
   }
 
@@ -160,6 +167,7 @@ export default class GroupManagementModal extends Vue {
   showModal (): void {
     this.groupName = ''
     this.groupNameState = null
+    this.groupNameInvalidFeedBack = ''
     this.invitUserName = ''
     this.invitUserNameState = null
     this.$bvModal.show('modal-group-management')
