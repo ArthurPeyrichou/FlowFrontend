@@ -158,6 +158,7 @@ export default class ConceptionGrid extends Vue {
         } else {
           fdElement.removeLink(Number.parseInt(output[0]), { index: Number.parseInt(input[0]), id: input[1] })
         }
+        console.log('par iciccicicici')
         this.backendRequestFactory.setALink(fdElement)
         if (this.configs.communicationType === 'DIRECT') {
           this.sendMessageToBackend(this.backendRequestFactory.apply())
@@ -352,13 +353,15 @@ export default class ConceptionGrid extends Vue {
         this.idList.push(newId)
 
         this.backendRequestFactory.addElementIntoGrid(this.fdCompToDrop, mouse, this.currentTab, newId)
+        const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, this.fdCompToDrop.getOptions(), new Map());
+        (this.$parent as DesignBoard).updateDataBaseElements(newElement)
+        const elements = this.graphs.get(this.currentTab)
+        if (elements) {
+          elements.push(newElement)
+        } else {
+          this.graphs.set(this.currentTab, [newElement])
+        }
         if (this.configs.communicationType === 'ON_APPLY' || !this.isConnectedToBackEnd) {
-          const newElement = new FDElement(newId, this.fdCompToDrop, this.currentTab, '', '', mouse[0], mouse[1], '', { text: '', color: '' }, this.fdCompToDrop.getOptions(), new Map());
-          (this.$parent as DesignBoard).updateDataBaseElements(newElement)
-          const elements = this.graphs.get(this.currentTab)
-          if (elements) {
-            elements.push(newElement)
-          }
           addComponentIntoGrid(mouse, newElement, this.openComponentSettingModal, this.onComponentClick, this.onComponentMoove,
             this.configs.dataLoadingType, this.configs.transferShowIO, this.configs.svgGridSize, this.configs.svgGridBorderSize)
           createLinkIntoGrid(this.addAndRemoveLink, !this.isConnectedToBackEnd || this.configs.communicationType === 'ON_APPLY',

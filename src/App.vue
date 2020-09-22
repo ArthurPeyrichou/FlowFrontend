@@ -36,6 +36,7 @@ import ConceptionGrid from './components/conception/ConceptionGrid.vue'
 import { RSAService } from './services/RSAService'
 import { BackendRequestFactory } from './services/BackendRequestFactory'
 import VariableManagementModal from './components/tool/VariableManagementModal.vue'
+import ToolBar from './components/tool/ToolBar.vue'
 
 @Component({
   components: {
@@ -263,6 +264,11 @@ export default class App extends Vue {
           }
           break
         case 'designer':
+          if (this.$refs.portal instanceof DesignBoard) {
+            setTimeout(() => {
+              (this.$refs.portal.$refs.myToolBar as ToolBar).isUpdateClicked = false
+            }, 1000)
+          }
           if (this.shouldReload > 0 || this.configs.communicationType === 'DIRECT') {
             if (this.$refs.portal instanceof DesignBoard) {
               (this.$refs.portal as DesignBoard).sendDesignerData(data)

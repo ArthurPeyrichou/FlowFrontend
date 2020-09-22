@@ -10,7 +10,12 @@
         </b-navbar-toggle>
 
         <div id="tool-options">
-          <button v-if="shouldShowApplyButton" v-on:click="updateDataToBackend" id="send-update-button" type="button" class="btn btn-outline-success float-right">Update</button>
+          <button v-if="shouldShowApplyButton" v-on:click="updateDataToBackend" :disabled="isUpdateClicked" id="send-update-button" type="button" class="btn btn-outline-success float-right">
+            <div :style="'display:' + (isUpdateClicked ? 'initial' : 'none')">
+              <i id="send-update-icon" class="fa fa-spin fa-cog" style="font:900 normal normal 24px 'Font Awesome 5 Free'"></i>
+            </div>
+            Update
+          </button>
         </div>
 
         <b-collapse id="toolbar-option-navbar-toggle-collapse" is-nav>
@@ -87,6 +92,7 @@ export default class ToolBar extends Vue {
   compSearchPattern = '';
   /** FlowData components list got from DesignBoard vue, got itself by the api.  */
   compBrutList: FDComponent[] = []
+  public isUpdateClicked = false
 
   constructor () {
     super()
@@ -189,6 +195,7 @@ export default class ToolBar extends Vue {
   }
 
   updateDataToBackend (): void {
+    this.isUpdateClicked = true;
     (this.$parent.$children[1] as ConceptionGrid).updateDataToBackend()
   }
 }
@@ -315,6 +322,9 @@ export default class ToolBar extends Vue {
   #send-update-button {
     height: 100%;
     border-radius: 0px;
+  }
+  #send-update-button svg {
+    margin-right: 5px;
   }
 
   /* Dark side */
