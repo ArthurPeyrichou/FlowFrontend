@@ -18,7 +18,7 @@
           <p v-for="(log, index) in outputDebugLogs" :key="index" :style="fontSize" v-html="toHtml(log)" v-on:click="selectALog(log.fromId)"></p>
         </template>
         <template v-if="activeTab === 'errors'">
-          <p v-for="(log, index) in outputErrorsLogs" :key="index" :style="fontSize" v-html="toHtml(log)"></p>
+          <p v-for="(log, index) in outputErrorsLogs" :key="index" :style="fontSize" v-html="toHtml(log)" v-on:click="selectALog(log.fromId)"></p>
         </template>
         <template v-if="activeTab === 'infos'">
           <p v-for="(log, index) in outputInfosLogs" :key="index" :style="fontSize" v-html="toHtml(log)"></p>
