@@ -266,7 +266,7 @@ export default class App extends Vue {
         case 'designer':
           if (this.$refs.portal instanceof DesignBoard) {
             setTimeout(() => {
-              (this.$refs.portal.$refs.myToolBar as ToolBar).isUpdateClicked = false
+              ((this.$refs.portal as DesignBoard).$refs.myToolBar as ToolBar).isUpdateClicked = false
             }, 1000)
           }
           if (this.shouldReload > 0 || this.configs.communicationType === 'DIRECT') {

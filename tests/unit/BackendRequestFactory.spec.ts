@@ -28,7 +28,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
 
@@ -43,7 +43,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
 
@@ -63,7 +63,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
 
@@ -84,7 +84,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
 
     fdElement.addLink(0, { index: 0, id: 'id1' })
@@ -103,7 +103,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
 
     fdElement.addLink(0, { index: 0, id: 'id1' })
@@ -126,7 +126,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
     backendRF.mooveElementFromGrid(fdElement.getId(), [123, 123])
@@ -142,7 +142,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
     backendRF.mooveElementFromGrid(fdElement.getId(), [345, 456])
@@ -167,7 +167,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', 2, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', 2, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     const fdElement2 = new FDElement('id1', fdComp, newTab.id, 'aName', '#967ADC', 456, 588, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
@@ -199,7 +199,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.removeElementFromGrid(fdElement.getId())
     const res = backendRF.apply()
@@ -214,7 +214,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab2 = { id: '456456456', index: 1, name: 'Main2', linker: 'main2', icon: 'nothing' }
     backendRF.setTabs([newTab, newTab2], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab2.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     const fdElement2 = new FDElement('id1', fdComp, newTab2.id, 'aName', '#967ADC', 456, 588, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
@@ -230,7 +230,7 @@ describe('BackendRequestFactory Model', () => {
     const newTab = { id: '123456789', index: 0, name: 'Main', linker: 'main', icon: 'nothing' }
     backendRF.setTabs([newTab], [])
 
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, newTab.id, 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     backendRF.addElementIntoGrid(fdElement.getFDComponent(), [fdElement.getX(), fdElement.getY()], fdElement.getTabId(), fdElement.getId())
     backendRF.mooveElementFromGrid(fdElement.getId(), [345, 456])

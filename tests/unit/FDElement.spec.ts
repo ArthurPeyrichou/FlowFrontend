@@ -4,7 +4,7 @@ import { SVG_GRID_SIZE } from '../../src/config'
 
 describe('FDElement Model', () => {
   it('Position x y can be string or number', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     let fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     expect(fdElement.getX()).toEqual(1235)
     expect(fdElement.getY()).toEqual(2500)
@@ -14,7 +14,7 @@ describe('FDElement Model', () => {
   })
 
   it('Position x y should be beetween 0 and SVG_GRID_SIZE', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     expect(() => { return new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', -5, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}')) })
       .toThrow('x attribut of Component "id0" should be an integer in interval [0;' + SVG_GRID_SIZE + ']. Got "-5".')
 
@@ -29,19 +29,19 @@ describe('FDElement Model', () => {
   })
 
   it('If name null give his FDComponent name', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', '', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     expect(fdElement.getName()).toEqual('FakeComp1')
   })
 
   it('If color null give his FDComponent name', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{}'))
     expect(fdElement.getColor()).toEqual('#967ADC')
   })
 
   it('Getters check', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"}]}'))
     expect(fdElement.getId()).toEqual('id0')
     expect(fdElement.getFDComponent()).toEqual(fdComp)
@@ -57,7 +57,7 @@ describe('FDElement Model', () => {
   })
 
   it('Setters check', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"}]}'))
 
     expect(fdElement.getName()).toEqual('aName')
@@ -102,7 +102,7 @@ describe('FDElement Model', () => {
   })
 
   it('Links attribut check', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"}]}'))
     expect(fdElement.getLinks().has(0)).toEqual(true)
 
@@ -120,13 +120,13 @@ describe('FDElement Model', () => {
   })
 
   it('To string check', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"}]}'))
     expect(fdElement.toString()).toEqual('{"id":"id0","hisFDComponent":{"input":1,"output":5,"options":{"option1":"op1","option2":"op2"},"group":"FakeType1","id":"id0","title":"FakeComp1","color":"#967ADC","author":"autor","icon":"icon","version":"1.0","readme":"readme","click":false},"tabId":"tabId","name":"aName","color":"#967ADC","x":1235,"y":2500,"notes":"","state":{},"options":{"debug":false},"links":{"0": [{"index":"0","id":"1591868779323"}]}}')
   })
 
   it('From string check', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"},{"index":"1","id":"987654321"}],"1":[{"index":"0","id":"456123789"}]}'))
     const intoString = fdElement.toString()
     const newFDElement = FDElement.fromString(intoString)
@@ -154,7 +154,7 @@ describe('FDElement Model', () => {
   })
 
   it('From struct check', () => {
-    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'))
+    const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"},{"index":"1","id":"987654321"}],"1":[{"index":"0","id":"456123789"}]}'))
     const intoString = fdElement.toString()
     const intoStruct = JSON.parse(intoString)
