@@ -18,7 +18,7 @@ import './commands'
 
 import '@cypress/code-coverage/support'
 
-require('babel-core/register')
+require('babel-core')
 require('babel-polyfill')
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

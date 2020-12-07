@@ -122,7 +122,7 @@ describe('FDElement Model', () => {
   it('To string check', () => {
     const fdComp = new FDComponent('id0', 'FakeType1', 'FakeComp1', '#967ADC', 'autor', true, 5, 'icon', '1.0', 'readme', false, JSON.parse('{"option1":"op1","option2":"op2"}'), JSON.parse('{"option1":"op1","option2":"op2"}'))
     const fdElement = new FDElement('id0', fdComp, 'tabId', 'aName', '#967ADC', 1235, 2500, '', JSON.parse('{}'), JSON.parse('{}'), JSON.parse('{"0":[{"index":"0","id":"1591868779323"}]}'))
-    expect(fdElement.toString()).toEqual('{"id":"id0","hisFDComponent":{"input":1,"output":5,"options":{"option1":"op1","option2":"op2"},"group":"FakeType1","id":"id0","title":"FakeComp1","color":"#967ADC","author":"autor","icon":"icon","version":"1.0","readme":"readme","click":false},"tabId":"tabId","name":"aName","color":"#967ADC","x":1235,"y":2500,"notes":"","state":{},"options":{"debug":false},"links":{"0": [{"index":"0","id":"1591868779323"}]}}')
+    expect(fdElement.toString()).toEqual('{"id":"id0","hisFDComponent":{"input":1,"output":5,"options":{"option1":"op1","option2":"op2"},"details":{"option1":"op1","option2":"op2"},"group":"FakeType1","id":"id0","title":"FakeComp1","color":"#967ADC","author":"autor","icon":"icon","version":"1.0","readme":"readme","click":false},"tabId":"tabId","name":"aName","color":"#967ADC","x":1235,"y":2500,"notes":"","state":{},"options":{"debug":false},"links":{"0": [{"index":"0","id":"1591868779323"}]}}')
   })
 
   it('From string check', () => {

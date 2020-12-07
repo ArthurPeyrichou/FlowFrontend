@@ -122,25 +122,30 @@ export class RSAService {
     }
   }
 
-  async cryptoEncrypt (plaintext: string) {
+  cryptoEncrypt (plaintext: string) {
     if (this.publicKey === '') { return plaintext }
     try {
       if (plaintext.length < this.maxTextLenght) {
-        return await this.cryptoEncryptPart(plaintext)
+        return this.cryptoEncryptPart(plaintext)
       } else {
         let offset = 0
-        const res: Array<Promise<string>> = []
+        const res: Array<PromiseLike<string>> = []
         while (offset < plaintext.length) {
           const size = Math.min(this.maxTextLenght, plaintext.length - offset)
-          res.push(this.cryptoEncryptPart(plaintext.substring(offset, offset + size)))
-          offset += size
+          const r = this.cryptoEncryptPart(plaintext.substring(offset, offset + size))
+          if (typeof r !== 'string') {
+            res.push(r)
+            offset += size
+          }
         }
-        return await Promise.all(res).then((result: Array<string>) => {
+        return Promise.all(res).then((result: Array<string>) => {
           let resultString = result[0]
           for (let i = 1; i < result.length; ++i) {
             resultString += ',' + result[i]
           }
           return resultString
+        }).catch(() => {
+          return ''
         })
       }
     } catch (e) {
@@ -148,29 +153,36 @@ export class RSAService {
     }
   }
 
-  async cryptoDecrypt (cypher: string) {
+  cryptoDecrypt (cypher: string) {
     if (this.privateKey === '') { return cypher }
     try {
-      const res: Array<Promise<string>> = []
-      cypher.split(',').forEach(el => { res.push(this.cryptoDecryptPart(el)) })
-      return await Promise.all(res).then((result: Array<string>) => {
+      const res: Array<PromiseLike<string>> = []
+      cypher.split(',').forEach(el => {
+        const r = this.cryptoDecryptPart(el)
+        if (typeof r !== 'string') {
+          res.push(r)
+        }
+      })
+      return Promise.all(res).then((result: Array<string>) => {
         let resultString = ''
         for (let i = 0; i < result.length; ++i) {
           resultString += result[i]
         }
         console.warn(resultString)
         return resultString
+      }).catch(() => {
+        return ''
       })
     } catch (e) {
       return ''
     }
   }
 
-  private async cryptoEncryptPart (plaintext: string) {
+  private cryptoEncryptPart (plaintext: string): PromiseLike<string> | string {
     if (this.cryptoPubKey) {
       const enc = new TextEncoder()
       const encodedMessage = enc.encode(plaintext)
-      return await window.crypto.subtle.encrypt({
+      return window.crypto.subtle.encrypt({
         name: 'RSA-OAEP'
       },
       this.cryptoPubKey,
@@ -186,12 +198,12 @@ export class RSAService {
     }
   }
 
-  private async cryptoDecryptPart (encryptedText: string) {
+  private cryptoDecryptPart (encryptedText: string): PromiseLike<string> | string {
     if (this.cryptoPrivKey) {
       const enc = new TextEncoder()
       const dec = new TextDecoder()
       const encodedMessage = enc.encode(encryptedText)
-      return await window.crypto.subtle.decrypt({
+      return window.crypto.subtle.decrypt({
         name: 'RSA-OAEP'
       },
       this.cryptoPrivKey,
@@ -226,20 +238,24 @@ export class RSAService {
   }
 
   public setCryptoPubKey (pem: string): void {
-    // fetch the part of the PEM string between header and footer
-    const pemHeader = '-----BEGIN PUBLIC KEY-----'
-    const pemFooter = '-----END PUBLIC KEY-----'
-    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length)
-    // base64 decode the string to get the binary data
-    const binaryDerString = window.atob(pemContents)
-    // convert from a binary string to an ArrayBuffer
-    const binaryDer = this.str2ab(binaryDerString)
-    window.crypto.subtle.importKey('spki', binaryDer, {
-      name: 'RSA-OAEP',
-      hash: 'SHA-256'
-    },
-    true,
-    ['encrypt']).then(key => { this.cryptoPubKey = key })
+    try {
+      // fetch the part of the PEM string between header and footer
+      const pemHeader = '-----BEGIN PUBLIC KEY-----'
+      const pemFooter = '-----END PUBLIC KEY-----'
+      const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length)
+      // base64 decode the string to get the binary data
+      const binaryDerString = window.atob(pemContents)
+      // convert from a binary string to an ArrayBuffer
+      const binaryDer = this.str2ab(binaryDerString)
+      window.crypto.subtle.importKey('spki', binaryDer, {
+        name: 'RSA-OAEP',
+        hash: 'SHA-256'
+      },
+      true,
+      ['encrypt']).then(key => { this.cryptoPubKey = key })
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   private static base64ToArrayBuffer (base64: string): ArrayBuffer {

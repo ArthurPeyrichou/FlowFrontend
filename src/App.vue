@@ -123,7 +123,7 @@ export default class App extends Vue {
     })
   }
 
-  async runCommunication () {
+  runCommunication () {
     const t1 = performance.now()
     this.wait = true
     window.crypto.subtle.generateKey(
